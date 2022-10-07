@@ -80,10 +80,11 @@ void Server::serverloop()
 				{
 					if (FD_ISSET(this->_clients[i], &readfds))
 					{
-						// receives the message from the client, into the buffer, prints the message and clears the buffer
+						// receives the message from the client, into the buffer, prints the message, sends it to all clients
 
 						if (!recv(this->_clients[i], buffer, 1024, 0))
 						{
+							// if recv returns 0, it means that the client disconnected (always?)
 							temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(" disconnected.\n");
 							this->_clients.erase(this->_clients.begin() + i);
 							for (size_t j = 0; j < this->_clients.size(); j++)
@@ -91,6 +92,7 @@ void Server::serverloop()
 						}
 						else
 						{
+							// other return values (probably non negative though?) mean sent data
 							temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(": ") + buffer;
 							for (size_t j = 0; j < this->_clients.size(); j++)
 							{
