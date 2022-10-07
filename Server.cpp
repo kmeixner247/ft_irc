@@ -12,6 +12,8 @@
 
 #include "Server.hpp"
 #include <iostream>
+#include <sys/time.h>
+#include <sys/select.h>
 Server::Server()
 {
 	if (this->init())
@@ -27,12 +29,46 @@ void Server::serverloop()
 {
 	int addrlen = sizeof(this->_address);
 	int newfd;
-	while (69)
+	int highest_socket;
+	char buffer[1024] = { 0 };
+	fd_set readfds;
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = 10;
+	while (42)
 	{
 		if ((newfd = accept(this->_serverfd, (struct sockaddr *)&this->_address, (socklen_t *)&(addrlen))) > 0)
 		{
 			this->_clients.push_back(newfd);
-			std::cerr << "WE GOT A NEW CLIENT FOLKS" << std::endl;
+			std::cerr << "FD " << newfd << " connected." << std::endl;
+			if (fcntl(newfd, F_SETFL, O_NONBLOCK) == -1)
+			{
+				perror("fcntl failed");
+				exit (EXIT_FAILURE);
+			}
+		}
+		FD_ZERO(&readfds);
+		highest_socket = -1;
+		for (size_t i = 0; i < this->_clients.size(); i++)
+		{
+			if (this->_clients[i] > highest_socket)
+				highest_socket = this->_clients[i];
+			FD_SET(this->_clients[i], &readfds);
+		}
+		if (highest_socket > 0)
+		{
+			if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
+			{
+				for (size_t i = 0; i < this->_clients.size(); i++)
+				{
+					if (FD_ISSET(this->_clients[i], &readfds))
+					{
+						recv(this->_clients[i], buffer, 1024, 0);
+						std::cout << "FD " << this->_clients[i] << ": " << buffer;
+						memset((void *)buffer, 0, 1024);
+					}
+				}
+			}
 		}
 	}
 }
@@ -74,4 +110,4 @@ int Server::init()
 		exit (EXIT_FAILURE);
 	}
 	return (0);
-}
+}	
