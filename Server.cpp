@@ -44,8 +44,11 @@ void Server::serverloop()
 		{
 			// saving the client fd in a vector
 			// probably better as a map<int><Client> with a Client object later
+			std::cout << "FD " << newfd << " connected." << std::endl;
+			temp = std::string("FD ") + std::to_string(newfd) + std::string(" connected.\n");
+			for (size_t j = 0; j < this->_clients.size(); j++)
+					send(this->_clients[j], temp.c_str(), temp.length(), 0);
 			this->_clients.push_back(newfd);
-			std::cerr << "FD " << newfd << " connected." << std::endl;
 			// making the client fd nonblocking (is this necessary?)
 			if (fcntl(newfd, F_SETFL, O_NONBLOCK) == -1)
 			{
@@ -78,16 +81,25 @@ void Server::serverloop()
 					if (FD_ISSET(this->_clients[i], &readfds))
 					{
 						// receives the message from the client, into the buffer, prints the message and clears the buffer
-						recv(this->_clients[i], buffer, 1024, 0);
-						temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(": ") + buffer;
-						std::cout << temp;
-						// also sends the message to all of the clients (except the one who sent it)
-						memset((void *)buffer, 0, 1024);
-						for (size_t j = 0; j < this->_clients.size(); j++)
+
+						if (!recv(this->_clients[i], buffer, 1024, 0))
 						{
-							if (j != i)
+							temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(" disconnected.\n");
+							this->_clients.erase(this->_clients.begin() + i);
+							for (size_t j = 0; j < this->_clients.size(); j++)
 								send(this->_clients[j], temp.c_str(), temp.length(), 0);
 						}
+						else
+						{
+							temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(": ") + buffer;
+							for (size_t j = 0; j < this->_clients.size(); j++)
+							{
+								if (j != i)
+									send(this->_clients[j], temp.c_str(), temp.length(), 0);
+							}
+						}
+						std::cout << temp;
+						memset((void *)buffer, 0, 1024);
 						temp = "";
 					}
 				}
