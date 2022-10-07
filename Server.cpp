@@ -37,32 +37,46 @@ void Server::serverloop()
 	tv.tv_usec = 10;
 	while (42)
 	{
+		// checking whether there's a new client trying to connect 
+		// (make this a loop in case several try to connect at the same time?)
 		if ((newfd = accept(this->_serverfd, (struct sockaddr *)&this->_address, (socklen_t *)&(addrlen))) > 0)
 		{
+			// saving the client fd in a vector
+			// probably better as a map<int><Client> with a Client object later
 			this->_clients.push_back(newfd);
 			std::cerr << "FD " << newfd << " connected." << std::endl;
+			// making the client fd nonblocking (is this necessary?)
 			if (fcntl(newfd, F_SETFL, O_NONBLOCK) == -1)
 			{
 				perror("fcntl failed");
 				exit (EXIT_FAILURE);
 			}
 		}
+		// clearing the readfds set (necessary?)
 		FD_ZERO(&readfds);
 		highest_socket = -1;
+		// filling the readfds set (for select) while finding the highest socket fd (also for select)
 		for (size_t i = 0; i < this->_clients.size(); i++)
 		{
 			if (this->_clients[i] > highest_socket)
 				highest_socket = this->_clients[i];
 			FD_SET(this->_clients[i], &readfds);
 		}
+		// doesn't go in here if no clients are connected
 		if (highest_socket > 0)
 		{
+			// checks if there are clients trying to send stuff
 			if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
 			{
+				// going through all clients, checking whether each individual one is part of the
+				// readfds set after it was changed by select (it'll only contain those who try to send things)
+				// is there a more efficient ways to check which fds are in the set?
+				// there must be a way to simply iterate through the set right?
 				for (size_t i = 0; i < this->_clients.size(); i++)
 				{
 					if (FD_ISSET(this->_clients[i], &readfds))
 					{
+						// receives the message from the client, into the buffer, prints the message and clears the buffer
 						recv(this->_clients[i], buffer, 1024, 0);
 						std::cout << "FD " << this->_clients[i] << ": " << buffer;
 						memset((void *)buffer, 0, 1024);
