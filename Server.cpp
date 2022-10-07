@@ -6,12 +6,12 @@
 /*   By: kmeixner <konstantin.meixner@freenet.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/07 11:58:19 by kmeixner          #+#    #+#             */
-/*   Updated: 2022/10/07 14:08:02 by kmeixner         ###   ########.fr       */
+/*   Updated: 2022/10/07 14:25:32 by kmeixner         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-
+#include <iostream>
 Server::Server()
 {
 	if (this->init())
@@ -21,6 +21,20 @@ Server::Server()
 Server::~Server()
 {
 	shutdown(this->_serverfd, SHUT_RDWR);
+}
+
+void Server::serverloop()
+{
+	int addrlen = sizeof(this->_address);
+	int newfd;
+	while (69)
+	{
+		if ((newfd = accept(this->_serverfd, (struct sockaddr *)&this->_address, (socklen_t *)&(addrlen))) > 0)
+		{
+			this->_clients.push_back(newfd);
+			std::cerr << "WE GOT A NEW CLIENT FOLKS" << std::endl;
+		}
+	}
 }
 
 int Server::init()
@@ -53,6 +67,11 @@ int Server::init()
 	{
 		perror("server init: listen failed");
 		return (-1);
+	}
+	if (fcntl(this->_serverfd, F_SETFL, O_NONBLOCK) == -1)
+	{
+		perror("fcntl failed");
+		exit (EXIT_FAILURE);
 	}
 	return (0);
 }

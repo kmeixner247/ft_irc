@@ -6,7 +6,7 @@
 /*   By: kmeixner <konstantin.meixner@freenet.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/07 11:56:13 by kmeixner          #+#    #+#             */
-/*   Updated: 2022/10/07 14:06:56 by kmeixner         ###   ########.fr       */
+/*   Updated: 2022/10/07 14:21:45 by kmeixner         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 
 class Server
 {
@@ -30,7 +31,7 @@ private:
 public:
 	Server();
 	~Server();
-
+	void serverloop();
 private:
 	Server(const Server &rhs);
 	Server &operator=(const Server &rhs);
