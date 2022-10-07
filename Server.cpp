@@ -32,6 +32,7 @@ void Server::serverloop()
 	int highest_socket;
 	char buffer[1024] = { 0 };
 	fd_set readfds;
+	std::string temp;
 	struct timeval tv;
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
@@ -78,8 +79,16 @@ void Server::serverloop()
 					{
 						// receives the message from the client, into the buffer, prints the message and clears the buffer
 						recv(this->_clients[i], buffer, 1024, 0);
-						std::cout << "FD " << this->_clients[i] << ": " << buffer;
+						temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(": ") + buffer;
+						std::cout << temp;
+						// also sends the message to all of the clients (except the one who sent it)
 						memset((void *)buffer, 0, 1024);
+						for (size_t j = 0; j < this->_clients.size(); j++)
+						{
+							if (j != i)
+								send(this->_clients[j], temp.c_str(), temp.length(), 0);
+						}
+						temp = "";
 					}
 				}
 			}
