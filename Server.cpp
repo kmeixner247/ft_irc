@@ -34,7 +34,7 @@ void Server::serverloop()
 	fd_set readfds;
 	struct timeval tv;
 	tv.tv_sec = 0;
-	tv.tv_usec = 10;
+	tv.tv_usec = 0;
 	while (42)
 	{
 		// checking whether there's a new client trying to connect 
