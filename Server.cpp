@@ -45,7 +45,7 @@ void Server::serverloop()
 			// saving the client fd in a vector
 			// probably better as a map<int><Client> with a Client object later
 			std::cout << "FD " << newfd << " connected." << std::endl;
-			temp = std::string("FD ") + std::to_string(newfd) + std::string(" connected.\n");
+			temp = "FD " + std::to_string(newfd) + " connected.\n";
 			for (size_t j = 0; j < this->_clients.size(); j++)
 					send(this->_clients[j], temp.c_str(), temp.length(), 0);
 			this->_clients.push_back(newfd);
@@ -85,7 +85,7 @@ void Server::serverloop()
 						if (!recv(this->_clients[i], buffer, 1024, 0))
 						{
 							// if recv returns 0, it means that the client disconnected (always?)
-							temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(" disconnected.\n");
+							temp = "FD " + std::to_string(this->_clients[i]) + " disconnected.\n";
 							this->_clients.erase(this->_clients.begin() + i);
 							for (size_t j = 0; j < this->_clients.size(); j++)
 								send(this->_clients[j], temp.c_str(), temp.length(), 0);
@@ -93,7 +93,7 @@ void Server::serverloop()
 						else
 						{
 							// other return values (probably non negative though?) mean sent data
-							temp = std::string("FD ") + std::to_string(this->_clients[i]) + std::string(": ") + buffer;
+							temp = "FD " + std::to_string(this->_clients[i]) + ": " + buffer;
 							for (size_t j = 0; j < this->_clients.size(); j++)
 							{
 								if (j != i)
