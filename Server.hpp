@@ -4,26 +4,33 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <vector>
+#include <map>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include "Client.hpp"
+#include "Message.hpp"
 
 class Server
 {
 private:
 	int _serverfd;
 	struct sockaddr_in _address;
-	std::vector<int> _clients;
+	std::map<int, Client> _clients;
+	fd_set readfds;
 
 public:
 	Server();
 	~Server();
 	void serverloop();
+	void testloop();
+	void connectClient(int socket);
 private:
 	Server(const Server &rhs);
 	Server &operator=(const Server &rhs);
 	int init();
+	std::vector<Message> parseMessages(char *input);
 };
 
 #endif

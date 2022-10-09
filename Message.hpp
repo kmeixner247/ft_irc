@@ -16,10 +16,10 @@ public:
     Message &operator=(const Message &rhs);
     void parse(std::string input);
     void clear();
-
     //just temporary
-    std::string getPrefix() {return this->_prefix;}
-    std::string getCommand() {return this->_command;}
-    std::vector<std::string> getParameters() {return this->_parameters;}
+    std::string getPrefix() const {return this->_prefix;}
+    std::string getCommand() const {return this->_command;}
+    std::vector<std::string> getParameters() const {return this->_parameters;}
 };
+std::ostream &operator<<(std::ostream &o, Message const &m);
 #endif
