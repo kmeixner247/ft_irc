@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: kmeixner <konstantin.meixner@freenet.de    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/10/07 11:58:19 by kmeixner          #+#    #+#             */
-/*   Updated: 2022/10/07 14:25:32 by kmeixner         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Server.hpp"
 #include <iostream>
 #include <sys/time.h>
@@ -130,7 +118,7 @@ int Server::init()
 	}
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY;
-	this->_address.sin_port = htons(8080);
+	this->_address.sin_port = htons(8080);	//this'll be the passed port eventually
 	if (bind(this->_serverfd, (struct sockaddr *)&this->_address, sizeof(this->_address)) < 0)
 	{
 		perror("server init: bind failed");
