@@ -37,6 +37,7 @@ void Server::connectClient(int socket)
 		if (i < msgs.size())
 			newclient.setUsername(msgs[i].getParameters()[0]);
 		newclient.setRealname(msgs[i].getParameters().back());
+		Message response;
 		//what to respond to the client?
 	}
 }
