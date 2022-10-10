@@ -5,22 +5,12 @@
 Server::Server()
 {
 	if (this->init())
-		throw "temp";
+		throw "something went wrong in init";
 }
 
 Server::~Server()
 {
 	shutdown(this->_serverfd, SHUT_RDWR);
-}
-
-void analyze_string(char *str)
-{
-	int i = 0;
-	while (str[i])
-	{
-		std::cout << i << ": " << static_cast<int>(str[i]) << " " << str[i] <<  std::endl;
-		i++;
-	}
 }
 
 void Server::connectClient(int socket)
@@ -165,7 +155,7 @@ int Server::init()
 	if (fcntl(this->_serverfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl failed");
-		exit (EXIT_FAILURE);
+		return (-1);
 	}
 	return (0);
 }	
