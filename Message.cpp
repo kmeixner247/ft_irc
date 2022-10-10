@@ -19,7 +19,6 @@ Message::~Message()
     this->_parameters.clear();
 }
 
-
 Message &Message::operator=(const Message &rhs)
 {
     this->_prefix = rhs._prefix;
@@ -38,29 +37,31 @@ void Message::parse(std::string input)
 {
     if (input[0] == ':')
     {
-        this->_prefix = input.substr(0, input.find_first_of(" "));
-        input = input.substr(input.find_first_of(" ") + 1, input.npos);
+        this->_prefix = input.substr(1, input.find(' '));
+        input.erase(0, input.find(' ') + 1);
     }
     else
         this->_prefix = "";
-    this->_command = input.substr(0, input.find_first_of(" "));
-    input = input.substr(input.find_first_of(" ") + 1, input.npos);
+    this->_command = input.substr(0, input.find(' '));
+    input.erase(0, input.find(' ') + 1);
     size_t pos;
-    while ((pos = input.find_first_of(" ")) != input.npos)
+    while ((pos = input.find(' ')) != input.npos && input[0] != ':')
     {
         this->_parameters.push_back(input.substr(0, pos));
-        input = input.substr(pos + 1, input.npos);
+        input = input.erase(0, pos + 1);
     }
+    if (input[0] == ':')
+        input = input.erase(0, 1);
     this->_parameters.push_back(input);
 }
-std::ostream &operator<<( std::ostream &o, Message const &m)
+std::ostream &operator<<(std::ostream &o, Message const &m)
 {
     size_t paramsize = m.getParameters().size();
     std::cout << "PREFIX: " << m.getPrefix() << "; COMMAND: " << m.getCommand() << "; PARAMS: [";
     if (paramsize)
         std::cout << m.getParameters()[0];
     for (size_t i = 1; i < m.getParameters().size(); i++)
-        std::cout <<", "<< m.getParameters()[i];
+        std::cout << ", " << m.getParameters()[i];
     std::cout << "]";
-	return (o);
+    return (o);
 }

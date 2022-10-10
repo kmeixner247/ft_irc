@@ -25,6 +25,7 @@ void analyze_string(char *str)
 
 void Server::connectClient(int socket)
 {
+	std::string temp;
 	Client newclient(socket);
 	std::vector<Message> msgs;
 	this->_clients[this->_clients.size()] = newclient;
@@ -32,8 +33,8 @@ void Server::connectClient(int socket)
 	recv(socket, buffer, 1024, 0);
 	std::cout << "FD " << socket << " connected." << std::endl;
 	msgs = parseMessages(buffer);
-	if (!msgs.size())
-		return ;
+	if (msgs.size()) {
+
 	//confirm password?
 	size_t i = 0;
 	while (i < msgs.size() && msgs[i].getCommand().compare("NICK")) { i++; }
@@ -43,10 +44,9 @@ void Server::connectClient(int socket)
 	while (i < msgs.size() && msgs[i].getCommand().compare("USER")) { i++; }
 	if (i < msgs.size())
 		newclient.setUsername(msgs[i].getParameters()[0]);
-	std::cout << "MSG SIZE IS " << msgs.size() << std::endl;
-	std::string temp = msgs[i].getParameters()[3];
+	temp = msgs[i].getParameters()[3];
 	size_t j = 4;
-	while (j <= msgs[i].getParameters().size())
+	while (j < msgs[i].getParameters().size())
 	{
 		temp += " ";
 		temp += msgs[i].getParameters()[j];
@@ -54,7 +54,9 @@ void Server::connectClient(int socket)
 	}
 	newclient.setRealname(temp);
 	this->_clients[this->_clients.size()] = newclient;
-
+	}
+	temp = ":localhost 001 gui :Welcome to the Internet Relay Network gui!Adium@localhost";
+	send(socket, temp.c_str(), temp.length(), 0);
 	//what to respond to the client?
 }
 
