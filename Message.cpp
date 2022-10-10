@@ -33,6 +33,29 @@ void Message::clear()
     this->_parameters.clear();
 }
 
+std::string Message::getRaw() const
+{
+    std::string temp = "";
+    if (this->_prefix.length() > 0)
+        temp = ":" + this->_prefix;
+    if (this->_command.length() > 0)
+    {
+        if (temp.length() > 0)
+            temp += " ";
+        temp += this->_command;
+    }
+    if (this->_parameters.size() > 0)
+    {
+        if (temp.length() > 0)
+            temp += " ";
+        for (size_t i = 0; i < this->_parameters.size(); i++)
+            temp += this->_parameters[i] + " ";
+        temp.erase(temp.end() - 1);
+        temp += "\r\n";
+    }
+    return (temp);
+}
+
 void Message::parse(std::string input)
 {
     if (input[0] == ':')

@@ -33,31 +33,22 @@ void Server::connectClient(int socket)
 	recv(socket, buffer, 1024, 0);
 	std::cout << "FD " << socket << " connected." << std::endl;
 	msgs = parseMessages(buffer);
-	if (msgs.size()) {
-
-	//confirm password?
-	size_t i = 0;
-	while (i < msgs.size() && msgs[i].getCommand().compare("NICK")) { i++; }
-	if (i < msgs.size())
-		newclient.setNickname(msgs[i].getParameters()[0]);
-	i = 0;
-	while (i < msgs.size() && msgs[i].getCommand().compare("USER")) { i++; }
-	if (i < msgs.size())
-		newclient.setUsername(msgs[i].getParameters()[0]);
-	temp = msgs[i].getParameters()[3];
-	size_t j = 4;
-	while (j < msgs[i].getParameters().size())
+	for (size_t j = 0; j < msgs.size(); j++)
+		std::cout << msgs[j].getRaw();
+	if (msgs.size()) 
 	{
-		temp += " ";
-		temp += msgs[i].getParameters()[j];
-		j++;
+		//confirm password?
+		size_t i = 0;
+		while (i < msgs.size() && msgs[i].getCommand().compare("NICK")) { i++; }
+		if (i < msgs.size())
+			newclient.setNickname(msgs[i].getParameters()[0]);
+		i = 0;
+		while (i < msgs.size() && msgs[i].getCommand().compare("USER")) { i++; }
+		if (i < msgs.size())
+			newclient.setUsername(msgs[i].getParameters()[0]);
+		newclient.setRealname(msgs[i].getParameters().back());
+		//what to respond to the client?
 	}
-	newclient.setRealname(temp);
-	this->_clients[this->_clients.size()] = newclient;
-	}
-	temp = ":localhost 001 gui :Welcome to the Internet Relay Network gui!Adium@localhost";
-	send(socket, temp.c_str(), temp.length(), 0);
-	//what to respond to the client?
 }
 
 void Server::serverloop()
@@ -178,6 +169,12 @@ int Server::init()
 	}
 	return (0);
 }	
+
+void sendMsg(Client client, Message msg)
+{
+	std::string temp = msg.getRaw();
+	send(client.getSocket(), temp.c_str(), temp.length(), 0);
+}
 
 std::vector<Message> Server::parseMessages(char *input)
 {

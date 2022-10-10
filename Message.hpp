@@ -16,6 +16,7 @@ public:
     Message &operator=(const Message &rhs);
     void parse(std::string input);
     void clear();
+    std::string getRaw() const;
     //just temporary
     std::string getPrefix() const {return this->_prefix;}
     std::string getCommand() const {return this->_command;}
