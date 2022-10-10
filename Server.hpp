@@ -26,7 +26,9 @@ public:
 	void serverloop();
 	void testloop();
 	void connectClient(int socket);
-	void sendMsg(Client client, Message msg);
+	void sendMsg(Client client, Message msg) const;
+	void sendMsg(Client client, std::string msg) const;
+	void sendMsg(Client client, char *msg) const;
 private:
 	Server(const Server &rhs);
 	Server &operator=(const Server &rhs);

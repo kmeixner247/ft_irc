@@ -166,6 +166,16 @@ void sendMsg(Client client, Message msg)
 	send(client.getSocket(), temp.c_str(), temp.length(), 0);
 }
 
+void sendMsg(Client client, std::string msg)
+{
+	send(client.getSocket(), msg.c_str(), msg.length(), 0);
+}
+
+void sendMsg(Client client, char *msg)
+{
+	send(client.getSocket(), msg, std::string(msg).length(), 0);
+}
+
 std::vector<Message> Server::parseMessages(char *input)
 {
 	std::vector<Message> msgs;
