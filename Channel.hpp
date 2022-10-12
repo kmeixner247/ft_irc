@@ -6,7 +6,7 @@ class Channel
 {
 private:
     std::string _name;
-    std::map<int, Client> _clients;
+    std::map<std::string, Client> _clients;
 
 public:
     Channel();

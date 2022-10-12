@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <sys/select.h>
+#include <cstring>
 Server::Server()
 {
 	if (this->init())
@@ -15,31 +16,20 @@ Server::~Server()
 
 void Server::connectClient(int socket)
 {
-	std::string temp;
+	FD_SET(socket, &this->_readfds);
 	Client newclient(socket);
-	std::vector<Message> msgs;
-	this->_clients[this->_clients.size()] = newclient;
-	char buffer[1024] = {0};
-	recv(socket, buffer, 1024, 0);
-	std::cout << "FD " << socket << " connected." << std::endl;
-	msgs = parseMessages(buffer);
-	for (size_t j = 0; j < msgs.size(); j++)
-		std::cout << msgs[j].getRaw();
-	if (msgs.size()) 
-	{
-		//confirm password?
-		size_t i = 0;
-		while (i < msgs.size() && msgs[i].getCommand().compare("NICK")) { i++; }
-		if (i < msgs.size())
-			newclient.setNickname(msgs[i].getParameters()[0]);
-		i = 0;
-		while (i < msgs.size() && msgs[i].getCommand().compare("USER")) { i++; }
-		if (i < msgs.size())
-			newclient.setUsername(msgs[i].getParameters()[0]);
-		newclient.setRealname(msgs[i].getParameters().back());
-		Message response;
-		//what to respond to the client?
-	}
+	this->_connectedclients[socket] = newclient;
+	std::cout << "client connected" << std::endl;
+}
+
+void Server::disconnectClient(int socket)
+{
+	std::cout << "client disconnected" << std::endl;
+	FD_CLR(socket, &this->_readfds);
+
+	this->_registeredclients.erase(this->_connectedclients[socket].getNickname());
+	if (!this->_connectedclients.erase(socket))
+		throw "invalid socket disconnect";
 }
 
 void Server::serverloop()
@@ -47,7 +37,7 @@ void Server::serverloop()
 	int addrlen = sizeof(this->_address);
 	int newfd;
 	int highest_socket;
-	char buffer[1024] = { 0 };
+	char buffer[1024] = {0};
 	fd_set readfds;
 	std::string temp;
 	struct timeval tv;
@@ -55,7 +45,7 @@ void Server::serverloop()
 	tv.tv_usec = 0;
 	while (42)
 	{
-		// checking whether there's a new client trying to connect 
+		// checking whether there's a new client trying to connect
 		// (make this a loop in case several try to connect at the same time?)
 		if ((newfd = accept(this->_serverfd, (struct sockaddr *)&this->_address, (socklen_t *)&(addrlen))) > 0)
 		{
@@ -63,64 +53,36 @@ void Server::serverloop()
 			if (fcntl(newfd, F_SETFL, O_NONBLOCK) == -1)
 			{
 				perror("fcntl failed");
-				exit (EXIT_FAILURE);
+				exit(EXIT_FAILURE);
 			}
 			this->connectClient(newfd);
 		}
-		// clearing the readfds set (necessary?)
-		FD_ZERO(&readfds);
-		highest_socket = -1;
-		// filling the readfds set (for select) while finding the highest socket fd (also for select)
-		for (size_t i = 0; i < this->_clients.size(); i++)
-		{
-			if (this->_clients[i].getSocket() > highest_socket)
-				highest_socket = this->_clients[i].getSocket();
-			FD_SET(this->_clients[i].getSocket(), &readfds);
-		}
-		// doesn't go in here if no clients are connected
+		// get highest socket for select. is there a better way to do this?#
+		if (this->_connectedclients.size() > 0)
+			highest_socket = this->_connectedclients.rbegin()->first;
+		readfds = this->_readfds;
 		if (highest_socket > 0)
 		{
-			// checks if there are clients trying to send stuff
 			if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
 			{
-				// going through all clients, checking whether each individual one is part of the
-				// readfds set after it was changed by select (it'll only contain those who try to send things)
-				// is there a more efficient ways to check which fds are in the set?
-				// there must be a way to simply iterate through the set right?
-				for (size_t i = 0; i < this->_clients.size(); i++)
+				for (std::map<int, Client>::iterator it = this->_connectedclients.begin(); it != this->_connectedclients.end(); it++)
 				{
-					if (FD_ISSET(this->_clients[i].getSocket(), &readfds))
+					if (FD_ISSET(it->first, &readfds))
 					{
-						// receives the message from the client, into the buffer, prints the message, sends it to all clients
-
-						if (!recv(this->_clients[i].getSocket(), buffer, 1024, 0))
+						if (!recv(it->first, buffer, 1024, 0))
 						{
-							// if recv returns 0, it means that the client disconnected (always?)
-							temp = "FD " + std::to_string(this->_clients[i].getSocket()) + " disconnected.\n";
-							this->_clients.erase(i);
-							for (size_t j = 0; j < this->_clients.size(); j++)
-								send(this->_clients[j].getSocket(), temp.c_str(), temp.length(), 0);
+							this->disconnectClient(it->first);
+							break ;	//segfaulted with a heap-use-after-free on line 68 without this. I assume it's because the iterator position is skewed after deleting an element. would be nicer to not have to break here
 						}
 						else
-						{
-							// other return values (probably non negative though?) mean sent data
-							temp = "FD " + std::to_string(this->_clients[i].getSocket()) + ": " + buffer;
-							for (size_t j = 0; j < this->_clients.size(); j++)
-							{
-								if (j != i)
-									send(this->_clients[j].getSocket(), temp.c_str(), temp.length(), 0);
-							}
-						}
-						std::cout << temp;
-						memset((void *)buffer, 0, 1024);
-						temp = "";
+							this->interpretMessages(buffer);
+						memset(buffer, 0, 1024);
 					}
 				}
 			}
 		}
 	}
 }
-
 
 int Server::init()
 {
@@ -142,7 +104,7 @@ int Server::init()
 	}
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY;
-	this->_address.sin_port = htons(8080);	//this'll be the passed port eventually
+	this->_address.sin_port = htons(8080); // this'll be the passed port eventually
 	if (bind(this->_serverfd, (struct sockaddr *)&this->_address, sizeof(this->_address)) < 0)
 	{
 		perror("server init: bind failed");
@@ -159,20 +121,20 @@ int Server::init()
 		return (-1);
 	}
 	return (0);
-}	
+}
 
-void sendMsg(Client client, Message msg)
+void Server::sendMsg(Client client, Message msg) const
 {
 	std::string temp = msg.getRaw();
 	send(client.getSocket(), temp.c_str(), temp.length(), 0);
 }
 
-void sendMsg(Client client, std::string msg)
+void Server::sendMsg(Client client, std::string msg) const
 {
 	send(client.getSocket(), msg.c_str(), msg.length(), 0);
 }
 
-void sendMsg(Client client, char *msg)
+void Server::sendMsg(Client client, char *msg) const
 {
 	send(client.getSocket(), msg, std::string(msg).length(), 0);
 }
@@ -184,10 +146,42 @@ std::vector<Message> Server::parseMessages(char *input)
 	size_t pos;
 	while ((pos = temp.find('\n')) != temp.npos)
 	{
-		msgs.push_back(Message(temp.substr(0, temp.find('\n')-1)));
+		msgs.push_back(Message(temp.substr(0, temp.find('\n') - 1)));
 		temp = temp.substr(temp.find('\n') + 1, temp.npos);
 	}
-	for (size_t i = 0; i < msgs.size(); i++)
-		std::cout << msgs[i] <<"$"<< std::endl;
 	return (msgs);
+}
+
+void Server::interpretMessages(char *buffer)
+{
+	std::vector<Message> msgs = parseMessages(buffer);
+	for (std::vector<Message>::iterator it = msgs.begin(); it != msgs.end(); it++)
+	{
+		std::string command = it->getCommand();
+
+		if (!(command.compare("PASS"))) this->PASS(*it);
+		else if (!command.compare("USER")) this->USER(*it);
+		else if (!command.compare("NICK")) this->NICK(*it);
+		else std::cout << "NONE OF THOSE" << std::endl;
+	}
+}
+
+// commands
+void Server::PASS(Message msg)
+{
+	std::cout << "PASS" << std::endl;
+	std::cout << msg << std::endl;
+}
+void Server::NICK(Message msg)
+{
+	// if there is a prefix; change user with nick prefix to parameter
+	// if no prefix, introducing new nick for user
+	std::cout << "NICK" << std::endl;
+	std::cout << msg << std::endl;
+}
+void Server::USER(Message msg)
+{
+	//
+	std::cout << "USER" << std::endl;
+	std::cout << msg << std::endl;
 }
