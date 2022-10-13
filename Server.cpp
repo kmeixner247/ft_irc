@@ -3,7 +3,7 @@
 #include <sys/time.h>
 #include <sys/select.h>
 #include <cstring>
-Server::Server()
+Server::Server() : _host("127.0.0.1"), _servername("awesomeserverofawesomeness"), _version("69.69"), _motd("kacper smells")
 {
 	if (this->init())
 		throw "something went wrong in init";
@@ -22,14 +22,16 @@ void Server::connectClient(int socket)
 	std::cout << "client connected" << std::endl;
 }
 
-void Server::disconnectClient(int socket)
+void Server::disconnectClient(Client *cl)
 {
 	std::cout << "client disconnected" << std::endl;
-	FD_CLR(socket, &this->_readfds);
+	FD_CLR(cl->getSocket(), &this->_readfds);
 
-	this->_registeredclients.erase(this->_connectedclients[socket].getNickname());
-	if (!this->_connectedclients.erase(socket))
+	this->_registeredclients.erase(cl->getNickname());
+	if (!this->_connectedclients.erase(cl->getSocket()))
 		throw "invalid socket disconnect";
+	// std::cout << this->_registeredclients.size() << std::endl;
+	// std::cout << this->_connectedclients.size() << std::endl;
 }
 
 void Server::serverloop()
@@ -71,11 +73,11 @@ void Server::serverloop()
 					{
 						if (!recv(it->first, buffer, 1024, 0))
 						{
-							this->disconnectClient(it->first);
+							this->disconnectClient(&it->second);
 							break ;	//segfaulted with a heap-use-after-free on line 68 without this. I assume it's because the iterator position is skewed after deleting an element. would be nicer to not have to break here
 						}
 						else
-							this->interpretMessages(buffer);
+							this->interpretMessages(&it->second, buffer);
 						memset(buffer, 0, 1024);
 					}
 				}
@@ -146,42 +148,93 @@ std::vector<Message> Server::parseMessages(char *input)
 	size_t pos;
 	while ((pos = temp.find('\n')) != temp.npos)
 	{
-		msgs.push_back(Message(temp.substr(0, temp.find('\n') - 1)));
-		temp = temp.substr(temp.find('\n') + 1, temp.npos);
+		msgs.push_back(Message(temp.substr(0, pos - 1)));
+		temp = temp.substr(pos + 1, temp.npos);
 	}
 	return (msgs);
 }
 
-void Server::interpretMessages(char *buffer)
+void Server::interpretMessages(Client *cl, char *buffer)
 {
 	std::vector<Message> msgs = parseMessages(buffer);
+	(void)cl;
 	for (std::vector<Message>::iterator it = msgs.begin(); it != msgs.end(); it++)
 	{
 		std::string command = it->getCommand();
 
-		if (!(command.compare("PASS"))) this->PASS(*it);
-		else if (!command.compare("USER")) this->USER(*it);
-		else if (!command.compare("NICK")) this->NICK(*it);
+		if (!(command.compare("PASS"))) this->PASS(cl, *it);
+		else if (!command.compare("USER")) this->USER(cl, *it);
+		else if (!command.compare("NICK")) this->NICK(cl, *it);
 		else std::cout << "NONE OF THOSE" << std::endl;
 	}
 }
 
 // commands
-void Server::PASS(Message msg)
+void Server::PASS(Client *cl, Message msg)
 {
-	std::cout << "PASS" << std::endl;
-	std::cout << msg << std::endl;
+	(void)msg;
+	(void)cl;
+
 }
-void Server::NICK(Message msg)
+void Server::NICK(Client *cl, Message msg)
 {
 	// if there is a prefix; change user with nick prefix to parameter
 	// if no prefix, introducing new nick for user
-	std::cout << "NICK" << std::endl;
-	std::cout << msg << std::endl;
+	if (msg.getPrefix() != "")
+		this->_registeredclients.erase(cl->getNickname());
+	cl->setNickname(msg.getParameters().back());
+	if (cl->getUsername() != "" && cl->getRealname() != "")
+	{
+		this->_registeredclients[cl->getNickname()] = cl;	//ALSO WELCOME MESSAGE YO
+		this->sendWelcome(cl);
+	}
+	//ERRORS TBD
 }
-void Server::USER(Message msg)
+void Server::USER(Client *cl, Message msg)
 {
-	//
-	std::cout << "USER" << std::endl;
-	std::cout << msg << std::endl;
+	cl->setUsername(msg.getParameters()[0]);
+	cl->setRealname(msg.getParameters().back());
+	if (cl->getNickname() != "")
+	{
+		this->_registeredclients[cl->getNickname()] = cl;	//ALSO WELCOME MESSAGE YO
+		this->sendWelcome(cl);
+	}
+
+}
+
+void Server::sendWelcome(Client *cl)
+{
+	//this is kinda temporary
+	std::string temp(RPL_WELCOME);
+	std::cout << this->replace_thingies(RPL_WELCOME, cl)<<std::endl;
+	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
+	temp = RPL_YOURHOST;
+	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
+	temp = RPL_CREATED;
+	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
+	temp = RPL_MYINFO;
+	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
+	temp = RPL_MOTDSTART;
+	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
+	temp = RPL_MOTD;
+	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
+	temp = RPL_ENDOFMOTD;
+	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
+}
+
+std::string Server::replace_thingies(std::string msg, Client *c)
+{
+	int pos;
+	if ((pos = msg.find("<nick>") != std::string::npos))
+		msg.replace(msg.find("<nick>"), 6, c->getNickname());
+	if ((pos = msg.find("<user>") != std::string::npos))
+		msg.replace(msg.find("<user>"), 6, c->getUsername());
+	if ((pos = msg.find("<host>") != std::string::npos))
+		msg.replace(msg.find("<host>"), 6, this->_host);
+	if ((pos = msg.find("<version>") != std::string::npos))
+		msg.replace(msg.find("<version>"), 9, this->_version);
+	if ((pos = msg.find("<server>") != std::string::npos))
+		msg.replace(msg.find("<server>"), 9, this->_servername);
+	return (msg);
+
 }
