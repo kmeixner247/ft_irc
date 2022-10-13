@@ -165,21 +165,23 @@ void Server::interpretMessages(Client *cl, char *buffer)
 		if (!(command.compare("PASS"))) this->PASS(cl, *it);
 		else if (!command.compare("USER")) this->USER(cl, *it);
 		else if (!command.compare("NICK")) this->NICK(cl, *it);
-		else std::cout << "NONE OF THOSE" << std::endl;
+		else std::cout << "NONE OF THOSE\n" << *it << std::endl;
 	}
 }
 
 // commands
 void Server::PASS(Client *cl, Message msg)
 {
-	(void)msg;
 	(void)cl;
-
+	std::cout << "PASS" << std::endl;
+	std::cout << msg << std::endl;
 }
 void Server::NICK(Client *cl, Message msg)
 {
 	// if there is a prefix; change user with nick prefix to parameter
 	// if no prefix, introducing new nick for user
+	std::cout << "NICK" << std::endl;
+	std::cout << msg << std::endl;
 	if (msg.getPrefix() != "")
 		this->_registeredclients.erase(cl->getNickname());
 	cl->setNickname(msg.getParameters().back());
@@ -192,6 +194,8 @@ void Server::NICK(Client *cl, Message msg)
 }
 void Server::USER(Client *cl, Message msg)
 {
+	std::cout << "USER" << std::endl;
+	std::cout << msg << std::endl;
 	cl->setUsername(msg.getParameters()[0]);
 	cl->setRealname(msg.getParameters().back());
 	if (cl->getNickname() != "")
@@ -205,6 +209,7 @@ void Server::USER(Client *cl, Message msg)
 void Server::sendWelcome(Client *cl)
 {
 	//this is kinda temporary
+
 	std::string temp(RPL_WELCOME);
 	std::cout << this->replace_thingies(RPL_WELCOME, cl)<<std::endl;
 	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
