@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(): _socket(-1), _nickname(""), _username(""), _realname(""), _operator(false)
+Client::Client(): _socket(-1), _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false)
 {
 }
 
@@ -9,7 +9,7 @@ Client::Client(const Client &rhs)
     *this = rhs;
 }
 
-Client::Client(int socket): _socket(socket),  _nickname(""), _username(""), _realname(""), _operator(false)
+Client::Client(int socket): _socket(socket),  _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false)
 {
 }
 
@@ -24,6 +24,7 @@ Client &Client::operator=(const Client &rhs)
     this->_username = rhs._username;
     this->_realname = rhs._realname;
     this->_operator = rhs._operator;
+    this->_passbool = rhs._passbool;
     return (*this);
 }
 std::string Client::getNickname()
@@ -49,6 +50,10 @@ int Client::getSocket()
 {
     return (this->_socket);
 }
+bool Client::getPassbool()
+{
+    return (this->_passbool);
+}
 void Client::setNickname(std::string nickname)
 {
     this->_nickname = nickname;
@@ -68,4 +73,8 @@ void Client::setOperator(bool isop)
 void Client::setSocket(int socket)
 {
     this->_socket = socket;
+}
+void Client::setPassbool(bool b)
+{
+    this->_passbool = b;
 }
