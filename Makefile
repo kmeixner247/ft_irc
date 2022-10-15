@@ -6,7 +6,7 @@ CC			=	c++
 
 RM			=	rm
 
-CFLAGS		=	-Wall -Werror -Wextra -std=c++98 #-g -fsanitize=address
+CFLAGS		=	-Wall -Werror -Wextra -std=c++98 -g -fsanitize=address
 
 all:		$(NAME)
 

@@ -8,6 +8,7 @@
 #define RPL_MOTD				":<server> 372 <nick> :Kacper smells\r\n"
 #define RPL_ENDOFMOTD			":<server> 376 <nick> :End of /MOTD command.\r\n"
 //ERRORS
+
 #define ERR_NOSUCHNICK			"401 <nick> :No such nick/channel"
 #define ERR_NOSUCHSERVER		"402 <server> :No such server"
 #define ERR_NOSUCHCHANNEL		"403 <channel name> :No such channel"
@@ -51,6 +52,4 @@
 #define ERR_NOOPERHOST			"491 :No O-lines for your host"
 #define ERR_UMODEUNKNOWNFLAG	"501 :Unknown MODE flag"
 #define ERR_USERSDONTMATCH		"502 :Can't change mode for other users"
-
-
 #endif

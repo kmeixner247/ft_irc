@@ -32,8 +32,6 @@ void Server::disconnectClient(Client *cl)
 	this->_registeredclients.erase(cl->getNickname());
 	if (!this->_connectedclients.erase(cl->getSocket()))
 		throw "invalid socket disconnect";
-	// std::cout << this->_registeredclients.size() << std::endl;
-	// std::cout << this->_connectedclients.size() << std::endl;
 }
 
 void Server::serverloop()
@@ -43,6 +41,9 @@ void Server::serverloop()
 	int highest_socket;
 	char buffer[1024] = {0};
 	fd_set readfds;
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
 	std::string temp;
 	while (42)
 	{
@@ -55,7 +56,7 @@ void Server::serverloop()
 			{
 				perror("fcntl failed");
 				exit(EXIT_FAILURE);
-			}
+			} 
 			this->connectClient(newfd);
 		}
 		// get highest socket for select. is there a better way to do this?#
@@ -64,16 +65,24 @@ void Server::serverloop()
 		readfds = this->_readfds;
 		if (highest_socket > 0)
 		{
-			if (select(highest_socket + 1, &readfds, NULL, NULL, NULL) > 0)
+			if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
 			{
-				for (std::map<int, Client>::iterator it = this->_connectedclients.begin(); it != this->_connectedclients.end(); it++)
+				std::map<int, Client>::iterator tempend = this->_connectedclients.end();
+				for (std::map<int, Client>::iterator it = this->_connectedclients.begin(); it != tempend; it++)
 				{
 					if (FD_ISSET(it->first, &readfds))
 					{
 						if (!recv(it->first, buffer, 1024, 0))
 						{
+							//pls prettify
 							this->disconnectClient(&it->second);
-							break ;	//segfaulted with a heap-use-after-free on line 68 without this. I assume it's because the iterator position is skewed after deleting an element. would be nicer to not have to break here
+							if (_connectedclients.size() == 0)
+							{
+								memset(buffer, 0, 1024);
+								break ;
+							}
+							tempend = this->_connectedclients.end();
+							it = this->_connectedclients.begin();
 						}
 						else
 							this->interpretMessages(&it->second, buffer);
