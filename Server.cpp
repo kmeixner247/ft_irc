@@ -67,8 +67,8 @@ void Server::serverloop()
 		{
 			if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
 			{
-				std::map<int, Client>::iterator tempend = this->_connectedclients.end();
-				for (std::map<int, Client>::iterator it = this->_connectedclients.begin(); it != tempend; it++)
+				iterator tempend = this->_connectedclients.end();
+				for (iterator it = this->_connectedclients.begin(); it != tempend; it++)
 				{
 					if (FD_ISSET(it->first, &readfds))
 					{
@@ -181,48 +181,22 @@ void Server::interpretMessages(Client *cl, char *buffer)
 			else if (!command.compare("NICK")) this->NICK(cl, *it);
 			else std::cout << "NONE OF THOSE\n" << *it << std::endl;
 		}
+		if (this->clientIsRegistered(cl))
+		{
+			if (!(command.compare("QUIT"))) this->QUIT(cl, *it);
+			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
+			else if (!(command.compare("OPER"))) this->OPER(cl, *it);
+			else if (!(command.compare("SQUIT"))) this->SQUIT(cl, *it);
+			else if (!(command.compare("PRIVMSG"))) this->PRIVMSG(cl, *it);
+			else if (!(command.compare("WALLOPS"))) this->WALLOPS(cl, *it);
+			else if (!(command.compare("NOTICE"))) this->NOTICE(cl, *it);
+			else if (!(command.compare("KICK"))) this->KICK(cl, *it);
+			else if (!(command.compare("MODE"))) this->MODE(cl, *it);
+			else if (!(command.compare("INVITE"))) this->INVITE(cl, *it);
+			else if (!(command.compare("TOPIC"))) this->TOPIC(cl, *it);
+			else std::cout << "NONE OF THOSE\n" << *it << std::endl;
+		}
 	}
-}
-
-// commands
-void Server::PASS(Client *cl, Message msg)
-{
-	if (!msg.getParameters().back().compare(this->_password))
-		cl->setPassbool(true);
-	else
-		cl->setPassbool(false);
-	std::cout << "PASS " << std::endl;
-	std::cout << msg << std::endl;
-}
-void Server::NICK(Client *cl, Message msg)
-{
-	//make nick lowercase in all cases
-	// if there is a prefix; change user with nick prefix to parameter
-	// if no prefix, introducing new nick for user
-	std::cout << "NICK" << std::endl;
-	std::cout << msg << std::endl;
-	if (msg.getPrefix() != "")
-		this->_registeredclients.erase(cl->getNickname());
-	cl->setNickname(msg.getParameters().back());
-	if (cl->getUsername() != "" && cl->getRealname() != "")
-	{
-	this->_registeredclients[cl->getNickname()] = cl;
-		this->sendWelcome(cl);
-	}
-	//ERRORS TBD
-}
-void Server::USER(Client *cl, Message msg)
-{
-	std::cout << "USER" << std::endl;
-	std::cout << msg << std::endl;
-	cl->setUsername(msg.getParameters()[0]);
-	cl->setRealname(msg.getParameters().back());
-	if (cl->getNickname() != "")
-	{
-	this->_registeredclients[cl->getNickname()] = cl;
-		this->sendWelcome(cl);
-	}
-
 }
 
 void Server::sendResponse(Client *cl, std::string msg)
@@ -257,4 +231,14 @@ std::string Server::replace_thingies(std::string msg, Client *cl)
 		msg.replace(msg.find("<server>"), 8, this->_servername);
 	//probably more
 	return (msg);
+}
+
+bool Server::clientIsConnected(Client *cl)
+{
+	return !(this->_connectedclients.find(cl->getSocket()) == _connectedclients.end());
+}
+
+bool Server::clientIsRegistered(Client *cl)
+{
+	return !(this->_registeredclients.find(cl->getNickname()) == _registeredclients.end());
 }

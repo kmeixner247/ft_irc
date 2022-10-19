@@ -16,6 +16,7 @@
 
 class Server
 {
+	typedef std::map<int, Client>::iterator	iterator;
 private:
 	int _port;
 	std::string _password;
@@ -51,9 +52,22 @@ private:
 	void PASS(Client *cl, Message msg);
 	void USER(Client *cl, Message msg);
 	void NICK(Client *cl, Message msg);
+	void QUIT(Client *cl, Message msg);
+	void KILL(Client *cl, Message msg);
+	void OPER(Client *cl, Message msg);
+	void SQUIT(Client *cl, Message msg);
+	void PRIVMSG(Client *cl, Message msg);
+	void WALLOPS(Client *cl, Message msg);
+	void NOTICE(Client *cl, Message msg);
+	void KICK(Client *cl, Message msg);
+	void MODE(Client *cl, Message msg);
+	void INVITE(Client *cl, Message msg);
+	void TOPIC(Client *cl, Message msg);
 	void sendWelcome(Client *cl);
 	std::string replace_thingies(std::string msg, Client *cl);
 	void sendResponse(Client *cl, std::string msg);
+	bool clientIsConnected(Client *cl);
+	bool clientIsRegistered(Client *cl);
 
 };
 
