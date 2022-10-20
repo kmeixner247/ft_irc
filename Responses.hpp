@@ -37,7 +37,7 @@
 #define ERR_USERSDISABLED		"446 :USERS has been disabled"
 #define ERR_NOTREGISTERED		"451 :You have not registered"
 #define ERR_NEEDMOREPARAMS		"461 <command> :Not enough parameters"
-#define ERR_ALREADYREGISTERED	"462 :You may not reregister"
+#define ERR_ALREADYREGISTRED	"462 :You may not reregister"
 #define ERR_NOPERMFORHOST		"463 :Your host isn't among the privileged"
 #define ERR_PASSWDMISMATCH		"464 :Password incorrect"
 #define ERR_YOUREBANNEDCREEP	"465 :You are banned from this server"

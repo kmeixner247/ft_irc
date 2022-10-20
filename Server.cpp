@@ -170,18 +170,9 @@ void Server::interpretMessages(Client *cl, char *buffer)
 	{
 		//errors?
 		std::string command = it->getCommand();
-
-		if (!(command.compare("PASS"))) 
+		if (!(command.compare("PASS")))
 			this->PASS(cl, *it);
-		else
-		{
-			if (!cl->getPassbool())
-				return ;
-			if (!command.compare("USER")) this->USER(cl, *it);
-			else if (!command.compare("NICK")) this->NICK(cl, *it);
-			else std::cout << "NONE OF THOSE\n" << *it << std::endl;
-		}
-		if (this->clientIsRegistered(cl))
+		else if (this->clientIsRegistered(cl))
 		{
 			if (!(command.compare("QUIT"))) this->QUIT(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
@@ -194,7 +185,15 @@ void Server::interpretMessages(Client *cl, char *buffer)
 			else if (!(command.compare("MODE"))) this->MODE(cl, *it);
 			else if (!(command.compare("INVITE"))) this->INVITE(cl, *it);
 			else if (!(command.compare("TOPIC"))) this->TOPIC(cl, *it);
-			else std::cout << "NONE OF THOSE\n" << *it << std::endl;
+			else std::cout << "NONE OF THOSE1\n" << *it << std::endl;
+		}
+		else if(!(this->clientIsRegistered(cl)))
+		{
+			if (!cl->getPassbool())
+				return ;
+			if (!command.compare("USER")) this->USER(cl, *it);
+			else if (!command.compare("NICK")) this->NICK(cl, *it);
+			else std::cout << "NONE OF THOSE2\n" << *it << std::endl;
 		}
 	}
 }

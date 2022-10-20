@@ -7,8 +7,18 @@
 // commands
 void Server::PASS(Client *cl, Message msg)
 {
-	if (!msg.getParameters().back().compare(this->_password))
+	if (msg.getParameters().size() == 0)
+	{
+		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
+		this->sendResponse(cl, "\n");
+	}
+	else if (!msg.getParameters().back().compare(this->_password) && !cl->getPassbool())
 		cl->setPassbool(true);
+	else if (this->clientIsRegistered(cl)) //check, if adium/pidgin enter here when passbool is true, but cl not registered
+	{
+		this->sendResponse(cl, ERR_ALREADYREGISTRED);
+		this->sendResponse(cl, "\n");
+	}
 	else
 		cl->setPassbool(false);
 	std::cout << "PASS " << std::endl;
