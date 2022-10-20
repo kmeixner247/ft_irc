@@ -66,6 +66,8 @@ void Message::parse(std::string input)
 	else
 		this->_prefix = "";
 	this->_command = input.substr(0, input.find(' '));
+	if (input.find(' ') == input.npos)
+		return;
 	input.erase(0, input.find(' ') + 1);
 	size_t pos;
 	while ((pos = input.find(' ')) != input.npos && input[0] != ':')
@@ -83,7 +85,7 @@ std::ostream &operator<<(std::ostream &o, Message const &m)
 	std::cout << "PREFIX: " << m.getPrefix() << "; COMMAND: " << m.getCommand() << "; PARAMS: [";
 	if (paramsize)
 		std::cout << m.getParameters()[0];
-	for (size_t i = 1; i < m.getParameters().size(); i++)
+	for (size_t i = 1; i < paramsize; i++)
 		std::cout << ", " << m.getParameters()[i];
 	std::cout << "]";
 	return (o);
