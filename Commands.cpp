@@ -4,6 +4,21 @@
 #include <sys/select.h>
 #include <cstring>
 
+std::string strToLower(std::string str)
+{
+	for (int i = 0; str[i] != '\0'; i++)
+		str[i] = (char)std::tolower(str[i]);
+	return (str);
+}
+
+bool strIsASCII(const std::string& str)
+{
+	for (int i = 0; str[i] != '\0'; i++)
+		if (!isascii(str[i]))
+			return(false);
+	return (true);
+}
+
 // commands
 void Server::PASS(Client *cl, Message msg)
 {
@@ -24,22 +39,42 @@ void Server::PASS(Client *cl, Message msg)
 	std::cout << "PASS " << std::endl;
 	std::cout << msg << std::endl;
 }
+
 void Server::NICK(Client *cl, Message msg)
 {
-	//make nick lowercase in all cases
+	// to avoid collisions in naming usernames are stored in lowercase
 	// if there is a prefix; change user with nick prefix to parameter
 	// if no prefix, introducing new nick for user
 	std::cout << "NICK" << std::endl;
 	std::cout << msg << std::endl;
-	if (msg.getPrefix() != "")
+	if (msg.getParameters().size() == 0)
+	{
+		this->sendResponse(cl, ERR_NONICKNAMEGIVEN);
+		this->sendResponse(cl, "\n");
+		return;
+	}
+	else if (!(strIsASCII(msg.getParameters().back()))) //check with ref client if it is really ascii
+	{
+		this->sendResponse(cl, ERR_ERRONEUSNICKNAME);
+		this->sendResponse(cl, "\n");
+		return;
+	}
+	else if (this->_registeredclients.find(strToLower(msg.getParameters().back())) != this->_registeredclients.end())
+	{
+		this->sendResponse(cl, ERR_NICKNAMEINUSE);
+		this->sendResponse(cl, "\n");
+		return;
+	}
+	std::string prefixLower = strToLower(msg.getPrefix());
+	std::string paramLower = strToLower(msg.getParameters().back());
+	if (prefixLower != "" && (!(prefixLower.compare(cl->getNickname()))))
 		this->_registeredclients.erase(cl->getNickname());
-	cl->setNickname(msg.getParameters().back());
+	cl->setNickname(paramLower);
 	if (cl->getUsername() != "" && cl->getRealname() != "")
 	{
 	this->_registeredclients[cl->getNickname()] = cl;
 		this->sendWelcome(cl);
 	}
-	//ERRORS TBD
 }
 
 void Server::USER(Client *cl, Message msg)

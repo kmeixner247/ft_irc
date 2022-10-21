@@ -13,6 +13,10 @@ all:		$(NAME)
 $(NAME):	$(SRCS)
 			$(CC) $(CFLAGS) -o $(NAME) $(SRCS)
 
+run:		
+			make re
+			./server 6969 test
+
 clean:		
 			$(RM) -f $(NAME)
 
@@ -20,4 +24,4 @@ fclean:		clean
 
 re:			fclean all
 
-.PHONY:		all clean fclean re
+.PHONY:		all run clean fclean re
