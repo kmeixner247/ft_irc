@@ -81,6 +81,18 @@ void Server::USER(Client *cl, Message msg)
 {
 	std::cout << "USER" << std::endl;
 	std::cout << msg << std::endl;
+	if (this->clientIsRegistered(cl))
+	{
+		this->sendResponse(cl, ERR_ALREADYREGISTRED);
+		this->sendResponse(cl, "\n");
+		return;
+	}
+	else if (msg.getParameters().size() < 4)//check with Pidgin/Adim if that is really the right min amount of params
+	{
+		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
+		this->sendResponse(cl, "\n");
+		return;
+	}
 	cl->setUsername(msg.getParameters()[0]);
 	cl->setRealname(msg.getParameters().back());
 	if (cl->getNickname() != "")
