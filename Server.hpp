@@ -68,6 +68,7 @@ private:
 	void TOPIC(Client *cl, Message msg);
 	void sendWelcome(Client *cl);
 	std::string replace_thingies(std::string msg, Client *cl);
+	std::string replace_thingies(std::string msg, Client *cl, Channel *ch)
 	void sendResponse(Client *cl, std::string msg);
 	bool clientIsConnected(Client *cl);
 	bool clientIsRegistered(Client *cl);

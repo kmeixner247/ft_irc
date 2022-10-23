@@ -5,14 +5,15 @@
 
 #define CHAN_MODERATOR 1
 #define CHAN_OPERATOR 2
-#define CHAN_BANNED 4
+#define CHAN_BAN 4
+#define CHAN_INVITE 8
 
 class Client;
 
 class Channel
 {
 private:
-	std::string _name;
+	const std::string _name;
 	std::map<std::string, std::vector<Client*> > _clients;
 	bool _privateChan;
 	bool _secretChan;
