@@ -237,8 +237,9 @@ std::string Server::replace_thingies(std::string msg, Client *cl)
 }
 std::string Server::replace_thingies(std::string msg, Client *cl, Channel *ch)
 {
-	int pos;
-	msg = this->replace_thingies(msg, cl)
+	//int pos;
+	(void)ch;
+	msg = this->replace_thingies(msg, cl);
 
 	//probably more
 	return (msg);
