@@ -1,6 +1,6 @@
 #include "Channel.hpp"
 
-Channel::Channel() : _name("")
+Channel::Channel() : _name(""), _privateChan(false), _inviteOnly(false), _secretChan(false), _topic(""), _noMsgFromOutside(false), _moderatedChan(false), _limit(99999), /*_banMask(),*/ _key("");
 {
 
 }

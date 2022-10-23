@@ -13,6 +13,7 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Responses.hpp"
+#include "Channel.hpp"
 
 class Server
 {
@@ -29,6 +30,8 @@ private:
 	std::string _servername;
 	std::string _version;
 	std::string _motd;
+	std::string _passwordOper;
+	std::map<std::string, Channel*> _channels;
 
 public:
 	Server(int port, std::string pw);

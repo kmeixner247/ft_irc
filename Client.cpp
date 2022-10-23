@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(): _socket(-1), _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false)
+Client::Client(): _socket(-1), _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false), _invisible(false), _serverNotice(false), _wallopReceiver(false)
 {
 }
 
@@ -54,6 +54,19 @@ bool Client::getPassbool()
 {
 	return (this->_passbool);
 }
+bool Client::getInvisible()
+{
+	return (this->_invisible);
+}
+bool Client::getServerNotice()
+{
+	return (this->_serverNotice);
+}
+bool Client::getWallopReceiver()
+{
+	return (this->_wallopReceiver);
+}
+
 void Client::setNickname(std::string nickname)
 {
 	this->_nickname = nickname;

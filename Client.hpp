@@ -1,6 +1,10 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 #include <string>
+#include <map>
+#include <vector>
+#include "Channel.hpp"
+
 class Client
 {
 private:
@@ -10,6 +14,10 @@ private:
 	std::string _realname;
 	bool _operator;
 	bool _passbool;
+	bool _invisible;
+	bool _serverNotice;
+	bool _wallopReceiver;
+	std::map<std::string, std::vector<Channel*> > _channel;
 public:
 	Client();
 	Client(const Client &rhs);
@@ -22,6 +30,9 @@ public:
 	bool getOperator();
 	int getSocket();
 	bool getPassbool();
+	bool getInvisible();
+	bool getServerNotice();
+	bool getWallopReceiver();
 	void setNickname(std::string nickname);
 	void setUsername(std::string username);
 	void setRealname(std::string realname);

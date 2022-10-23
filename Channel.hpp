@@ -1,12 +1,29 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 #include <map>
-#include <Client.hpp>
+#include "Client.hpp"
+
+#define CHAN_MODERATOR 1
+#define CHAN_OPERATOR 2
+#define CHAN_BANNED 4
+
+class Client;
+
 class Channel
 {
 private:
 	std::string _name;
-	std::map<std::string, Client> _clients;
+	std::map<std::string, std::vector<Client*> > _clients;
+	bool _privateChan;
+	bool _secretChan;
+	bool _inviteOnly;
+	std::string _topic;
+	bool _noMsgFromOutside;
+	bool _moderatedChan;
+	int _limit;
+	//bool _banMask;
+	std::string _key;
+	std::map<std::string, int> _clientRights;
 
 public:
 	Channel();
