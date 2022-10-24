@@ -31,6 +31,27 @@ public:
 	Channel(const Channel &rhs);
 	~Channel();
 	Channel &operator=(const Channel &rhs);
+	Client *getClient(std::string name);
+	void setClient(std::string name, Client *client);
+	void setPrivateChan(bool);
+	bool getPrivateChan();
+	void setSecretChan(bool);
+	bool getSecretChan();
+	void setInviteOnly(bool);
+	bool getInviteOnly();
+	void setTopic(std::string);
+	std::string getTopic();
+	void setNoMsgFromOutside(bool);
+	bool getNoMsgFromOutside();
+	void setModeratedChan(bool);
+	bool getModeratedChan();
+	void setLimit(int);
+	int getLimit();
+	void setKey(std::string);
+	std::string getKey();
+	void setClientRights(std::string, int);
+	int getClientRights(std::string);
+
 };
 
 #endif
