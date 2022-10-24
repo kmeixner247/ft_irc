@@ -85,7 +85,7 @@ void Server::serverloop()
 							it = this->_connectedclients.begin();
 						}
 						else
-							this->interpretMessages(&it->second, buffer);
+							this->receiveMessage(&it->second, buffer);
 						memset(buffer, 0, 1024);
 					}
 				}
@@ -150,22 +150,36 @@ void Server::sendMsg(Client *cl, char *msg) const
 }
 
 
-std::vector<Message> Server::parseMessages(char *input)
+std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 {
 	std::vector<Message> msgs;
-	std::string temp(input);
 	size_t pos;
-	while ((pos = temp.find('\n')) != temp.npos)
+	while ((pos = input.find('\n')) != input.npos)
 	{
-		msgs.push_back(Message(temp.substr(0, pos - 1)));
-		temp = temp.substr(pos + 1, temp.npos);
+		msgs.push_back(Message(input.substr(0, pos - 1)));
+		input = input.substr(pos + 1, input.npos);
 	}
+	cl->setBuffer(input);
 	return (msgs);
 }
 
-void Server::interpretMessages(Client *cl, char *buffer)
+// std::vector<Message> Server::parseMessages(char *input)
+// {
+// 	std::vector<Message> msgs;
+// 	std::string temp(input);
+// 	size_t pos;
+// 	while ((pos = temp.find('\n')) != temp.npos)
+// 	{
+// 		msgs.push_back(Message(temp.substr(0, pos - 1)));
+// 		temp = temp.substr(pos + 1, temp.npos);
+// 	}
+// 	return (msgs);
+// }
+
+// void Server::interpretMessages(Client *cl, char *buffer)
+void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 {
-	std::vector<Message> msgs = parseMessages(buffer);
+	// std::vector<Message> msgs = parseMessages(buffer);
 	for (std::vector<Message>::iterator it = msgs.begin(); it != msgs.end(); it++)
 	{
 		//errors?
@@ -200,6 +214,13 @@ void Server::interpretMessages(Client *cl, char *buffer)
 			else std::cout << "NONE OF THOSE2\n" << *it << std::endl;
 		} */
 	}
+}
+
+void Server::receiveMessage(Client *cl, char *buffer)
+{
+	cl->catBuffer(buffer);
+	if (cl->getBuffer().find_first_of('\n') != std::string::npos)
+		this->interpretMessages(cl, this->parseMessages(cl, cl->getBuffer()));
 }
 
 void Server::sendResponse(Client *cl, std::string msg)

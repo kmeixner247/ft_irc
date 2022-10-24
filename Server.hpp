@@ -39,7 +39,9 @@ public:
 	void serverloop();
 	void connectClient(int socket);
 	void disconnectClient(Client *cl);
-	void interpretMessages(Client *cl, char *buffer);
+	// void interpretMessages(Client *cl, char *buffer);
+	void receiveMessage(Client *cl, char *buffer);
+	void interpretMessages(Client *cl, std::vector<Message> msgs);
 	void sendMsg(Client *cl, Message msg) const;
 	void sendMsg(Client *cl, std::string msg) const;
 	void sendMsg(Client *cl, char *msg) const;
@@ -48,7 +50,8 @@ private:
 	Server(const Server &rhs);
 	Server &operator=(const Server &rhs);
 	int init();
-	std::vector<Message> parseMessages(char *input);
+	// std::vector<Message> parseMessages(char *input);
+	std::vector<Message> parseMessages(Client *cl, std::string input);
 	std::string getPassword() const;
 	int getPort() const;
 	// commands

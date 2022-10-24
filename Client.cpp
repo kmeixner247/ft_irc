@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(): _socket(-1), _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false), _invisible(false), _serverNotice(false), _wallopReceiver(false)
+Client::Client() : _socket(-1), _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false), _invisible(false), _serverNotice(false), _wallopReceiver(false), _buffer("")
 {
 }
 
@@ -9,7 +9,7 @@ Client::Client(const Client &rhs)
 	*this = rhs;
 }
 
-Client::Client(int socket): _socket(socket),  _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false)
+Client::Client(int socket) : _socket(socket), _nickname(""), _username(""), _realname(""), _operator(false), _passbool(false), _invisible(false), _serverNotice(false), _wallopReceiver(false), _buffer("")
 {
 }
 
@@ -25,6 +25,10 @@ Client &Client::operator=(const Client &rhs)
 	this->_realname = rhs._realname;
 	this->_operator = rhs._operator;
 	this->_passbool = rhs._passbool;
+	this->_invisible = rhs._invisible;
+	this->_serverNotice = rhs._serverNotice;
+	this->_wallopReceiver = rhs._wallopReceiver;
+	this->_buffer = rhs._buffer;
 	return (*this);
 }
 std::string Client::getNickname()
@@ -46,7 +50,7 @@ bool Client::getOperator()
 {
 	return (this->_operator);
 }
-int Client::getSocket() 
+int Client::getSocket()
 {
 	return (this->_socket);
 }
@@ -66,7 +70,14 @@ bool Client::getWallopReceiver()
 {
 	return (this->_wallopReceiver);
 }
-
+std::string Client::getBuffer()
+{
+	return (this->_buffer);
+}
+void Client::catBuffer(char *str)
+{
+	this->_buffer += str;
+}
 void Client::setNickname(std::string nickname)
 {
 	this->_nickname = nickname;
@@ -90,4 +101,8 @@ void Client::setSocket(int socket)
 void Client::setPassbool(bool b)
 {
 	this->_passbool = b;
+}
+void Client::setBuffer(std::string buffer)
+{
+	this->_buffer = buffer;
 }

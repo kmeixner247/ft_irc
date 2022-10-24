@@ -18,6 +18,7 @@ private:
 	bool _serverNotice;
 	bool _wallopReceiver;
 	std::map<std::string, std::vector<Channel*> > _channel;
+	std::string _buffer;
 public:
 	Client();
 	Client(const Client &rhs);
@@ -33,11 +34,14 @@ public:
 	bool getInvisible();
 	bool getServerNotice();
 	bool getWallopReceiver();
+	std::string getBuffer();
+	void catBuffer(char *str);
 	void setNickname(std::string nickname);
 	void setUsername(std::string username);
 	void setRealname(std::string realname);
 	void setOperator(bool isop);
 	void setSocket(int socket);
 	void setPassbool(bool b);
+	void setBuffer(std::string buffer);
 };
 #endif
