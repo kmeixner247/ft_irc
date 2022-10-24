@@ -67,14 +67,28 @@ void Server::NICK(Client *cl, Message msg)
 	}
 	std::string prefixLower = strToLower(msg.getPrefix());
 	std::string paramLower = strToLower(msg.getParameters().back());
-	if (prefixLower != "" && (!(prefixLower.compare(cl->getNickname()))))
+	if (prefixLower != "" && (prefixLower.compare(cl->getNickname())))
+	{
 		this->_registeredclients.erase(cl->getNickname());
-	cl->setNickname(paramLower);
+		this->_registeredclients.insert(std::make_pair(paramLower, cl));
+		cl->setNickname(paramLower);
+		return;
+	}
 	if (cl->getUsername() != "" && cl->getRealname() != "")
 	{
-	this->_registeredclients[cl->getNickname()] = cl;
-		this->sendWelcome(cl);
+		
+		if (prefixLower == "" && this->_registeredclients.find(paramLower) != this->_registeredclients.end())
+		{
+			cl->setNickname(paramLower);
+			this->_registeredclients[cl->getNickname()] = cl;
+			this->sendWelcome(cl);
+			return;
+		}
+		else return;
+
 	}
+	if (cl->getUsername() == "" && cl->getRealname() == "")
+		cl->setNickname(paramLower);
 }
 
 void Server::USER(Client *cl, Message msg)
@@ -87,7 +101,7 @@ void Server::USER(Client *cl, Message msg)
 		this->sendResponse(cl, "\n");
 		return;
 	}
-	else if (msg.getParameters().size() < 4)//check with Pidgin/Adim if that is really the right min amount of params
+	else if (msg.getParameters().size() < 4 || msg.getParameters().at(3) == "")//check with Pidgin/Adim if that is really the right min amount of params
 	{
 		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
 		this->sendResponse(cl, "\n");
@@ -109,6 +123,15 @@ void Server::QUIT(Client *cl, Message msg)
 	std::cout << msg << std::endl;
 	this->disconnectClient(cl);
 }
+
+/* void Server::WHO(Client *cl, Message msg)
+{
+	std::cout << "WHO" << std::endl;
+	std::cout << msg << std::endl;
+	std::cout << "My nickname is " << cl->getNickname() << std::endl;
+	std::cout << "My realname is " << cl->getRealname() << std::endl;
+	std::cout << "My username is " << cl->getUsername() << std::endl;
+} */
 
 void Server::KILL(Client *cl, Message msg)
 {
