@@ -14,7 +14,7 @@ class Channel
 {
 private:
 	const std::string _name;
-	std::map<std::string, std::vector<Client*> > _clients;
+	std::map<std::string, Client*> _clients;
 	bool _privateChan;
 	bool _secretChan;
 	bool _inviteOnly;

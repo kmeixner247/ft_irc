@@ -23,11 +23,11 @@ Channel &Channel::operator=(const Channel &rhs)
 
 void Channel::setClient(std::string name, Client *client)
 {
-	this->_clients[name].push_back(client);
+	this->_clients[name] = client;
 }
 Client *Channel::getClient(std::string name)
 {
-	return this->_clients[name].back();
+	return this->_clients[name];
 }
 void Channel::setPrivateChan(bool b)
 {
