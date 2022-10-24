@@ -156,7 +156,10 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 	size_t pos;
 	while ((pos = input.find('\n')) != input.npos)
 	{
-		msgs.push_back(Message(input.substr(0, pos - 1)));
+		if (input[pos - 1] == '\r')
+			msgs.push_back(Message(input.substr(0, pos - 1)));
+		else
+			msgs.push_back(Message(input.substr(0, pos)));
 		input = input.substr(pos + 1, input.npos);
 	}
 	cl->setBuffer(input);
@@ -203,9 +206,10 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("MODE"))) this->MODE(cl, *it);
 			else if (!(command.compare("INVITE"))) this->INVITE(cl, *it);
 			else if (!(command.compare("TOPIC"))) this->TOPIC(cl, *it);
+			else if (!(command.compare("WHO"))) this->WHO(cl, *it);
 			else std::cout << "NONE OF THOSE1\n" << *it << std::endl;
 		}
-/* 		else if(!(this->clientIsRegistered(cl)))
+/* else if(!(this->clientIsRegistered(cl)))
 		{
 			if (!cl->getPassbool())
 				return ;
@@ -229,7 +233,8 @@ void Server::sendResponse(Client *cl, std::string msg)
 }
 
 void Server::sendWelcome(Client *cl)
-{
+{	
+	std::cerr << "Sending welcome" << std::endl;
 	//this is kinda temporary
 	this->sendResponse(cl, RPL_WELCOME);
 	this->sendResponse(cl, RPL_YOURHOST);

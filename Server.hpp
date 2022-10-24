@@ -69,6 +69,8 @@ private:
 	void MODE(Client *cl, Message msg);
 	void INVITE(Client *cl, Message msg);
 	void TOPIC(Client *cl, Message msg);
+	void WHO(Client *cl, Message msg);
+
 	void sendWelcome(Client *cl);
 	std::string replace_thingies(std::string msg, Client *cl);
 	std::string replace_thingies(std::string msg, Client *cl, Channel *ch);

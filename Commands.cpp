@@ -76,8 +76,7 @@ void Server::NICK(Client *cl, Message msg)
 	}
 	if (cl->getUsername() != "" && cl->getRealname() != "")
 	{
-		
-		if (prefixLower == "" && this->_registeredclients.find(paramLower) != this->_registeredclients.end())
+		if (prefixLower == "" && this->_registeredclients.find(paramLower) == this->_registeredclients.end())
 		{
 			cl->setNickname(paramLower);
 			this->_registeredclients[cl->getNickname()] = cl;
@@ -124,14 +123,14 @@ void Server::QUIT(Client *cl, Message msg)
 	this->disconnectClient(cl);
 }
 
-/* void Server::WHO(Client *cl, Message msg)
+void Server::WHO(Client *cl, Message msg)
 {
 	std::cout << "WHO" << std::endl;
 	std::cout << msg << std::endl;
 	std::cout << "My nickname is " << cl->getNickname() << std::endl;
 	std::cout << "My realname is " << cl->getRealname() << std::endl;
 	std::cout << "My username is " << cl->getUsername() << std::endl;
-} */
+} 
 
 void Server::KILL(Client *cl, Message msg)
 {
