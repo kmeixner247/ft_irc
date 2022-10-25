@@ -13,7 +13,7 @@ class Client;
 class Channel
 {
 private:
-	const std::string _name;
+	std::string _name;
 	std::map<std::string, Client*> _clients;
 	bool _privateChan;
 	bool _secretChan;
@@ -34,24 +34,26 @@ public:
 	Client *getClient(std::string name);
 	void setClient(std::string name, Client *client);
 	void setPrivateChan(bool);
-	bool getPrivateChan();
+	bool getPrivateChan() const;
 	void setSecretChan(bool);
-	bool getSecretChan();
+	bool getSecretChan() const;
 	void setInviteOnly(bool);
-	bool getInviteOnly();
+	bool getInviteOnly() const;
 	void setTopic(std::string);
-	std::string getTopic();
+	std::string getTopic() const;
 	void setNoMsgFromOutside(bool);
-	bool getNoMsgFromOutside();
+	bool getNoMsgFromOutside() const;
 	void setModeratedChan(bool);
-	bool getModeratedChan();
+	bool getModeratedChan() const;
 	void setLimit(int);
-	int getLimit();
+	int getLimit() const;
 	void setKey(std::string);
-	std::string getKey();
+	std::string getKey() const;
 	void setClientRights(std::string, int);
-	int getClientRights(std::string);
-
+	std::map<std::string, int> getClientRights() const;
+	std::string getName() const;
+	std::map<std::string, Client*> getClients() const;
+	void setClients(std::map<std::string, Client*> clients);
 };
 
 #endif

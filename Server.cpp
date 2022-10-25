@@ -4,6 +4,35 @@
 #include <sys/select.h>
 #include <cstring>
 
+Server::Server()
+{
+	this->_port = 0;
+	this->_password = "";
+	this->_serverfd = 0;
+	this->_host = "";
+	this->_servername = "";
+	this->_version = "";
+	this->_motd = "";
+	this->_passwordOper = "";
+}
+
+Server &Server::operator=(const Server &rhs)
+{
+	this->_port = rhs.getPort();
+	this->_password = rhs.getPassword();
+	this->_serverfd = rhs.getServerfd();
+	this->_host = rhs.getHost();
+	this->_servername = rhs.getServerName();
+	this->_version = rhs.getVersion();
+	this->_motd = rhs.getMotd();
+	this->_passwordOper = rhs.getPasswordOper();
+	return (*this);
+}
+
+Server::Server(const Server &rhs)
+{
+	*this = rhs;
+}
 
 Server::Server(int port, std::string pw) : _port(port), _password(pw), _host("127.0.0.1"), _servername("awesomeserverofawesomeness"), _version("69.69"), _motd("kacper smells")
 {
@@ -304,7 +333,7 @@ void Server::setHost(std::string host)
 {
 	this->_host = host;
 }
-std::string Server::getHost()
+std::string Server::getHost() const
 {
 	return this->_host;
 }
@@ -312,7 +341,7 @@ void Server::setServerName(std::string servername)
 {
 	this->_servername = servername;
 }
-std::string Server::getServerName()
+std::string Server::getServerName() const
 {
 	return this->_servername;
 }
@@ -320,7 +349,7 @@ void Server::setVersion(std::string version)
 {
 	this->_version = version;
 }
-std::string Server::getVersion()
+std::string Server::getVersion() const
 {
 	return this->_version;
 }
@@ -328,7 +357,7 @@ void Server::setMotd(std::string motd)
 {
 	this->_motd = motd;
 }
-std::string Server::getMotd()
+std::string Server::getMotd() const
 {
 	return this->_motd;
 }
@@ -336,7 +365,7 @@ void Server::setChannels(std::map<std::string, Channel*> channels)
 {
 	this->_channels = channels;
 }
-std::map<std::string, Channel*> Server::getChannels()
+std::map<std::string, Channel*> Server::getChannels() const
 {
 	return this->_channels;
 }
@@ -344,7 +373,31 @@ void Server::setPasswordOper(std::string password)
 {
 	this->_passwordOper = password;
 }
-std::string Server::getPasswordOper()
+std::string Server::getPasswordOper() const
 {
 	return this->_passwordOper;
+}
+std::string Server::getPassword() const
+{
+	return this->_password; 
+}
+
+int Server::getServerfd() const
+{
+	return this->_serverfd;
+}
+
+void Server::setServerfd(int serverfd)
+{
+	this->_serverfd = serverfd;
+}
+
+int Server::getPort() const
+{
+	return this->_port;
+}
+
+void Server::setPassword(std::string password)
+{
+	this->_password = password;
 }
