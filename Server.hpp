@@ -45,6 +45,28 @@ public:
 	void sendMsg(Client *cl, Message msg) const;
 	void sendMsg(Client *cl, std::string msg) const;
 	void sendMsg(Client *cl, char *msg) const;
+	void setPort(int port);
+	void setPassword(std::string pw);
+	void setRegisteredClients(std::map<std::string, Client*> clients);
+	std::map<std::string, Client*> getRegisteredClients();
+	void setConnectedClients(std::map<int, Client> clients);
+	std::map<int, Client> getConnectedClients();
+	void setHost(std::string host);
+	std::string getHost() const;
+	void setServerName(std::string name);
+	std::string getServerName() const;
+	void setVersion(std::string version);
+	std::string getVersion() const;
+	void setMotd(std::string motd);
+	std::string getMotd() const;
+	void setPasswordOper(std::string pw);
+	std::string getPasswordOper() const;
+	void setChannels(std::map<std::string, Channel*> channels);
+	std::map<std::string, Channel*> getChannels() const;
+	std::string getPassword() const;
+	int getPort() const;
+	int getServerfd() const;
+	void setServerfd(int fd);
 private:
 	Server();
 	Server(const Server &rhs);
@@ -52,8 +74,6 @@ private:
 	int init();
 	// std::vector<Message> parseMessages(char *input);
 	std::vector<Message> parseMessages(Client *cl, std::string input);
-	std::string getPassword() const;
-	int getPort() const;
 	// commands
 	void PASS(Client *cl, Message msg);
 	void USER(Client *cl, Message msg);

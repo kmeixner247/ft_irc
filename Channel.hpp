@@ -13,8 +13,8 @@ class Client;
 class Channel
 {
 private:
-	const std::string _name;
-	std::map<std::string, std::vector<Client*> > _clients;
+	std::string _name;
+	std::map<std::string, Client*> _clients;
 	bool _privateChan;
 	bool _secretChan;
 	bool _inviteOnly;
@@ -32,15 +32,35 @@ public:
 	Channel(const std::string &name);
 	~Channel();
 	Channel &operator=(const Channel &rhs);
-	std::map<std::string, std::vector<Client*> > getClients();
+
 	void addClientRight(Client *cl, int right);
 	bool checkClientRight(Client *cl, int right);
-	bool isInviteOnly();
-	bool isPrivate();
-	std::string getKey();
-	int getLimit();
 	int getSize();
 	void addClient(Client *cl);
+
+	Client *getClient(std::string name);
+	void setClient(std::string name, Client *client);
+	void setPrivateChan(bool);
+	bool getPrivateChan() const;
+	void setSecretChan(bool);
+	bool getSecretChan() const;
+	void setInviteOnly(bool);
+	bool getInviteOnly() const;
+	void setTopic(std::string);
+	std::string getTopic() const;
+	void setNoMsgFromOutside(bool);
+	bool getNoMsgFromOutside() const;
+	void setModeratedChan(bool);
+	bool getModeratedChan() const;
+	void setLimit(int);
+	int getLimit() const;
+	void setKey(std::string);
+	std::string getKey() const;
+	void setClientRights(std::string, int);
+	std::map<std::string, int> getClientRights() const;
+	std::string getName() const;
+	std::map<std::string, Client*> getClients() const;
+	void setClients(std::map<std::string, Client*> clients);
 };
 
 #endif
