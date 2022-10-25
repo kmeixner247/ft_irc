@@ -29,8 +29,18 @@ private:
 public:
 	Channel();
 	Channel(const Channel &rhs);
+	Channel(const std::string &name);
 	~Channel();
 	Channel &operator=(const Channel &rhs);
+	std::map<std::string, std::vector<Client*> > getClients();
+	void addClientRight(Client *cl, int right);
+	bool checkClientRight(Client *cl, int right);
+	bool isInviteOnly();
+	bool isPrivate();
+	std::string getKey();
+	int getLimit();
+	int getSize();
+	void addClient(Client *cl);
 };
 
 #endif

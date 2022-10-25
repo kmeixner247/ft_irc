@@ -193,7 +193,7 @@ void Server::JOIN(Client *cl, Message msg)
 		this->sendResponse(cl, RPL_TOPIC);
 		this->sendResponse(cl, RPL_NAMREPLY);
 		this->sendResponse(cl, RPL_ENDOFNAMES);
-		//notic about commands?
+		//noticess about commands?
 	}
 	
 }

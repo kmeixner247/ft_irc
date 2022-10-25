@@ -43,5 +43,6 @@ public:
 	void setSocket(int socket);
 	void setPassbool(bool b);
 	void setBuffer(std::string buffer);
+	void addChannel(Channel *ch);
 };
 #endif

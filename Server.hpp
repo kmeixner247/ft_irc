@@ -58,6 +58,7 @@ private:
 	void PASS(Client *cl, Message msg);
 	void USER(Client *cl, Message msg);
 	void NICK(Client *cl, Message msg);
+	void JOIN(Client *cl, Message msg);
 	void QUIT(Client *cl, Message msg);
 	void KILL(Client *cl, Message msg);
 	void OPER(Client *cl, Message msg);
