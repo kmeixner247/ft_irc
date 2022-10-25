@@ -123,6 +123,8 @@ void Server::JOIN(Client *cl, Message msg)
 	std::cout << "JOIN" << std::endl;
 	std::cout << msg << std::endl;
 
+	/* !!!CAN'T HANDLE MULTIPLE CHANNELS YET!!! */
+
 	/*	NEED:
 		Channel name constructor
 		Channel::getKey
@@ -145,6 +147,7 @@ void Server::JOIN(Client *cl, Message msg)
 		RPL_NAMREPLY
 		RPL_ENDOFNAMES
 	*/
+
 
 	//ERR_NEEDMOREPARAMS
 	if (msg.getParameters().size() == 0)
