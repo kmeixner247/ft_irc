@@ -4,6 +4,9 @@
 #define RPL_YOURHOST			":<server> 002 <nick> :Your host is besthost, running version <version>\r\n"
 #define RPL_CREATED				":<server> 003 <nick> :This server was created <date>\r\n"
 #define RPL_MYINFO				":<server> 004 <nick> :<servername> <version> <available user modes> <available channel modes>\r\n"
+#define RPL_TOPIC				":<server> 332 <nick> <channel> :<topic>\r\n" //??
+#define RPL_NAMREPLY			":<server> 353 <nick> <channel> :<nicklist>" //??
+#define RPL_ENDOFNAMES			":<server> 366 <nick> <channel> :End of /NAMES list" //??
 #define RPL_MOTDSTART 			":<server> 375 <nick> :- <server> Message of the day - \r\n"
 #define RPL_MOTD				":<server> 372 <nick> :Kacper smells\r\n"
 #define RPL_ENDOFMOTD			":<server> 376 <nick> :End of /MOTD command.\r\n"
@@ -46,6 +49,7 @@
 #define ERR_UNKNOWNMODE			"472 <char> :is unknown mode char to me"
 #define ERR_INVITEONLYCHAN		"473 <channel> :Cannot join channel (+i)"
 #define ERR_BANNEDFROMCHAN		"474 <channel> :Cannot join channel (+b)"
+#define ERR_BADCHANNELKEY		"475 <channel> :Cannot join channel (+k)"
 #define ERR_NOPRIVILIGES		"481 :Permission Denied- You're not an IRC operator"
 #define ERR_CHANOPRIVSNEEDED	"482 <channel> :You're not channel operator"
 #define ERR_CANTKILLSERVER		"483 :You cant kill a server!"
