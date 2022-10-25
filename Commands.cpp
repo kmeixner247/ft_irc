@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Channel.hpp"
 #include <iostream>
 #include <sys/time.h>
 #include <sys/select.h>
@@ -114,6 +115,84 @@ void Server::USER(Client *cl, Message msg)
 		this->sendWelcome(cl);
 	}
 
+}
+
+void Server::JOIN(Client *cl, Message msg)
+{
+	Channel *ch;
+	std::cout << "JOIN" << std::endl;
+	std::cout << msg << std::endl;
+
+	/*	NEED:
+		Channel name constructor
+		Channel::getKey
+		Channel::getLimit
+		Channel::isInviteOnly
+		Channel::isPrivate
+		Channel::addClientRight
+		Channel::checkClientRight
+		Channel::getSize
+		Channel::addClient
+		Client::addChannel
+		ERR_NEEDMOREPARAMS
+		ERR_BADCHANMASK
+		ERR_NOSUCHCHANNEL
+		ERR_BADCHANNELKEY
+		ERR_INVITEONLYCHAN
+		ERR_BANNEDFROMCHAN
+		ERR_CHANNELISFULL
+		RPL_TOPIC
+		RPL_NAMREPLY
+		RPL_ENDOFNAMES
+	*/
+
+	//ERR_NEEDMOREPARAMS
+	if (msg.getParameters().size() == 0)
+		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
+	//ERR_BADCHANMASK ?? 
+	//ERR_NOSUCHCHANNEL ??
+	if (!this->_channels.count(msg.getParameters().front())) 
+	{	//create channel, make client op
+		Channel newchan(msg.getParameters().front()); //assuming name constructor
+		ch = &newchan;
+		ch->addClient(cl);
+		ch->addClientRight(cl, CHAN_OPERATOR);
+		cl->addChannel(ch);
+	}
+	else
+	{
+		//ERR_BADCHANNELKEY
+		if (ch->isPrivate() && ch->getKey().compare(msg.getParameters().back()))
+		{
+			this->sendResponse(cl, ERR_BADCHANNELKEY);
+			return ;
+		}
+		//ERR_INVITEONLYCHAN
+		if (ch->isInviteOnly() && ch->checkClientRight(cl, CHAN_INVITE))
+		{
+			this->sendResponse(cl, ERR_INVITEONLYCHAN);
+			return ;
+		}
+		//ERR_BANNEDFROMCHAN
+		if (ch->checkClientRight(cl, CHAN_BAN))
+		{
+			this->sendResponse(cl, ERR_BANNEDFROMCHAN);
+			return ;
+		}
+		//ERR_CHANNELISFULL 
+		if (ch->getLimit() >= ch->getSize())
+		{
+			this->sendResponse(cl, ERR_CHANNELISFULL);
+			return ;
+		}
+		ch->addClient(cl);
+		cl->addChannel(ch);
+		this->sendResponse(cl, RPL_TOPIC);
+		this->sendResponse(cl, RPL_NAMREPLY);
+		this->sendResponse(cl, RPL_ENDOFNAMES);
+		//notic about commands?
+	}
+	
 }
 
 void Server::QUIT(Client *cl, Message msg)
