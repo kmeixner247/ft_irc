@@ -33,7 +33,7 @@ void Server::PASS(Client *cl, Message msg)
 	else if (this->clientIsRegistered(cl)) //check, if adium/pidgin enter here when passbool is true, but cl not registered
 	{
 		this->sendResponse(cl, ERR_ALREADYREGISTRED);
-		this->sendResponse(cl, "\n");
+		this->sendResponse(cl, "\n"); 
 	}
 	else
 		cl->setPassbool(false);
@@ -158,6 +158,7 @@ void Server::JOIN(Client *cl, Message msg)
 	{	//create channel, make client op
 		Channel newchan(msg.getParameters().front()); //assuming name constructor
 		ch = &newchan;
+		// this->addChannel(ch);
 		ch->addClient(cl);
 		ch->addClientRight(cl, CHAN_OPERATOR);
 		cl->addChannel(ch);
