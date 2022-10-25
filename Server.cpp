@@ -225,6 +225,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			if (!command.compare("USER")) this->USER(cl, *it);
 			else if (!command.compare("NICK")) this->NICK(cl, *it);
 			else if (!(command.compare("QUIT"))) this->QUIT(cl, *it);
+			else if (!(command.compare("JOIN"))) this->JOIN(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
 			else if (!(command.compare("OPER"))) this->OPER(cl, *it);
 			else if (!(command.compare("SQUIT"))) this->SQUIT(cl, *it);
@@ -368,6 +369,10 @@ void Server::setChannels(std::map<std::string, Channel*> channels)
 std::map<std::string, Channel*> Server::getChannels() const
 {
 	return this->_channels;
+}
+void Server::addChannel(Channel *ch)
+{
+	this->_channels.insert(std::make_pair(ch->getName(), ch));
 }
 void Server::setPasswordOper(std::string password)
 {

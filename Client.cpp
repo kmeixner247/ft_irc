@@ -106,3 +106,7 @@ void Client::setBuffer(std::string buffer)
 {
 	this->_buffer = buffer;
 }
+void Client::addChannel(Channel *ch)
+{
+	this->_channel.insert(std::make_pair(ch->getName(), ch));
+}

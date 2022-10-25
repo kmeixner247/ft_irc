@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
@@ -63,6 +64,7 @@ public:
 	std::string getPasswordOper() const;
 	void setChannels(std::map<std::string, Channel*> channels);
 	std::map<std::string, Channel*> getChannels() const;
+	void addChannel(Channel *);
 	std::string getPassword() const;
 	int getPort() const;
 	int getServerfd() const;

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef RESPONSES_HPP
 #define RESPONSES_HPP
 #define RPL_WELCOME				":<server> 001 <nick> :Welcome to the Internet Relay Network <nick>!<user>@<host>\r\n"

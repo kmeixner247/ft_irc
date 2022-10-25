@@ -1,10 +1,12 @@
+#pragma once
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 #include <map>
 #include "Client.hpp"
-
-#define CHAN_MODERATOR 1
-#define CHAN_OPERATOR 2
+#include <string>
+#include <utility>
+#define CHAN_OPERATOR 1
+#define CHAN_MODERATOR 2
 #define CHAN_BAN 4
 #define CHAN_INVITE 8
 
@@ -22,7 +24,6 @@ private:
 	bool _noMsgFromOutside;
 	bool _moderatedChan;
 	int _limit;
-	//bool _banMask;
 	std::string _key;
 	std::map<std::string, int> _clientRights;
 
@@ -35,7 +36,8 @@ public:
 
 	void addClientRight(Client *cl, int right);
 	bool checkClientRight(Client *cl, int right);
-	int getSize();
+	void removeClientRight(Client *cl, int right);
+	size_t getSize() const;
 	void addClient(Client *cl);
 
 	Client *getClient(std::string name);
@@ -53,7 +55,7 @@ public:
 	void setModeratedChan(bool);
 	bool getModeratedChan() const;
 	void setLimit(int);
-	int getLimit() const;
+	size_t getLimit() const;
 	void setKey(std::string);
 	std::string getKey() const;
 	void setClientRights(std::string, int);

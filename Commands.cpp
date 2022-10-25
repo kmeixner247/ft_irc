@@ -126,15 +126,6 @@ void Server::JOIN(Client *cl, Message msg)
 	/* !!!CAN'T HANDLE MULTIPLE CHANNELS YET!!! */
 
 	/*	NEED:
-		Channel name constructor
-		Channel::getKey
-		Channel::getLimit
-		Channel::isInviteOnly
-		Channel::isPrivate
-		Channel::addClientRight
-		Channel::checkClientRight
-		Channel::getSize
-		Channel::addClient
 		Client::addChannel
 		ERR_NEEDMOREPARAMS
 		ERR_BADCHANMASK
@@ -148,31 +139,40 @@ void Server::JOIN(Client *cl, Message msg)
 		RPL_ENDOFNAMES
 	*/
 
-
 	//ERR_NEEDMOREPARAMS
 	if (msg.getParameters().size() == 0)
+	{
 		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
-	//ERR_BADCHANMASK ?? 
-	//ERR_NOSUCHCHANNEL ??
+		return ;
+	}
+	if (msg.getParameters()[0][0] != '#')
+	{
+		this->sendResponse(cl, ERR_NOSUCHCHANNEL);
+		return ;
+	}
 	if (!this->_channels.count(msg.getParameters().front())) 
 	{	//create channel, make client op
-		Channel newchan(msg.getParameters().front()); //assuming name constructor
+		Channel newchan(msg.getParameters()[0]); //assuming name constructor
 		ch = &newchan;
-		// this->addChannel(ch);
+		this->addChannel(ch);
 		ch->addClient(cl);
+
 		ch->addClientRight(cl, CHAN_OPERATOR);
 		cl->addChannel(ch);
 	}
 	else
 	{
+
+		ch = this->_channels[msg.getParameters()[0]];
+		std::cerr << ch->getName() << std::endl;
 		//ERR_BADCHANNELKEY
-		if (ch->isPrivate() && ch->getKey().compare(msg.getParameters().back()))
+		if (ch->getPrivateChan() && ch->getKey().compare(msg.getParameters().back()))
 		{
 			this->sendResponse(cl, ERR_BADCHANNELKEY);
 			return ;
 		}
 		//ERR_INVITEONLYCHAN
-		if (ch->isInviteOnly() && ch->checkClientRight(cl, CHAN_INVITE))
+		if (ch->getInviteOnly() && ch->checkClientRight(cl, CHAN_INVITE))
 		{
 			this->sendResponse(cl, ERR_INVITEONLYCHAN);
 			return ;
@@ -191,11 +191,12 @@ void Server::JOIN(Client *cl, Message msg)
 		}
 		ch->addClient(cl);
 		cl->addChannel(ch);
-		this->sendResponse(cl, RPL_TOPIC);
-		this->sendResponse(cl, RPL_NAMREPLY);
-		this->sendResponse(cl, RPL_ENDOFNAMES);
 		//noticess about commands?
 	}
+	std::cerr << "sending channel welcome" << std::endl;
+	this->sendResponse(cl, RPL_TOPIC);
+	this->sendResponse(cl, RPL_NAMREPLY);
+	this->sendResponse(cl, RPL_ENDOFNAMES);
 	
 }
 
