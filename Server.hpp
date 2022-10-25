@@ -45,6 +45,24 @@ public:
 	void sendMsg(Client *cl, Message msg) const;
 	void sendMsg(Client *cl, std::string msg) const;
 	void sendMsg(Client *cl, char *msg) const;
+	void setPort(int port);
+	void setPassword(std::string pw);
+	void setRegisteredClients(std::map<std::string, Client*> clients);
+	std::map<std::string, Client*> getRegisteredClients();
+	void setConnectedClients(std::map<int, Client> clients);
+	std::map<int, Client> getConnectedClients();
+	void setHost(std::string host);
+	std::string getHost();
+	void setServerName(std::string name);
+	std::string getServerName();
+	void setVersion(std::string version);
+	std::string getVersion();
+	void setMotd(std::string motd);
+	std::string getMotd();
+	void setPasswordOper(std::string pw);
+	std::string getPasswordOper();
+	void setChannels(std::map<std::string, Channel*> channels);
+	std::map<std::string, Channel*> getChannels();
 private:
 	Server();
 	Server(const Server &rhs);
