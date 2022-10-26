@@ -24,17 +24,11 @@ bool strIsASCII(const std::string& str)
 void Server::PASS(Client *cl, Message msg)
 {
 	if (msg.getParameters().size() == 0)
-	{
-		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
-		this->sendResponse(cl, "\n");
-	}
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PASS"));
 	else if (!msg.getParameters().back().compare(this->_password) && !cl->getPassbool())
 		cl->setPassbool(true);
 	else if (this->clientIsRegistered(cl)) //check, if adium/pidgin enter here when passbool is true, but cl not registered
-	{
-		this->sendResponse(cl, ERR_ALREADYREGISTRED);
-		this->sendResponse(cl, "\n"); 
-	}
+		this->sendMsg(cl, 1, ERR_ALREADYREGISTERED(cl));
 	else
 		cl->setPassbool(false);
 	std::cout << "PASS " << std::endl;
@@ -50,20 +44,17 @@ void Server::NICK(Client *cl, Message msg)
 	std::cout << msg << std::endl;
 	if (msg.getParameters().size() == 0)
 	{
-		this->sendResponse(cl, ERR_NONICKNAMEGIVEN);
-		this->sendResponse(cl, "\n");
+		this->sendMsg(cl, 1, ERR_NONICKNAMEGIVEN(cl));
 		return;
 	}
 	else if (!(strIsASCII(msg.getParameters().back()))) //check with ref client if it is really ascii
 	{
-		this->sendResponse(cl, ERR_ERRONEUSNICKNAME);
-		this->sendResponse(cl, "\n");
+		this->sendMsg(cl, 1, ERR_ERRONEUSNICKNAME(cl));
 		return;
 	}
 	else if (this->_registeredclients.find(strToLower(msg.getParameters().back())) != this->_registeredclients.end())
 	{
-		this->sendResponse(cl, ERR_NICKNAMEINUSE);
-		this->sendResponse(cl, "\n");
+		this->sendMsg(cl, 1, ERR_NICKNAMEINUSE(cl));
 		return;
 	}
 	std::string prefixLower = strToLower(msg.getPrefix());
@@ -81,7 +72,7 @@ void Server::NICK(Client *cl, Message msg)
 		{
 			cl->setNickname(paramLower);
 			this->_registeredclients[cl->getNickname()] = cl;
-			this->sendWelcome(cl);
+			this->sendMsg(cl, 3, RPL_MOTDSTART(cl).c_str(), RPL_MOTD(cl).c_str(), RPL_ENDOFMOTD(cl).c_str());
 			return;
 		}
 		else return;
@@ -97,14 +88,14 @@ void Server::USER(Client *cl, Message msg)
 	std::cout << msg << std::endl;
 	if (this->clientIsRegistered(cl))
 	{
-		this->sendResponse(cl, ERR_ALREADYREGISTRED);
-		this->sendResponse(cl, "\n");
+		this->sendMsg(cl, 1, ERR_ALREADYREGISTERED(cl));
+		// this->sendResponse(cl, ERR_ALREADYREGISTRED);
 		return;
 	}
 	else if (msg.getParameters().size() < 4 || msg.getParameters().at(3) == "")//check with Pidgin/Adim if that is really the right min amount of params
 	{
-		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
-		this->sendResponse(cl, "\n");
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "USER"));
+		// this->sendResponse(cl, ERR_NEEDMOREPARAMS);
 		return;
 	}
 	cl->setUsername(msg.getParameters()[0]);
@@ -112,7 +103,7 @@ void Server::USER(Client *cl, Message msg)
 	if (cl->getNickname() != "")
 	{
 	this->_registeredclients[cl->getNickname()] = cl;
-		this->sendWelcome(cl);
+		this->sendMsg(cl, 3, RPL_MOTDSTART(cl).c_str(), RPL_MOTD(cl).c_str(), RPL_ENDOFMOTD(cl).c_str());
 	}
 
 }
@@ -142,15 +133,19 @@ void Server::JOIN(Client *cl, Message msg)
 	//ERR_NEEDMOREPARAMS
 	if (msg.getParameters().size() == 0)
 	{
-		this->sendResponse(cl, ERR_NEEDMOREPARAMS);
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "JOIN"));
+		// this->sendResponse(cl, ERR_NEEDMOREPARAMS);
 		return ;
 	}
+	//better check for invalid channel names and fix sending the invalid channel name (there is no channel object obviously)
 	if (msg.getParameters()[0][0] != '#')
 	{
-		this->sendResponse(cl, ERR_NOSUCHCHANNEL);
+		std::cout << "sending nosuchchannel" << std::endl;
+		// this->sendResponse(cl, ERR_NOSUCHCHANNEL);
+		this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, msg.getParameters()[0]));
 		return ;
 	}
-	if (!this->_channels.count(msg.getParameters().front())) 
+	if (!this->_channels.count(msg.getParameters()[0])) 
 	{	//create channel, make client op
 		Channel newchan(msg.getParameters()[0]); //assuming name constructor
 		ch = &newchan;
@@ -162,42 +157,42 @@ void Server::JOIN(Client *cl, Message msg)
 	}
 	else
 	{
-
+		std::cerr << msg.getParameters()[0] << std::endl;
 		ch = this->_channels[msg.getParameters()[0]];
 		std::cerr << ch->getName() << std::endl;
 		//ERR_BADCHANNELKEY
 		if (ch->getPrivateChan() && ch->getKey().compare(msg.getParameters().back()))
 		{
-			this->sendResponse(cl, ERR_BADCHANNELKEY);
+			this->sendMsg(cl, 1, ERR_BADCHANNELKEY(cl, ch));
+			// this->sendResponse(cl, ERR_BADCHANNELKEY);
 			return ;
 		}
 		//ERR_INVITEONLYCHAN
 		if (ch->getInviteOnly() && ch->checkClientRight(cl, CHAN_INVITE))
 		{
-			this->sendResponse(cl, ERR_INVITEONLYCHAN);
+			this->sendMsg(cl, 1, ERR_INVITEONLYCHAN(cl, ch));
 			return ;
 		}
-		//ERR_BANNEDFROMCHAN
+		//ERR_BANNED MCHAN
 		if (ch->checkClientRight(cl, CHAN_BAN))
 		{
-			this->sendResponse(cl, ERR_BANNEDFROMCHAN);
+			this->sendMsg(cl, 1, ERR_BANNEDFROMCHAN(cl, ch));
 			return ;
 		}
 		//ERR_CHANNELISFULL 
 		if (ch->getLimit() >= ch->getSize())
 		{
-			this->sendResponse(cl, ERR_CHANNELISFULL);
+			this->sendMsg(cl, 1, ERR_CHANNELISFULL(cl, ch));
 			return ;
 		}
 		ch->addClient(cl);
 		cl->addChannel(ch);
 		//noticess about commands?
 	}
-	std::cerr << "sending channel welcome" << std::endl;
-	this->sendResponse(cl, RPL_TOPIC);
-	this->sendResponse(cl, RPL_NAMREPLY);
-	this->sendResponse(cl, RPL_ENDOFNAMES);
-	
+	//send JOIN with nick as prefix to channel)
+	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
+	this->sendMsg(cl, 1, JOINREPLY(cl, ch));
+	this->sendMsg(cl, 3, RPL_TOPIC(cl, ch).c_str(), RPL_NAMREPLY(cl, ch).c_str(), RPL_ENDOFNAMES(cl, ch).c_str());
 }
 
 void Server::QUIT(Client *cl, Message msg)

@@ -162,22 +162,41 @@ int Server::init()
 	return (0);
 }
 
-void Server::sendMsg(Client *cl, Message msg) const
+void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 {
-	std::string temp = msg.getRaw();
-	send(cl->getSocket(), temp.c_str(), temp.length(), 0);
-}
+	std::string msg;
+	va_list args;
+	va_start(args, str);
 
-void Server::sendMsg(Client *cl, std::string msg) const
-{
+	while (argNum-- != 0)
+	{
+		msg += str;
+		if (argNum == 0)
+			va_end(args);
+		else
+			str = va_arg(args, const char*);
+	}
 	send(cl->getSocket(), msg.c_str(), msg.length(), 0);
 }
 
-void Server::sendMsg(Client *cl, char *msg) const
+void Server::sendMsg(Channel *ch, int argNum, std::string str, ...) const
 {
-	send(cl->getSocket(), msg, std::string(msg).length(), 0);
-}
+	std::string msg;
+	va_list args;
+	va_start(args, str);
 
+	while (argNum-- != 0)
+	{
+		msg += str;
+		if (argNum == 0)
+			va_end(args);
+		else
+			str = va_arg(args, const char*);
+	}
+	std::map<std::string, Client*> tempclients = ch->getClients();
+	for (std::map<std::string, Client*>::iterator it = tempclients.begin(); it != tempclients.end(); it++)
+		send (it->second->getSocket(), msg.c_str(), msg.length(), 0);
+}
 
 std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 {
@@ -194,19 +213,6 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 	cl->setBuffer(input);
 	return (msgs);
 }
-
-// std::vector<Message> Server::parseMessages(char *input)
-// {
-// 	std::vector<Message> msgs;
-// 	std::string temp(input);
-// 	size_t pos;
-// 	while ((pos = temp.find('\n')) != temp.npos)
-// 	{
-// 		msgs.push_back(Message(temp.substr(0, pos - 1)));
-// 		temp = temp.substr(pos + 1, temp.npos);
-// 	}
-// 	return (msgs);
-// }
 
 // void Server::interpretMessages(Client *cl, char *buffer)
 void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
@@ -257,48 +263,35 @@ void Server::receiveMessage(Client *cl, char *buffer)
 		this->interpretMessages(cl, this->parseMessages(cl, cl->getBuffer()));
 }
 
-void Server::sendResponse(Client *cl, std::string msg)
-{
-	this->sendMsg(cl, replace_thingies(msg, cl));
-}
-
 void Server::sendWelcome(Client *cl)
 {	
+	(void)cl;
 	std::cerr << "Sending welcome" << std::endl;
 	//this is kinda temporary
-	this->sendResponse(cl, RPL_WELCOME);
-	this->sendResponse(cl, RPL_YOURHOST);
-	this->sendResponse(cl, RPL_CREATED);
-	this->sendResponse(cl, RPL_MYINFO);
-	this->sendResponse(cl, RPL_MOTDSTART);
-	this->sendResponse(cl, RPL_MOTD);
-	this->sendResponse(cl, RPL_ENDOFMOTD);
+	// this->sendResponse(cl, RPL_WELCOME);
+	// this->sendResponse(cl, RPL_YOURHOST);
+	// this->sendResponse(cl, RPL_CREATED);
+	// this->sendResponse(cl, RPL_MYINFO);
+	// this->sendResponse(cl, RPL_MOTDSTART);
+	// this->sendResponse(cl, RPL_MOTD);
+	// this->sendResponse(cl, RPL_ENDOFMOTD);
 }
 
-std::string Server::replace_thingies(std::string msg, Client *cl)
+std::string msgMaker(int argNum, std::string str, ...)
 {
-	int pos;
-	while ((pos = msg.find("<nick>") != std::string::npos))
-		msg.replace(msg.find("<nick>"), 6, cl->getNickname());
-	while ((pos = msg.find("<user>") != std::string::npos))
-		msg.replace(msg.find("<user>"), 6, cl->getUsername());
-	while ((pos = msg.find("<host>") != std::string::npos))
-		msg.replace(msg.find("<host>"), 6, this->_host);
-	while ((pos = msg.find("<version>") != std::string::npos))
-		msg.replace(msg.find("<version>"), 9, this->_version);
-	while ((pos = msg.find("<server>") != std::string::npos))
-		msg.replace(msg.find("<server>"), 8, this->_servername);
-	//probably more
-	return (msg);
-}
-std::string Server::replace_thingies(std::string msg, Client *cl, Channel *ch)
-{
-	//int pos;
-	(void)ch;
-	msg = this->replace_thingies(msg, cl);
-
-	//probably more
-	return (msg);
+    va_list args;
+    va_start(args, str);
+    std::string msgOutput;
+    
+    while (argNum-- != 0)
+    {
+        msgOutput += str;
+        if (argNum == 0)
+            va_end(args);
+        else
+            str = va_arg(args, const char*);
+    }
+    return msgOutput;
 }
 
 bool Server::clientIsConnected(Client *cl)

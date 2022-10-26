@@ -43,9 +43,9 @@ public:
 	// void interpretMessages(Client *cl, char *buffer);
 	void receiveMessage(Client *cl, char *buffer);
 	void interpretMessages(Client *cl, std::vector<Message> msgs);
-	void sendMsg(Client *cl, Message msg) const;
-	void sendMsg(Client *cl, std::string msg) const;
-	void sendMsg(Client *cl, char *msg) const;
+	void sendMsg(Client *cl, int argNum, std::string str, ...) const;
+	void sendMsg(Channel *ch, int argNum, std::string str, ...) const;
+	/* GETTERS AND SETTERS */
 	void setPort(int port);
 	void setPassword(std::string pw);
 	void setRegisteredClients(std::map<std::string, Client*> clients);
@@ -70,6 +70,7 @@ public:
 	int getServerfd() const;
 	void setServerfd(int fd);
 private:
+	std::string msgMaker(int argNum, std::string, ...);
 	Server();
 	Server(const Server &rhs);
 	Server &operator=(const Server &rhs);
@@ -93,11 +94,40 @@ private:
 	void INVITE(Client *cl, Message msg);
 	void TOPIC(Client *cl, Message msg);
 	void WHO(Client *cl, Message msg);
+	
+	/* CHANNEL DISTRIBUTION STUFF? */
+	std::string JOINREPLY(Client *cl, Channel *ch);
+
+	/* RESPONSES */
+	std::string RPL_WELCOME(Client *cl);
+	std::string RPL_YOURHOST(Client *cl);
+	std::string RPL_CREATED(Client *cl);
+	std::string RPL_MYINFO(Client *cl);
+	std::string RPL_TOPIC(Client *cl, Channel *ch);
+	std::string RPL_NAMREPLY(Client *cl, Channel *ch);
+	std::string RPL_ENDOFNAMES(Client *cl, Channel *ch);
+	std::string RPL_MOTDSTART(Client *cl);
+	std::string RPL_MOTD(Client *cl);
+	std::string RPL_ENDOFMOTD(Client *cl);
+
+	/* ERRORS */
+	std::string ERR_ALREADYREGISTERED(Client *cl);
+	std::string ERR_NEEDMOREPARAMS(Client *cl, std::string command);
+	std::string ERR_NONICKNAMEGIVEN(Client *cl);
+	std::string ERR_ERRONEUSNICKNAME(Client *cl);
+	std::string ERR_NICKNAMEINUSE(Client *cl);
+	std::string ERR_NOSUCHCHANNEL(Client *cl, std::string channel);
+	std::string ERR_BADCHANNELKEY(Client *cl, Channel *ch);
+	std::string ERR_INVITEONLYCHAN(Client *cl, Channel *ch);
+	std::string ERR_BANNEDFROMCHAN(Client *cl, Channel *ch);
+	std::string ERR_CHANNELISFULL(Client *cl, Channel *ch);
+
 
 	void sendWelcome(Client *cl);
 	std::string replace_thingies(std::string msg, Client *cl);
 	std::string replace_thingies(std::string msg, Client *cl, Channel *ch);
 	void sendResponse(Client *cl, std::string msg);
+	void sendResponse(Client *cl, Channel *ch, std::string msg);
 	bool clientIsConnected(Client *cl);
 	bool clientIsRegistered(Client *cl);
 

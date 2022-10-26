@@ -1,6 +1,6 @@
 NAME		=	server
 
-SRCS		=	main.cpp Server.cpp Client.cpp Message.cpp Commands.cpp Channel.cpp
+SRCS		=	main.cpp Server.cpp Client.cpp Message.cpp Commands.cpp Channel.cpp ErrorMessages.cpp Replies.cpp
 
 CC			=	c++
 
