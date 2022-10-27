@@ -1,12 +1,15 @@
+#pragma once
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 #include <map>
 #include "Client.hpp"
-
-#define CHAN_MODERATOR 1
-#define CHAN_OPERATOR 2
+#include <string>
+#include <utility>
+#define CHAN_OPERATOR 1
+#define CHAN_MODERATOR 2
 #define CHAN_BAN 4
 #define CHAN_INVITE 8
+#include <sys/socket.h>
 
 class Client;
 
@@ -22,15 +25,22 @@ private:
 	bool _noMsgFromOutside;
 	bool _moderatedChan;
 	int _limit;
-	//bool _banMask;
 	std::string _key;
 	std::map<std::string, int> _clientRights;
 
 public:
 	Channel();
 	Channel(const Channel &rhs);
+	Channel(const std::string &name);
 	~Channel();
 	Channel &operator=(const Channel &rhs);
+
+	void addClientRight(Client *cl, int right);
+	bool checkClientRight(Client *cl, int right);
+	void removeClientRight(Client *cl, int right);
+	size_t getSize() const;
+	void addClient(Client *cl);
+
 	Client *getClient(std::string name);
 	void setClient(std::string name, Client *client);
 	void setPrivateChan(bool);
@@ -46,14 +56,18 @@ public:
 	void setModeratedChan(bool);
 	bool getModeratedChan() const;
 	void setLimit(int);
-	int getLimit() const;
+	size_t getLimit() const;
 	void setKey(std::string);
 	std::string getKey() const;
 	void setClientRights(std::string, int);
 	std::map<std::string, int> getClientRights() const;
 	std::string getName() const;
+	void setName(std::string);
 	std::map<std::string, Client*> getClients() const;
+	std::string getNicklist();
 	void setClients(std::map<std::string, Client*> clients);
+	void distributeMsg(std::string msg);
 };
 
 #endif
+

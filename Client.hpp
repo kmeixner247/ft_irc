@@ -1,10 +1,13 @@
+#pragma once
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 #include <string>
 #include <map>
 #include <vector>
 #include "Channel.hpp"
+#include <utility>
 
+class Channel;
 class Client
 {
 private:
@@ -17,8 +20,9 @@ private:
 	bool _invisible;
 	bool _serverNotice;
 	bool _wallopReceiver;
-	std::map<std::string, std::vector<Channel*> > _channel;
+	std::map<std::string, Channel *> _channel;
 	std::string _buffer;
+
 public:
 	Client();
 	Client(const Client &rhs);
@@ -43,5 +47,6 @@ public:
 	void setSocket(int socket);
 	void setPassbool(bool b);
 	void setBuffer(std::string buffer);
+	void addChannel(Channel *ch);
 };
 #endif

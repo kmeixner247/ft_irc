@@ -1,19 +1,32 @@
 #include "Channel.hpp"
 
-Channel::Channel()
+Channel::Channel() : 
+	_name(""), 
+	_clients(std::map<std::string, Client *>()),
+	_privateChan(false),  
+	_secretChan(false), 
+	_inviteOnly(false), 
+	_topic(""), 
+	_noMsgFromOutside(false), 
+	_moderatedChan(false), 
+	_limit(99999), 
+	_key(""),
+	_clientRights(std::map<std::string, int>())
 {
-	_privateChan = false;
-	_secretChan = false;
-	_inviteOnly = false;
-	_noMsgFromOutside = false;
-	_moderatedChan = false;
-	_limit = 0;
-	// _banMask = false;
 }
-
-Channel::Channel() : _name(""), _privateChan(false), _inviteOnly(false), _secretChan(false), _topic(""), _noMsgFromOutside(false), _moderatedChan(false), _limit(99999), /*_banMask(),*/ _key("")
+Channel::Channel(const std::string &name) : 
+	_name(name), 
+	_clients(std::map<std::string, Client *>()),
+	_privateChan(false), 
+	_secretChan(false), 
+	_inviteOnly(false), 
+	_topic(""), 
+	_noMsgFromOutside(false), 
+	_moderatedChan(false), 
+	_limit(99999), 
+	_key(""),
+	_clientRights(std::map<std::string, int>())
 {
-
 }
 
 Channel::Channel(const Channel &rhs)
@@ -41,6 +54,34 @@ Channel &Channel::operator=(const Channel &rhs)
 	// this->_banMask = rhs._banMask;
 	this->_key = rhs.getKey();
 	return (*this);
+}
+
+void Channel::addClientRight(Client *cl, int right)
+{
+	this->_clientRights.at(cl->getNickname()) = (this->_clientRights.at(cl->getNickname()) | right);
+}
+
+bool Channel::checkClientRight(Client *cl, int right)
+{
+	if (!this->_clientRights.count(cl->getNickname()))
+		return (false);
+	return (this->_clientRights.at(cl->getNickname()) & right);
+}
+
+void Channel::removeClientRight(Client *cl, int right)
+{
+	this->_clientRights.at(cl->getNickname()) = this->_clientRights.at(cl->getNickname()) & (~right);
+}
+
+void Channel::addClient(Client *cl)
+{
+	this->_clients.insert(std::make_pair(cl->getNickname(), cl));
+	this->_clientRights.insert(std::make_pair(cl->getNickname(), 0));
+}
+
+size_t Channel::getSize() const
+{
+	return (this->_clients.size());
 }
 
 void Channel::setClient(std::string name, Client *client)
@@ -103,7 +144,7 @@ void Channel::setLimit(int i)
 {
 	this->_limit = i;
 }
-int Channel::getLimit() const
+size_t Channel::getLimit() const
 {
 	return this->_limit;
 }
@@ -127,13 +168,38 @@ std::string Channel::getName() const
 {
 	return this->_name;
 }
-
-std::map<std::string, Client*> Channel::getClients() const
+void Channel::setName(std::string name)
+{
+	this->_name = name;
+}
+std::map<std::string, Client *> Channel::getClients() const
 {
 	return this->_clients;
 }
 
-void Channel::setClients(std::map<std::string, Client*> clients)
+std::string Channel::getNicklist()
+{
+	std::string list;
+	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
+	{
+		if (this->checkClientRight(it->second, CHAN_OPERATOR))
+			list += "@";
+		list += it->second->getNickname() + " ";
+	}
+	list.resize(list.size() - 1);
+	return (list);
+}
+
+void Channel::setClients(std::map<std::string, Client *> clients)
 {
 	this->_clients = clients;
+}
+#include <iostream>
+void Channel::distributeMsg(std::string msg)
+{
+	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
+	{
+		std::cerr << "##############\nSENDING...\n" << msg << "...to" << it->second->getNickname()<<"\n##############" << std::endl;
+		send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
+	}
 }
