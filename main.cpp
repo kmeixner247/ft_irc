@@ -25,7 +25,7 @@ int inputValidation(int argc, char **argv)
 	}
 	return (0);
 }
-
+#include <cstdlib>
 int main(int argc, char **argv)
 {
 	if (inputValidation(argc, argv) < 0)

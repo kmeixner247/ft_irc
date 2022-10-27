@@ -3,9 +3,20 @@ std::string Server::JOINREPLY(Client *cl, Channel *ch)
 {
 	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
 	std::string msg;
-	msg += ":" + cl->getNickname();
-	msg += " JOIN ";
+	msg += this->makeClientPrefix(cl);
+	msg += " JOIN :";
 	msg += ch->getName();
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
+{
+	std::string msg;
+	msg += this->makeClientPrefix(from);
+	msg += " PRIVMSG ";
+	msg += to + " :";
+	msg += text;
 	msg += "\r\n";
 	return (msg);
 }

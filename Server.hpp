@@ -77,6 +77,7 @@ private:
 	int init();
 	// std::vector<Message> parseMessages(char *input);
 	std::vector<Message> parseMessages(Client *cl, std::string input);
+	std::string makeClientPrefix(Client *cl);
 	// commands
 	void PASS(Client *cl, Message msg);
 	void USER(Client *cl, Message msg);
@@ -97,6 +98,7 @@ private:
 	
 	/* CHANNEL DISTRIBUTION STUFF? */
 	std::string JOINREPLY(Client *cl, Channel *ch);
+	std::string PRIVMSGREPLY(Client *from, std::string to, std::string text);
 
 	/* RESPONSES */
 	std::string RPL_WELCOME(Client *cl);
