@@ -2,6 +2,7 @@
 
 Channel::Channel() : 
 	_name(""), 
+	_clients(std::map<std::string, Client *>()),
 	_privateChan(false),  
 	_secretChan(false), 
 	_inviteOnly(false), 
@@ -9,11 +10,13 @@ Channel::Channel() :
 	_noMsgFromOutside(false), 
 	_moderatedChan(false), 
 	_limit(99999), 
-	_key("")
+	_key(""),
+	_clientRights(std::map<std::string, int>())
 {
 }
 Channel::Channel(const std::string &name) : 
 	_name(name), 
+	_clients(std::map<std::string, Client *>()),
 	_privateChan(false), 
 	_secretChan(false), 
 	_inviteOnly(false), 
@@ -21,7 +24,8 @@ Channel::Channel(const std::string &name) :
 	_noMsgFromOutside(false), 
 	_moderatedChan(false), 
 	_limit(99999), 
-	_key("")
+	_key(""),
+	_clientRights(std::map<std::string, int>())
 {
 }
 
@@ -162,10 +166,28 @@ std::string Channel::getName() const
 {
 	return this->_name;
 }
-
+void Channel::setName(std::string name)
+{
+	this->_name = name;
+}
 std::map<std::string, Client *> Channel::getClients() const
 {
 	return this->_clients;
+}
+
+std::string Channel::getNicklist()
+{
+	std::string list;
+	std::map<std::string, Client*>::iterator itt = this->_clients.begin();
+	(void)itt;
+	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
+	{
+		if (it->second->getOperator())
+			list += "@";
+		list += it->second->getNickname() + " ";
+	}
+	list.resize(list.size() - 1);
+	return (list);
 }
 
 void Channel::setClients(std::map<std::string, Client *> clients)

@@ -61,7 +61,9 @@ public:
 	void setClientRights(std::string, int);
 	std::map<std::string, int> getClientRights() const;
 	std::string getName() const;
+	void setName(std::string);
 	std::map<std::string, Client*> getClients() const;
+	std::string getNicklist();
 	void setClients(std::map<std::string, Client*> clients);
 };
 

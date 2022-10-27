@@ -29,15 +29,7 @@ std::string Server::RPL_NAMREPLY(Client *cl, Channel *ch)
 	msg += " 353 ";
 	msg += cl->getNickname() + " ";
 	msg += ch->getName();
-	msg += " :";
-	std::map<std::string, Client*> tempcl = ch->getClients();
-	for (std::map<std::string, Client*>::iterator it = tempcl.begin(); it != tempcl.end(); it++)
-	{
-		if (it->second->getOperator())
-			msg += "@";
-		msg += it->second->getNickname() + " ";
-	}
-	msg.resize(msg.size() - 1);
+	msg += " :" + ch->getNicklist();
 	msg += "\r\n";
 	return (msg);
 }

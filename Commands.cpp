@@ -110,6 +110,7 @@ void Server::USER(Client *cl, Message msg)
 
 void Server::JOIN(Client *cl, Message msg)
 {
+	Channel newchan;
 	Channel *ch;
 	std::cout << "JOIN" << std::endl;
 	std::cout << msg << std::endl;
@@ -147,11 +148,10 @@ void Server::JOIN(Client *cl, Message msg)
 	}
 	if (!this->_channels.count(msg.getParameters()[0])) 
 	{	//create channel, make client op
-		Channel newchan(msg.getParameters()[0]); //assuming name constructor
+		newchan.setName(msg.getParameters()[0]);
 		ch = &newchan;
 		this->addChannel(ch);
 		ch->addClient(cl);
-
 		ch->addClientRight(cl, CHAN_OPERATOR);
 		cl->addChannel(ch);
 	}
@@ -187,7 +187,6 @@ void Server::JOIN(Client *cl, Message msg)
 		}
 		ch->addClient(cl);
 		cl->addChannel(ch);
-		//noticess about commands?
 	}
 	//send JOIN with nick as prefix to channel)
 	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
