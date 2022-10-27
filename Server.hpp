@@ -32,7 +32,7 @@ private:
 	std::string _version;
 	std::string _motd;
 	std::string _passwordOper;
-	std::map<std::string, Channel*> _channels;
+	std::map<std::string, Channel> _channels;
 
 public:
 	Server(int port, std::string pw);
@@ -62,9 +62,9 @@ public:
 	std::string getMotd() const;
 	void setPasswordOper(std::string pw);
 	std::string getPasswordOper() const;
-	void setChannels(std::map<std::string, Channel*> channels);
-	std::map<std::string, Channel*> getChannels() const;
-	void addChannel(Channel *);
+	void setChannels(std::map<std::string, Channel> channels);
+	std::map<std::string, Channel> getChannels() const;
+	Channel *addChannel(Channel);
 	std::string getPassword() const;
 	int getPort() const;
 	int getServerfd() const;

@@ -9,6 +9,7 @@
 #define CHAN_MODERATOR 2
 #define CHAN_BAN 4
 #define CHAN_INVITE 8
+#include <sys/socket.h>
 
 class Client;
 
@@ -65,6 +66,7 @@ public:
 	std::map<std::string, Client*> getClients() const;
 	std::string getNicklist();
 	void setClients(std::map<std::string, Client*> clients);
+	void distributeMsg(std::string msg);
 };
 
 #endif

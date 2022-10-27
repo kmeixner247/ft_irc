@@ -176,6 +176,7 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 		else
 			str = va_arg(args, const char*);
 	}
+		std::cerr << "##############\nSENDING...\n" << msg << "...to" << cl->getNickname()<<"\n##############" << std::endl;
 	send(cl->getSocket(), msg.c_str(), msg.length(), 0);
 }
 
@@ -193,9 +194,7 @@ void Server::sendMsg(Channel *ch, int argNum, std::string str, ...) const
 		else
 			str = va_arg(args, const char*);
 	}
-	std::map<std::string, Client*> tempclients = ch->getClients();
-	for (std::map<std::string, Client*>::iterator it = tempclients.begin(); it != tempclients.end(); it++)
-		send (it->second->getSocket(), msg.c_str(), msg.length(), 0);
+	ch->distributeMsg(msg);
 }
 
 std::vector<Message> Server::parseMessages(Client *cl, std::string input)
@@ -261,20 +260,6 @@ void Server::receiveMessage(Client *cl, char *buffer)
 	cl->catBuffer(buffer);
 	if (cl->getBuffer().find_first_of('\n') != std::string::npos)
 		this->interpretMessages(cl, this->parseMessages(cl, cl->getBuffer()));
-}
-
-void Server::sendWelcome(Client *cl)
-{	
-	(void)cl;
-	std::cerr << "Sending welcome" << std::endl;
-	//this is kinda temporary
-	// this->sendResponse(cl, RPL_WELCOME);
-	// this->sendResponse(cl, RPL_YOURHOST);
-	// this->sendResponse(cl, RPL_CREATED);
-	// this->sendResponse(cl, RPL_MYINFO);
-	// this->sendResponse(cl, RPL_MOTDSTART);
-	// this->sendResponse(cl, RPL_MOTD);
-	// this->sendResponse(cl, RPL_ENDOFMOTD);
 }
 
 std::string msgMaker(int argNum, std::string str, ...)
@@ -355,17 +340,19 @@ std::string Server::getMotd() const
 {
 	return this->_motd;
 }
-void Server::setChannels(std::map<std::string, Channel*> channels)
+void Server::setChannels(std::map<std::string, Channel> channels)
 {
 	this->_channels = channels;
 }
-std::map<std::string, Channel*> Server::getChannels() const
+std::map<std::string, Channel> Server::getChannels() const
 {
 	return this->_channels;
 }
-void Server::addChannel(Channel *ch)
+Channel *Server::addChannel(Channel ch)
 {
-	this->_channels.insert(std::make_pair(ch->getName(), ch));
+	std::map<std::string, Channel>::iterator it = this->_channels.insert(std::make_pair(ch.getName(), ch)).first;
+	// return (this->_channels.insert(std::make_pair(ch.getName(), ch)));
+	return (&it->second);
 }
 void Server::setPasswordOper(std::string password)
 {

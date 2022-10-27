@@ -149,17 +149,14 @@ void Server::JOIN(Client *cl, Message msg)
 	if (!this->_channels.count(msg.getParameters()[0])) 
 	{	//create channel, make client op
 		newchan.setName(msg.getParameters()[0]);
-		ch = &newchan;
-		this->addChannel(ch);
+		ch = this->addChannel(newchan);
 		ch->addClient(cl);
 		ch->addClientRight(cl, CHAN_OPERATOR);
 		cl->addChannel(ch);
 	}
 	else
 	{
-		std::cerr << msg.getParameters()[0] << std::endl;
-		ch = this->_channels[msg.getParameters()[0]];
-		std::cerr << ch->getName() << std::endl;
+		ch = &(this->_channels[msg.getParameters()[0]]);
 		//ERR_BADCHANNELKEY
 		if (ch->getPrivateChan() && ch->getKey().compare(msg.getParameters().back()))
 		{
@@ -180,7 +177,7 @@ void Server::JOIN(Client *cl, Message msg)
 			return ;
 		}
 		//ERR_CHANNELISFULL 
-		if (ch->getLimit() >= ch->getSize())
+		if (ch->getLimit() <= ch->getSize())
 		{
 			this->sendMsg(cl, 1, ERR_CHANNELISFULL(cl, ch));
 			return ;
@@ -190,7 +187,7 @@ void Server::JOIN(Client *cl, Message msg)
 	}
 	//send JOIN with nick as prefix to channel)
 	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
-	this->sendMsg(cl, 1, JOINREPLY(cl, ch));
+	this->sendMsg(ch, 1, JOINREPLY(cl, ch));
 	this->sendMsg(cl, 3, RPL_TOPIC(cl, ch).c_str(), RPL_NAMREPLY(cl, ch).c_str(), RPL_ENDOFNAMES(cl, ch).c_str());
 }
 
@@ -212,70 +209,80 @@ void Server::WHO(Client *cl, Message msg)
 
 void Server::KILL(Client *cl, Message msg)
 {
-	std::cout << "KILL" << std::endl;
+	std::cout << "KILL from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::OPER(Client *cl, Message msg)
 {
-	std::cout << "OPER" << std::endl;
+	std::cout << "OPER from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::SQUIT(Client *cl, Message msg)
 {
-	std::cout << "SQUIT" << std::endl;
+	std::cout << "SQUIT from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::PRIVMSG(Client *cl, Message msg)
 {
-	std::cout << "PRIVMSG" << std::endl;
+	std::cout << "PRIVMSG from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::WALLOPS(Client *cl, Message msg)
 {
-	std::cout << "WALLOPS" << std::endl;
+	std::cout << "WALLOPS from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::NOTICE(Client *cl, Message msg)
 {
-	std::cout << "NOTICE" << std::endl;
+	std::cout << "NOTICE from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::KICK(Client *cl, Message msg)
 {
-	std::cout << "KICK" << std::endl;
+	std::cout << "KICK from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::MODE(Client *cl, Message msg)
 {
-	std::cout << "MODE" << std::endl;
+	std::cout << "MODE from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::INVITE(Client *cl, Message msg)
 {
-	std::cout << "INVITE" << std::endl;
+	std::cout << "INVITE from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::TOPIC(Client *cl, Message msg)
 {
-	std::cout << "TOPIC" << std::endl;
+	std::cout << "TOPIC from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }

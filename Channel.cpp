@@ -63,6 +63,8 @@ void Channel::addClientRight(Client *cl, int right)
 
 bool Channel::checkClientRight(Client *cl, int right)
 {
+	if (!this->_clientRights.count(cl->getNickname()))
+		return (false);
 	return (this->_clientRights.at(cl->getNickname()) & right);
 }
 
@@ -178,11 +180,9 @@ std::map<std::string, Client *> Channel::getClients() const
 std::string Channel::getNicklist()
 {
 	std::string list;
-	std::map<std::string, Client*>::iterator itt = this->_clients.begin();
-	(void)itt;
 	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
 	{
-		if (it->second->getOperator())
+		if (this->checkClientRight(it->second, CHAN_OPERATOR))
 			list += "@";
 		list += it->second->getNickname() + " ";
 	}
@@ -193,4 +193,13 @@ std::string Channel::getNicklist()
 void Channel::setClients(std::map<std::string, Client *> clients)
 {
 	this->_clients = clients;
+}
+#include <iostream>
+void Channel::distributeMsg(std::string msg)
+{
+	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
+	{
+		std::cerr << "##############\nSENDING...\n" << msg << "...to" << it->second->getNickname()<<"\n##############" << std::endl;
+		send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
+	}
 }

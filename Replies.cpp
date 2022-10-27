@@ -27,7 +27,13 @@ std::string Server::RPL_NAMREPLY(Client *cl, Channel *ch)
 	std::string msg;
 	msg += ":" + this->getServerName();
 	msg += " 353 ";
-	msg += cl->getNickname() + " ";
+	msg += cl->getNickname();
+	if (ch->getPrivateChan())
+		msg += " * ";
+	else if (ch->getSecretChan())
+		msg += " @ ";
+	else
+		msg += " = ";
 	msg += ch->getName();
 	msg += " :" + ch->getNicklist();
 	msg += "\r\n";
