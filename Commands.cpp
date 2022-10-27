@@ -188,7 +188,11 @@ void Server::JOIN(Client *cl, Message msg)
 	//send JOIN with nick as prefix to channel)
 	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
 	this->sendMsg(ch, 1, JOINREPLY(cl, ch));
-	this->sendMsg(cl, 3, RPL_TOPIC(cl, ch).c_str(), RPL_NAMREPLY(cl, ch).c_str(), RPL_ENDOFNAMES(cl, ch).c_str());
+	// this->sendMsg(cl, 1, ":awesomeserverofawesomeness MODE #test +tn");
+	// this->sendMsg(ch, 1, ":randomuser JOIN #test :\r\n");
+	this->sendMsg(cl, 1, RPL_TOPIC(cl, ch).c_str());
+	this->sendMsg(cl, 1, RPL_NAMREPLY(cl, ch).c_str());
+	this->sendMsg(cl, 1, RPL_ENDOFNAMES(cl, ch).c_str());
 }
 
 void Server::QUIT(Client *cl, Message msg)
@@ -233,9 +237,47 @@ void Server::SQUIT(Client *cl, Message msg)
 
 void Server::PRIVMSG(Client *cl, Message msg)
 {
+	Client *toCl;
+	Channel *toCh;
+	std::string text;
 	std::cout << "PRIVMSG from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
 	
+    // ERR_NOSUCHNICK (401)
+    // ERR_NOSUCHSERVER (402)
+    // ERR_CANNOTSENDTOCHAN (404)
+    // ERR_TOOMANYTARGETS (407)
+    // ERR_NORECIPIENT (411)
+    // ERR_NOTEXTTOSEND (412)
+    // ERR_NOTOPLEVEL (413)
+    // ERR_WILDTOPLEVEL (414)
+    // RPL_AWAY (301)
+
+	text = msg.getParameters().back();
+	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
+	{
+
+		if (msg.getParameters()[i][0] == '#')
+		{
+			toCh = &this->_channels[msg.getParameters()[i]];
+			std::map<std::string, Client*> temptest = toCh->getClients();
+			for (std::map<std::string, Client*>::iterator it = temptest.begin(); it != temptest.end(); it++)
+			{
+				if (it->second->getNickname() != cl->getNickname())
+				{
+					text = this->PRIVMSGREPLY(cl, toCh->getName(), text);
+					send(it->second->getSocket(), text.c_str(), text.size(), 0);
+				}
+			}
+			// this->sendMsg(toCh, 1, this->PRIVMSGREPLY(cl, toCh->getName(), text));
+		}
+		else
+		{
+			toCl = this->_registeredclients[msg.getParameters()[i]];
+			this->sendMsg(toCl, 1, this->PRIVMSGREPLY(cl, toCl->getNickname(), text));
+		}
+	}
+
 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 

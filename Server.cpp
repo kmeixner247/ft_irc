@@ -4,16 +4,16 @@
 #include <sys/select.h>
 #include <cstring>
 
-Server::Server()
+Server::Server() : 
+_port(0), 
+_password(""), 
+_serverfd(0),
+_host(""), 
+_servername(""), 
+_version(""), 
+_motd(""),
+_passwordOper("")
 {
-	this->_port = 0;
-	this->_password = "";
-	this->_serverfd = 0;
-	this->_host = "";
-	this->_servername = "";
-	this->_version = "";
-	this->_motd = "";
-	this->_passwordOper = "";
 }
 
 Server &Server::operator=(const Server &rhs)
@@ -34,7 +34,15 @@ Server::Server(const Server &rhs)
 	*this = rhs;
 }
 
-Server::Server(int port, std::string pw) : _port(port), _password(pw), _host("127.0.0.1"), _servername("awesomeserverofawesomeness"), _version("69.69"), _motd("kacper smells")
+Server::Server(int port, std::string pw) : 
+_port(port), 
+_password(pw), 
+_serverfd(0),
+_host("127.0.0.1"), 
+_servername("awesomeserverofawesomeness"), 
+_version("69.69"), 
+_motd("kacper smells"),
+_passwordOper("42069")
 {
 	if (this->init())
 		throw "something went wrong in init";
@@ -164,6 +172,7 @@ int Server::init()
 
 void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 {
+	//prettify?
 	std::string msg;
 	va_list args;
 	va_start(args, str);
@@ -182,6 +191,7 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 
 void Server::sendMsg(Channel *ch, int argNum, std::string str, ...) const
 {
+	//prettify?
 	std::string msg;
 	va_list args;
 	va_start(args, str);
@@ -211,6 +221,13 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 	}
 	cl->setBuffer(input);
 	return (msgs);
+}
+
+std::string Server::makeClientPrefix(Client *cl)
+{
+	std::string prefix;
+	prefix += ":" + cl->getNickname() + "!" + cl->getUsername() + "@" + this->_host;
+	return (prefix);
 }
 
 // void Server::interpretMessages(Client *cl, char *buffer)
