@@ -101,6 +101,7 @@ private:
 	/* CHANNEL DISTRIBUTION STUFF? */
 	std::string JOINREPLY(Client *cl, Channel *ch);
 	std::string PRIVMSGREPLY(Client *from, std::string to, std::string text);
+	std::string NOTICEREPLY(Client *from, std::string to, std::string text);
 	std::string QUITREPLY(Client *cl, std::string reason);
 	std::string PARTREPLY(Client *cl, std::string channel, std::string reason);
 

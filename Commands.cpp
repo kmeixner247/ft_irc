@@ -290,6 +290,7 @@ void Server::PRIVMSG(Client *cl, Message msg)
 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
+
 void Server::WALLOPS(Client *cl, Message msg)
 {
 	std::cout << "WALLOPS from " << cl->getNickname() << std::endl;
@@ -300,9 +301,37 @@ void Server::WALLOPS(Client *cl, Message msg)
 
 void Server::NOTICE(Client *cl, Message msg)
 {
+	Client *toCl;
+	Channel *toCh;
+	std::string text;
 	std::cout << "NOTICE from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	
+
+	text = msg.getParameters().back();
+	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
+	{
+
+		if (msg.getParameters()[i][0] == '#')
+		{
+			toCh = &this->_channels[msg.getParameters()[i]];
+			std::map<std::string, Client*> temptest = toCh->getClients();
+			for (std::map<std::string, Client*>::iterator it = temptest.begin(); it != temptest.end(); it++)
+			{
+				if (it->second->getNickname() != cl->getNickname())
+				{
+					text = this->NOTICEREPLY(cl, toCh->getName(), text);
+					send(it->second->getSocket(), text.c_str(), text.size(), 0);
+				}
+			}
+			// this->sendMsg(toCh, 1, this->PRIVMSGREPLY(cl, toCh->getName(), text));
+		}
+		else
+		{
+			toCl = this->_registeredclients[msg.getParameters()[i]];
+			this->sendMsg(toCl, 1, this->NOTICEREPLY(cl, toCl->getNickname(), text));
+		}
+	}
+
 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 

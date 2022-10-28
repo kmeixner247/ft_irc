@@ -21,6 +21,17 @@ std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
 	return (msg);
 }
 
+std::string Server::NOTICEREPLY(Client *from, std::string to, std::string text)
+{
+	std::string msg;
+	msg += this->makeClientPrefix(from);
+	msg += " NOTICE ";
+	msg += to + " :";
+	msg += text;
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::QUITREPLY(Client *cl, std::string reason)
 {
 	std::string msg;
