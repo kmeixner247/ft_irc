@@ -110,89 +110,96 @@ void Server::USER(Client *cl, Message msg)
 
 void Server::JOIN(Client *cl, Message msg)
 {
-	Channel newchan;
+	Channel newChan;
 	Channel *ch;
-	std::cout << "JOIN" << std::endl;
-	std::cout << msg << std::endl;
-
+	std::vector<std::pair<std::string, std::string> > channelPW;
+	std::vector<std::pair<std::string, std::string> >::iterator it;
+	size_t pos;
+	std::string temp = msg.getParameters().front();
+	do
+	{
+		pos = temp.find_first_of(',');
+		channelPW.push_back(std::make_pair(temp.substr(0, pos), ""));
+		temp = temp.substr(pos+1, temp.back());
+	}
+	while (pos != std::string::npos);
+	if (msg.getParameters().size() > 1)
+	{
+		temp = msg.getParameters().back();
+		it = channelPW.begin();
+		do
+		{
+			pos = temp.find_first_of(',');
+			it->second = temp.substr(0, pos);
+			temp = temp.substr(pos+1, temp.back());
+			it++;
+		}
+		while (pos != std::string::npos);
+	}
 	/* !!!CAN'T HANDLE MULTIPLE CHANNELS YET!!! */
-
-	/*	NEED:
-		Client::addChannel
-		ERR_NEEDMOREPARAMS
-		ERR_BADCHANMASK
-		ERR_NOSUCHCHANNEL
-		ERR_BADCHANNELKEY
-		ERR_INVITEONLYCHAN
-		ERR_BANNEDFROMCHAN
-		ERR_CHANNELISFULL
-		RPL_TOPIC
-		RPL_NAMREPLY
-		RPL_ENDOFNAMES
-	*/
 
 	//ERR_NEEDMOREPARAMS
 	if (msg.getParameters().size() == 0)
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "JOIN"));
-		// this->sendResponse(cl, ERR_NEEDMOREPARAMS);
 		return ;
 	}
-	//better check for invalid channel names and fix sending the invalid channel name (there is no channel object obviously)
-	if (msg.getParameters()[0][0] != '#')
+	for (it = channelPW.begin(); it != channelPW.end(); it++)
 	{
-		std::cout << "sending nosuchchannel" << std::endl;
-		// this->sendResponse(cl, ERR_NOSUCHCHANNEL);
-		this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, msg.getParameters()[0]));
-		return ;
+		std::cerr << "CURRENT CHANNEL KEY PAIR IS " << "|" << it->first << "|" << it->second << "|" <<  std::endl;
+		if (it->first[0] != '#')
+		{
+			std::cout << "sending nosuchchannel" << std::endl;
+			this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, it->first));
+			continue ;
+		}
+		if (!this->_channels.count(it->first)) 
+		{	//create channel, make client op
+			newChan.setName(it->first);
+			std::cerr << "XXXXXXXXXXXXXXXXXXXX" << it->second << "XXXXXXXXXXXXXXXXXXXX" << std::endl;
+			newChan.setKey(it->second);
+			ch = this->addChannel(newChan);
+			ch->addClient(cl);
+			ch->addClientRight(cl, CHAN_OPERATOR);
+			cl->addChannel(ch);
+		}
+		else
+		{
+			ch = &(this->_channels[it->first]);
+			std::cerr << "KEY|" <<  ((ch->getKey() != "") ? ch->getKey() : "KEY IS EMPTY") << "|" << std::endl;
+			//ERR_BADCHANNELKEY
+			if (ch->getKey() != "" && ch->getKey().compare(it->second))
+			{
+				this->sendMsg(cl, 1, ERR_BADCHANNELKEY(cl, ch));
+				continue ;
+			}
+			//ERR_INVITEONLYCHAN
+			if (ch->getInviteOnly() && ch->checkClientRight(cl, CHAN_INVITE))
+			{
+				this->sendMsg(cl, 1, ERR_INVITEONLYCHAN(cl, ch));
+				continue ;
+			}
+			//ERR_BANNED MCHAN
+			if (ch->checkClientRight(cl, CHAN_BAN))
+			{
+				this->sendMsg(cl, 1, ERR_BANNEDFROMCHAN(cl, ch));
+				continue ;
+			}
+			//ERR_CHANNELISFULL 
+			if (ch->getLimit() <= ch->getSize())
+			{
+				this->sendMsg(cl, 1, ERR_CHANNELISFULL(cl, ch));
+				continue ;
+			}
+			ch->addClient(cl);
+			cl->addChannel(ch);
+		}
+		//send JOIN with nick as prefix to channel)
+		this->sendMsg(ch, 1, JOINREPLY(cl, ch));
+		this->sendMsg(cl, 1, RPL_TOPIC(cl, ch).c_str());
+		this->sendMsg(cl, 1, RPL_NAMREPLY(cl, ch).c_str());
+		this->sendMsg(cl, 1, RPL_ENDOFNAMES(cl, ch).c_str());
 	}
-	if (!this->_channels.count(msg.getParameters()[0])) 
-	{	//create channel, make client op
-		newchan.setName(msg.getParameters()[0]);
-		ch = this->addChannel(newchan);
-		ch->addClient(cl);
-		ch->addClientRight(cl, CHAN_OPERATOR);
-		cl->addChannel(ch);
-	}
-	else
-	{
-		ch = &(this->_channels[msg.getParameters()[0]]);
-		//ERR_BADCHANNELKEY
-		if (ch->getPrivateChan() && ch->getKey().compare(msg.getParameters().back()))
-		{
-			this->sendMsg(cl, 1, ERR_BADCHANNELKEY(cl, ch));
-			// this->sendResponse(cl, ERR_BADCHANNELKEY);
-			return ;
-		}
-		//ERR_INVITEONLYCHAN
-		if (ch->getInviteOnly() && ch->checkClientRight(cl, CHAN_INVITE))
-		{
-			this->sendMsg(cl, 1, ERR_INVITEONLYCHAN(cl, ch));
-			return ;
-		}
-		//ERR_BANNED MCHAN
-		if (ch->checkClientRight(cl, CHAN_BAN))
-		{
-			this->sendMsg(cl, 1, ERR_BANNEDFROMCHAN(cl, ch));
-			return ;
-		}
-		//ERR_CHANNELISFULL 
-		if (ch->getLimit() <= ch->getSize())
-		{
-			this->sendMsg(cl, 1, ERR_CHANNELISFULL(cl, ch));
-			return ;
-		}
-		ch->addClient(cl);
-		cl->addChannel(ch);
-	}
-	//send JOIN with nick as prefix to channel)
-	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
-	this->sendMsg(ch, 1, JOINREPLY(cl, ch));
-	// this->sendMsg(cl, 1, ":awesomeserverofawesomeness MODE #test +tn");
-	// this->sendMsg(ch, 1, ":randomuser JOIN #test :\r\n");
-	this->sendMsg(cl, 1, RPL_TOPIC(cl, ch).c_str());
-	this->sendMsg(cl, 1, RPL_NAMREPLY(cl, ch).c_str());
-	this->sendMsg(cl, 1, RPL_ENDOFNAMES(cl, ch).c_str());
 }
 
 void Server::QUIT(Client *cl, Message msg)

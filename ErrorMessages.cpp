@@ -192,7 +192,7 @@ std::string Server::ERR_BADCHANNELKEY(Client *cl, Channel *ch)
 	msg += ":" + this->getServerName();
 	msg += " 475 ";
 	msg += cl->getNickname() + " ";
-	msg += ch->getName() + " ";
+	msg += ch->getName();
 	msg += " :Cannot join channel (+k)";
 	msg += "\r\n";
 	return (msg);
