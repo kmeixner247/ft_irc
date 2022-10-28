@@ -45,7 +45,7 @@
 // #define ERR_NEEDMOREPARAMS ":<server> 461 <nick> <command> :Not enough parameters\r\n"
 // #define ERR_ALREADYREGISTRED ":<server> 462 <nick> :You may not reregister\r\n"
 #define ERR_NOPERMFORHOST ":<server> 463 <nick> :Your host isn't among the privileged\r\n"
-#define ERR_PASSWDMISMATCH ":<server> 464 <nick> :Password incorrect\r\n"
+//#define ERR_PASSWDMISMATCH ":<server> 464 <nick> :Password incorrect\r\n"
 #define ERR_YOUREBANNEDCREEP ":<server> 465 <nick> :You are banned from this server\r\n"
 #define ERR_KEYSET ":<server> 467 <nick> <channel> :Channel key already set\r\n"
 // #define ERR_CHANNELISFULL ":<server> 471 <nick> <channel> :Cannot join channel (+l)\r\n"

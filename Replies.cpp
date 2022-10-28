@@ -127,6 +127,17 @@ std::string Server::RPL_ENDOFMOTD(Client *cl)
 	msg += "\r\n";
 	return (msg);
 }
+
+std::string Server::RPL_YOUREOPER(Client *cl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 381 ";
+	msg += cl->getNickname() + " ";
+	msg += ":You are now an IRC operator";
+	msg += "\r\n";
+	return (msg);
+}
 	// this->sendResponse(cl, RPL_MOTDSTART);
 	// this->sendResponse(cl, RPL_MOTD);
 	// this->sendResponse(cl, RPL_ENDOFMOTD);

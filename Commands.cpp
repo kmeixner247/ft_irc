@@ -237,10 +237,23 @@ void Server::KILL(Client *cl, Message msg)
 
 void Server::OPER(Client *cl, Message msg)
 {
-	std::cout << "OPER from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
+	if (msg.getParameters().size() < 2)
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "OPER"));
+		return ;
+	}
+	if (this->getPasswordOper().compare(msg.getParameters()[1]) != 0)
+	{	
+		this->sendMsg(cl, 1, ERR_PASSWDMISMATCH(cl));
+		return ;
+	}
+	if (cl->getUsername().compare(msg.getParameters()[0]) == 0)
+	{
+		cl->setOperator(true);
+		this->sendMsg(cl, 1, RPL_YOUREOPER(cl).c_str());
+	}
 	
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	// MODE MSG NEEDED
 }
 
 void Server::SQUIT(Client *cl, Message msg)
