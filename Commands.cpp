@@ -380,18 +380,32 @@ void Server::PART(Client *cl, Message msg)
 	std::cout << msg << std::endl;
 	Channel *ch;
 	std::string reason;
+	std::string name;
+	if (msg.getParameters().size() == 0)
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PART"));
+		return ;
+	}
 	reason = (msg.getParameters().size() > 1 ? msg.getParameters().back() : "");
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 	std::string channels = msg.getParameters().front();
 	size_t pos;
 	do
 	{
 		pos = channels.find_first_of(',');
-		ch = &this->_channels[channels.substr(0, pos)];
-		this->removeClientFromChannel(cl, ch);
-		this->sendMsg(ch, 1, this->PARTREPLY(cl, ch->getName(), reason));
-		//leave_channel(channels.substr(0, pos));
-		// std::cerr << channels.substr(0, pos) << std::endl;
+		name = channels.substr(0, pos);
+		if (!this->_channels.count(name))
+			this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, name));
+		else if (!this->_channels[name].getClients().count(cl->getNickname()))
+			this->sendMsg(cl, 1, ERR_NOTONCHANNEL(cl, name));
+		else
+		{
+			ch = &this->_channels[channels.substr(0, pos)];
+			this->sendMsg(ch, 1, this->PARTREPLY(cl, ch->getName(), reason));
+			this->removeClientFromChannel(cl, ch);
+			// this->sendMsg(cl, 1, this->PARTREPLY(cl, ch->getName(), reason));
+			//leave_channel(channels.substr(0, pos));
+			// std::cerr << channels.substr(0, pos) << std::endl;
+		}
 		channels = channels.substr(pos+1, channels.back());
 	}
 	while (pos != std::string::npos);

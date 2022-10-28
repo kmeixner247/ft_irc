@@ -49,7 +49,7 @@ std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reaso
 	msg += " PART ";
 	msg += channel;
 	if (reason != "")
-		msg += ":" + reason;
+		msg += " :" + reason;
 	msg += "\r\n";
 	return (msg);
 }
