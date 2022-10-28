@@ -21,6 +21,16 @@ std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
 	return (msg);
 }
 
+std::string Server::QUITREPLY(Client *cl, std::string reason)
+{
+	std::string msg;
+	msg += this->makeClientPrefix(cl);
+	msg += " QUIT ";
+	msg += ":" + reason;
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_TOPIC(Client *cl, Channel *ch)
 {
 	std::string msg;

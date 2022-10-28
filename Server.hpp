@@ -99,6 +99,7 @@ private:
 	/* CHANNEL DISTRIBUTION STUFF? */
 	std::string JOINREPLY(Client *cl, Channel *ch);
 	std::string PRIVMSGREPLY(Client *from, std::string to, std::string text);
+	std::string QUITREPLY(Client *cl, std::string reason);
 
 	/* RESPONSES */
 	std::string RPL_WELCOME(Client *cl);
@@ -123,6 +124,14 @@ private:
 	std::string ERR_INVITEONLYCHAN(Client *cl, Channel *ch);
 	std::string ERR_BANNEDFROMCHAN(Client *cl, Channel *ch);
 	std::string ERR_CHANNELISFULL(Client *cl, Channel *ch);
+	std::string ERR_NOSUCHNICK(Client *cl, std::string nick);
+	std::string ERR_NOSUCHSERVER(Client *cl, std::string server);
+	std::string ERR_TOOMANYTARGETS(Client *cl, std::string channel);
+	std::string ERR_CANNOTSENDTOCHAN(Client *cl, std::string target);
+	std::string ERR_NORECIPIENT(Client *cl, std::string command);
+	std::string ERR_NOTEXTTOSEND(Client *cl);
+	std::string ERR_NOTOPLEVEL(Client *cl, std::string mask);
+	std::string ERR_WILDTOPLEVEL(Client *cl, std::string mask);
 
 
 	void sendWelcome(Client *cl);

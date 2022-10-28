@@ -64,7 +64,7 @@ void Server::connectClient(int socket)
 void Server::disconnectClient(Client *cl)
 {
 	std::cout << "client disconnected" << std::endl;
-	FD_CLR(cl->getSocket(), &this->_readfds);
+	// FD_CLR(cl->getSocket(), &this->_readfds);
 
 	this->_registeredclients.erase(cl->getNickname());
 	if (!this->_connectedclients.erase(cl->getSocket()))
@@ -96,12 +96,12 @@ void Server::serverloop()
 			} 
 			this->connectClient(newfd);
 		}
-		// get highest socket for select. is there a better way to do this?#
 		if (this->_connectedclients.size() > 0)
 			highest_socket = this->_connectedclients.rbegin()->first;
 		readfds = this->_readfds;
 		if (highest_socket > 0)
 		{
+			//pls prettify oh god this is rly ugly
 			if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
 			{
 				iterator tempend = this->_connectedclients.end();
@@ -109,21 +109,21 @@ void Server::serverloop()
 				{
 					if (FD_ISSET(it->first, &readfds))
 					{
+						FD_CLR(it->first, &readfds);
 						if (!recv(it->first, buffer, 1024, 0))
 						{
-							//pls prettify
 							this->disconnectClient(&it->second);
-							if (_connectedclients.size() == 0)
-							{
-								memset(buffer, 0, 1024);
-								break ;
-							}
-							tempend = this->_connectedclients.end();
-							it = this->_connectedclients.begin();
 						}
 						else
 							this->receiveMessage(&it->second, buffer);
 						memset(buffer, 0, 1024);
+						tempend = this->_connectedclients.end();
+						it = this->_connectedclients.begin();
+						if (_connectedclients.size() == 0)
+						{
+							memset(buffer, 0, 1024);
+							break ;
+						}
 					}
 				}
 			}

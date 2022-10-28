@@ -199,6 +199,15 @@ void Server::QUIT(Client *cl, Message msg)
 {
 	std::cout << "QUIT" << std::endl;
 	std::cout << msg << std::endl;
+
+	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	{
+		if (it->second.getClients().count(cl->getNickname()))
+		{
+			it->second.getClients().erase(cl->getNickname());
+			this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
+		}
+	}
 	this->disconnectClient(cl);
 }
 
