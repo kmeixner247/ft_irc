@@ -40,7 +40,7 @@ public:
 	void removeClientRight(Client *cl, int right);
 	size_t getSize() const;
 	void addClient(Client *cl);
-
+	size_t removeClient(Client *cl);
 	Client *getClient(std::string name);
 	void setClient(std::string name, Client *client);
 	void setPrivateChan(bool);

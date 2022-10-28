@@ -78,6 +78,7 @@ private:
 	// std::vector<Message> parseMessages(char *input);
 	std::vector<Message> parseMessages(Client *cl, std::string input);
 	std::string makeClientPrefix(Client *cl);
+	void removeClientFromChannel(Client *cl, Channel *ch);
 	// commands
 	void PASS(Client *cl, Message msg);
 	void USER(Client *cl, Message msg);
@@ -95,11 +96,13 @@ private:
 	void INVITE(Client *cl, Message msg);
 	void TOPIC(Client *cl, Message msg);
 	void WHO(Client *cl, Message msg);
+	void PART(Client *cl, Message msg);
 	
 	/* CHANNEL DISTRIBUTION STUFF? */
 	std::string JOINREPLY(Client *cl, Channel *ch);
 	std::string PRIVMSGREPLY(Client *from, std::string to, std::string text);
 	std::string QUITREPLY(Client *cl, std::string reason);
+	std::string PARTREPLY(Client *cl, std::string channel, std::string reason);
 
 	/* RESPONSES */
 	std::string RPL_WELCOME(Client *cl);

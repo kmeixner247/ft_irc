@@ -230,6 +230,12 @@ std::string Server::makeClientPrefix(Client *cl)
 	return (prefix);
 }
 
+void Server::removeClientFromChannel(Client *cl, Channel *ch)
+{
+	cl->removeChannel(ch);
+	ch->removeClient(cl);
+}
+
 // void Server::interpretMessages(Client *cl, char *buffer)
 void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 {
@@ -259,6 +265,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("INVITE"))) this->INVITE(cl, *it);
 			else if (!(command.compare("TOPIC"))) this->TOPIC(cl, *it);
 			else if (!(command.compare("WHO"))) this->WHO(cl, *it);
+			else if (!(command.compare("PART"))) this->PART(cl, *it);
 			else std::cout << "NONE OF THOSE1\n" << *it << std::endl;
 		}
 /* else if(!(this->clientIsRegistered(cl)))

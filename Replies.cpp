@@ -31,6 +31,18 @@ std::string Server::QUITREPLY(Client *cl, std::string reason)
 	return (msg);
 }
 
+std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reason)
+{
+	std::string msg;
+	msg += makeClientPrefix(cl);
+	msg += " PART ";
+	msg += channel;
+	if (reason != "")
+		msg += ":" + reason;
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_TOPIC(Client *cl, Channel *ch)
 {
 	std::string msg;

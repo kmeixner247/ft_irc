@@ -48,5 +48,6 @@ public:
 	void setPassbool(bool b);
 	void setBuffer(std::string buffer);
 	void addChannel(Channel *ch);
+	size_t removeChannel(Channel *ch);
 };
 #endif

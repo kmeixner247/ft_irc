@@ -337,3 +337,26 @@ void Server::TOPIC(Client *cl, Message msg)
 	
 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
+
+void Server::PART(Client *cl, Message msg)
+{
+	std::cout << "PART from " << cl->getNickname() << std::endl;
+	std::cout << msg << std::endl;
+	Channel *ch;
+	std::string reason;
+	reason = (msg.getParameters().size() > 1 ? msg.getParameters().back() : "");
+	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	std::string channels = msg.getParameters().front();
+	size_t pos;
+	do
+	{
+		pos = channels.find_first_of(',');
+		ch = &this->_channels[channels.substr(0, pos)];
+		this->removeClientFromChannel(cl, ch);
+		this->sendMsg(ch, 1, this->PARTREPLY(cl, ch->getName(), reason));
+		//leave_channel(channels.substr(0, pos));
+		// std::cerr << channels.substr(0, pos) << std::endl;
+		channels = channels.substr(pos+1, channels.back());
+	}
+	while (pos != std::string::npos);
+}

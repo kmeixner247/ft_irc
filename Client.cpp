@@ -110,3 +110,8 @@ void Client::addChannel(Channel *ch)
 {
 	this->_channel.insert(std::make_pair(ch->getName(), ch));
 }
+
+size_t Client::removeChannel(Channel *ch)
+{
+	return(this->_channel.erase(ch->getName()));
+}

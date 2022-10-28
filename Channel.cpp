@@ -79,6 +79,11 @@ void Channel::addClient(Client *cl)
 	this->_clientRights.insert(std::make_pair(cl->getNickname(), 0));
 }
 
+size_t Channel::removeClient(Client *cl)
+{
+	return(this->_clients.erase(cl->getNickname()));
+}
+
 size_t Channel::getSize() const
 {
 	return (this->_clients.size());
