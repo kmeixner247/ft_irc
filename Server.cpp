@@ -234,6 +234,8 @@ void Server::removeClientFromChannel(Client *cl, Channel *ch)
 {
 	cl->removeChannel(ch);
 	ch->removeClient(cl);
+	if (ch->getClients().size() == 0)
+		this->_channels.erase(ch->getName());
 }
 
 // void Server::interpretMessages(Client *cl, char *buffer)

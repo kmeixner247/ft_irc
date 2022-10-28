@@ -123,6 +123,7 @@ private:
 	std::string ERR_NONICKNAMEGIVEN(Client *cl);
 	std::string ERR_ERRONEUSNICKNAME(Client *cl);
 	std::string ERR_NICKNAMEINUSE(Client *cl);
+	std::string ERR_NOTONCHANNEL(Client *cl, std::string channel);
 	std::string ERR_NOSUCHCHANNEL(Client *cl, std::string channel);
 	std::string ERR_BADCHANNELKEY(Client *cl, Channel *ch);
 	std::string ERR_INVITEONLYCHAN(Client *cl, Channel *ch);

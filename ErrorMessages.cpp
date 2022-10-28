@@ -127,6 +127,18 @@ std::string Server::ERR_NICKNAMEINUSE(Client *cl)
 	return (msg);
 }
 
+std::string Server::ERR_NOTONCHANNEL(Client *cl, std::string channel)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 442 ";
+	msg += cl->getNickname() + " ";
+	msg += channel;
+	msg += " :You're not on that channel";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::ERR_NEEDMOREPARAMS(Client *cl, std::string command)
 {
 	std::string msg;
@@ -197,4 +209,3 @@ std::string Server::ERR_BADCHANNELKEY(Client *cl, Channel *ch)
 	msg += "\r\n";
 	return (msg);
 }
-
