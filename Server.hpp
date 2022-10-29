@@ -116,6 +116,7 @@ private:
 	std::string RPL_MOTDSTART(Client *cl);
 	std::string RPL_MOTD(Client *cl);
 	std::string RPL_ENDOFMOTD(Client *cl);
+	std::string RPL_YOUREOPER(Client *cl);
 
 	/* ERRORS */
 	std::string ERR_ALREADYREGISTERED(Client *cl);
@@ -137,6 +138,8 @@ private:
 	std::string ERR_NOTEXTTOSEND(Client *cl);
 	std::string ERR_NOTOPLEVEL(Client *cl, std::string mask);
 	std::string ERR_WILDTOPLEVEL(Client *cl, std::string mask);
+	std::string ERR_PASSWDMISMATCH(Client *cl);
+
 
 
 	void sendWelcome(Client *cl);

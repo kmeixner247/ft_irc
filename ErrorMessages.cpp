@@ -209,3 +209,14 @@ std::string Server::ERR_BADCHANNELKEY(Client *cl, Channel *ch)
 	msg += "\r\n";
 	return (msg);
 }
+
+std::string Server::ERR_PASSWDMISMATCH(Client *cl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 464 ";
+	msg += cl->getNickname();
+	msg += " :Password incorrect";
+	msg += "\r\n";
+	return (msg);
+}
