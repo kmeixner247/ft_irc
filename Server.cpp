@@ -258,7 +258,6 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("JOIN"))) this->JOIN(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
 			else if (!(command.compare("OPER"))) this->OPER(cl, *it);
-			else if (!(command.compare("SQUIT"))) this->SQUIT(cl, *it);
 			else if (!(command.compare("PRIVMSG"))) this->PRIVMSG(cl, *it);
 			else if (!(command.compare("WALLOPS"))) this->WALLOPS(cl, *it);
 			else if (!(command.compare("NOTICE"))) this->NOTICE(cl, *it);

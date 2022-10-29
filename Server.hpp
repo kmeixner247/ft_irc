@@ -105,7 +105,7 @@ private:
 	std::string QUITREPLY(Client *cl, std::string reason);
 	std::string PARTREPLY(Client *cl, std::string channel, std::string reason);
 	std::string MODEREPLY(Client *cl, std::string target, std::string modestr);
-
+	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
 	/* RESPONSES */
 	// std::string RPL_WELCOME(Client *cl);
 	// std::string RPL_YOURHOST(Client *cl);
@@ -113,6 +113,7 @@ private:
 	// std::string RPL_MYINFO(Client *cl);
 	std::string RPL_UMODEIS(Client *cl);
 	std::string RPL_CHANNELMODEIS(Client *cl, Channel *ch);
+	std::string RPL_NOTOPIC(Client *cl, Channel *ch);
 	std::string RPL_TOPIC(Client *cl, Channel *ch);
 	std::string RPL_INVITELIST(Client *cl, Channel *ch);
 	std::string RPL_ENDOFINVITELIST(Client *cl);
