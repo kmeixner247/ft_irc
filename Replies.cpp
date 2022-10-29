@@ -243,6 +243,3 @@ std::string Server::RPL_YOUREOPER(Client *cl)
 	msg += "\r\n";
 	return (msg);
 }
-	// this->sendResponse(cl, RPL_MOTDSTART);
-	// this->sendResponse(cl, RPL_MOTD);
-	// this->sendResponse(cl, RPL_ENDOFMOTD);

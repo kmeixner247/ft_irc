@@ -227,6 +227,24 @@ void Server::KILL(Client *cl, Message msg)
 	std::cout << "KILL from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
 	
+	if (msg.getParameters().size() < 2)
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "KILL"));
+		return ;
+	}
+	if (!cl->checkMode(USERMODE_OP))
+	{
+		this->sendMsg(cl, 1, ERR_NOPRIVILEGES(cl));
+		return ;
+	}
+	if (!this->_registeredclients.count(msg.getParameters().front()))
+	{
+		this->sendMsg(cl, 1, ERR_NOSUCHNICK(cl, msg.getParameters().front()));
+		return ;
+	}
+	Client *target = this->_registeredclients.at(msg.getParameters().front());
+	this->sendMsg(target, 1, QUITREPLY(target, msg.getParameters().back()));
+	this->disconnectClient(target);
 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 

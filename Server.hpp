@@ -157,15 +157,15 @@ private:
 	std::string ERR_NOTOPLEVEL(Client *cl, std::string mask);
 	std::string ERR_WILDTOPLEVEL(Client *cl, std::string mask);
 	std::string ERR_PASSWDMISMATCH(Client *cl);
+	std::string ERR_NOPRIVILEGES(Client *cl);
 	std::string ERR_CHANOPRIVSNEEDED(Client *cl, Channel *ch);
 	std::string ERR_UMODEUNKNOWNFLAG(Client *cl);
 	std::string ERR_USERSDONTMATCH(Client *cl, std::string nick);
 
 
-
-	void sendWelcome(Client *cl);
-	std::string replace_thingies(std::string msg, Client *cl);
-	std::string replace_thingies(std::string msg, Client *cl, Channel *ch);
+	// void sendWelcome(Client *cl);
+	// std::string replace_thingies(std::string msg, Client *cl);
+	// std::string replace_thingies(std::string msg, Client *cl, Channel *ch);
 	void sendResponse(Client *cl, std::string msg);
 	void sendResponse(Client *cl, Channel *ch, std::string msg);
 	bool clientIsConnected(Client *cl);
