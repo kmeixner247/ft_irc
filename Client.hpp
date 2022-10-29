@@ -49,5 +49,6 @@ public:
 	void setBuffer(std::string buffer);
 	void addChannel(Channel *ch);
 	size_t removeChannel(Channel *ch);
+	bool ClientIsInChannel(Channel *ch);
 };
 #endif

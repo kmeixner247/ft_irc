@@ -67,6 +67,7 @@ public:
 	std::string getNicklist();
 	void setClients(std::map<std::string, Client*> clients);
 	void distributeMsg(std::string msg);
+	bool ChannelHasClient(Client* cl);
 };
 
 #endif

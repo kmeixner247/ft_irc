@@ -115,3 +115,8 @@ size_t Client::removeChannel(Channel *ch)
 {
 	return(this->_channel.erase(ch->getName()));
 }
+
+bool Client::ClientIsInChannel(Channel* ch)
+{
+	return(this->_channel.count(ch->getName()));
+}
