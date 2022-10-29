@@ -423,8 +423,40 @@ void Server::TOPIC(Client *cl, Message msg)
 {
 	std::cout << "TOPIC from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+
+	if (msg.getParameters().size() == 0)
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "TOPIC"));
+		return ;
+	}
+	if (!this->_channels.count(msg.getParameters().front()))
+	{
+		this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, msg.getParameters().front()));
+		return ;
+	}
+	Channel *ch = &this->_channels.at(msg.getParameters().front());
+	if (!ch->ChannelHasClient(cl))
+	{
+		this->sendMsg(cl, 1, ERR_NOTONCHANNEL(cl, ch->getName()));
+		return ;
+	}
+	if (msg.getParameters().size() == 1)
+	{
+		if (ch->getTopic() == "")
+			this->sendMsg(cl, 1, RPL_NOTOPIC(cl, ch));
+		else
+			this->sendMsg(cl, 1, RPL_TOPIC(cl, ch));
+	}
+	else
+	{
+		if (!ch->checkClientRight(cl, CHAN_OPERATOR))
+			this->sendMsg(cl, 1, ERR_CHANOPRIVSNEEDED(cl, ch));
+		else
+		{
+			ch->setTopic(msg.getParameters()[1]);
+			this->sendMsg(ch, 1, TOPICREPLY(cl, ch, msg.getParameters()[1]));
+		}
+	}
 }
 
 void Server::PART(Client *cl, Message msg)

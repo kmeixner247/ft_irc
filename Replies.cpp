@@ -62,7 +62,18 @@ std::string Server::MODEREPLY(Client *cl, std::string target, std::string modest
 	msg += target + " ";
 	msg += modestr;
 	msg += "\r\n";
-	return(msg);
+	return (msg);
+}
+
+std::string Server::TOPICREPLY(Client *cl, Channel *ch, std::string topic)
+{
+	std::string msg;
+	msg += makeClientPrefix(cl);
+	msg += " TOPIC ";
+	msg += ch->getName() + " ";
+	msg += topic;
+	msg += "\r\n";
+	return (msg);
 }
 
 std::string Server::RPL_UMODEIS(Client *cl)
@@ -110,6 +121,18 @@ std::string Server::RPL_CHANNELMODEIS(Client *cl, Channel *ch)
 		msg += "t";
 	if (ch->checkMode(CHANMODE_NOMSGFROMOUTSIDE))
 		msg += "n";
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::RPL_NOTOPIC(Client *cl, Channel *ch)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 331 ";
+	msg += cl->getNickname() + " ";
+	msg += ch->getName();
+	msg += " :No topic is set";
 	msg += "\r\n";
 	return (msg);
 }
