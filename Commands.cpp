@@ -251,14 +251,6 @@ void Server::OPER(Client *cl, Message msg)
 	// MODE MSG NEEDED
 }
 
-void Server::SQUIT(Client *cl, Message msg)
-{
-	std::cout << "SQUIT from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
-	
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
-}
-
 void Server::PRIVMSG(Client *cl, Message msg)
 {
 	Client *toCl;
