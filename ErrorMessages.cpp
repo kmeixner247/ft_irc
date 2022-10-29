@@ -220,3 +220,16 @@ std::string Server::ERR_PASSWDMISMATCH(Client *cl)
 	msg += "\r\n";
 	return (msg);
 }
+
+std::string Server::ERR_USERSDONTMATCH(Client *cl, std::string nick)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 502 ";
+	msg += cl->getNickname() + " ";
+	msg += nick;
+	msg += " :Can't change mode for other users";
+	msg += "\r\n";
+	return (msg);
+	//":<server> 502 <nick> :Can't change mode for other users\r\n"
+}

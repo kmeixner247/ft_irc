@@ -3,12 +3,8 @@
 Channel::Channel() : 
 	_name(""), 
 	_clients(std::map<std::string, Client *>()),
-	_privateChan(false),  
-	_secretChan(false), 
-	_inviteOnly(false), 
+	_chanmodes(0),
 	_topic(""), 
-	_noMsgFromOutside(false), 
-	_moderatedChan(false), 
 	_limit(99999), 
 	_key(""),
 	_clientRights(std::map<std::string, int>())
@@ -17,12 +13,8 @@ Channel::Channel() :
 Channel::Channel(const std::string &name) : 
 	_name(name), 
 	_clients(std::map<std::string, Client *>()),
-	_privateChan(false), 
-	_secretChan(false), 
-	_inviteOnly(false), 
+	_chanmodes(0),
 	_topic(""), 
-	_noMsgFromOutside(false), 
-	_moderatedChan(false), 
 	_limit(99999), 
 	_key(""),
 	_clientRights(std::map<std::string, int>())
@@ -43,17 +35,26 @@ Channel &Channel::operator=(const Channel &rhs)
 {
 	this->_name = rhs.getName();
 	this->_clients = rhs.getClients();
-	this->_privateChan = rhs.getPrivateChan();
-	this->_secretChan = rhs.getSecretChan();
-	this->_clientRights = rhs.getClientRights();
-	this->_inviteOnly = rhs.getInviteOnly();
 	this->_topic = rhs.getTopic();
-	this->_noMsgFromOutside = rhs.getNoMsgFromOutside();
-	this->_moderatedChan = rhs.getModeratedChan();
 	this->_limit = rhs.getLimit();
 	// this->_banMask = rhs._banMask;
 	this->_key = rhs.getKey();
 	return (*this);
+}
+
+void Channel::addMode(int mode)
+{
+	this->_chanmodes = this->_chanmodes | mode;
+}
+
+bool Channel::checkMode(int mode)
+{
+	return (this->_chanmodes & mode);
+}
+
+void Channel::removeMode(int mode)
+{
+	this->_chanmodes = this->_chanmodes & (~mode);
 }
 
 void Channel::addClientRight(Client *cl, int right)
@@ -97,30 +98,6 @@ Client *Channel::getClient(std::string name)
 {
 	return this->_clients[name];
 }
-void Channel::setPrivateChan(bool b)
-{
-	this->_privateChan = b;
-}
-bool Channel::getPrivateChan() const
-{
-	return this->_privateChan;
-}
-void Channel::setSecretChan(bool b)
-{
-	this->_secretChan = b;
-}
-bool Channel::getSecretChan() const
-{
-	return this->_secretChan;
-}
-void Channel::setInviteOnly(bool b)
-{
-	this->_inviteOnly = b;
-}
-bool Channel::getInviteOnly() const
-{
-	return this->_inviteOnly;
-}
 void Channel::setTopic(std::string s)
 {
 	this->_topic = s;
@@ -128,22 +105,6 @@ void Channel::setTopic(std::string s)
 std::string Channel::getTopic() const
 {
 	return this->_topic;
-}
-void Channel::setNoMsgFromOutside(bool b)
-{
-	this->_noMsgFromOutside = b;
-}
-bool Channel::getNoMsgFromOutside() const
-{
-	return this->_noMsgFromOutside;
-}
-void Channel::setModeratedChan(bool b)
-{
-	this->_moderatedChan = b;
-}
-bool Channel::getModeratedChan() const
-{
-	return this->_moderatedChan;
 }
 void Channel::setLimit(int i)
 {

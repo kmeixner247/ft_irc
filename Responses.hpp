@@ -58,5 +58,5 @@
 #define ERR_CANTKILLSERVER ":<server> 483 <nick> :You cant kill a server!\r\n"
 #define ERR_NOOPERHOST ":<server> 491 <nick> :No O-lines for your host\r\n"
 #define ERR_UMODEUNKNOWNFLAG ":<server> 501 <nick> :Unknown MODE flag\r\n"
-#define ERR_USERSDONTMATCH ":<server> 502 <nick> :Can't change mode for other users\r\n"
+// #define ERR_USERSDONTMATCH ":<server> 502 <nick> :Can't change mode for other users\r\n"
 #endif

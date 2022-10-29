@@ -25,12 +25,12 @@ void Server::PASS(Client *cl, Message msg)
 {
 	if (msg.getParameters().size() == 0)
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PASS"));
-	else if (!msg.getParameters().back().compare(this->_password) && !cl->getPassbool())
-		cl->setPassbool(true);
+	else if (!msg.getParameters().back().compare(this->_password) && !cl->checkMode(USERMODE_PASS))
+		cl->addMode(USERMODE_PASS);
 	else if (this->clientIsRegistered(cl)) //check, if adium/pidgin enter here when passbool is true, but cl not registered
 		this->sendMsg(cl, 1, ERR_ALREADYREGISTERED(cl));
 	else
-		cl->setPassbool(false);
+		cl->removeMode(USERMODE_PASS);
 	std::cout << "PASS " << std::endl;
 	std::cout << msg << std::endl;
 }
@@ -174,7 +174,7 @@ void Server::JOIN(Client *cl, Message msg)
 				continue ;
 			}
 			//ERR_INVITEONLYCHAN
-			if (ch->getInviteOnly() && ch->checkClientRight(cl, CHAN_INVITE))
+			if (ch->checkMode(CHANMODE_INVITE) && ch->checkClientRight(cl, CHAN_INVITE))
 			{
 				this->sendMsg(cl, 1, ERR_INVITEONLYCHAN(cl, ch));
 				continue ;
@@ -186,7 +186,7 @@ void Server::JOIN(Client *cl, Message msg)
 				continue ;
 			}
 			//ERR_CHANNELISFULL 
-			if (ch->getLimit() <= ch->getSize())
+			if (ch->checkMode(CHANMODE_LIMIT) && ch->getLimit() <= ch->getSize())
 			{
 				this->sendMsg(cl, 1, ERR_CHANNELISFULL(cl, ch));
 				continue ;
@@ -249,7 +249,7 @@ void Server::OPER(Client *cl, Message msg)
 	}
 	if (cl->getUsername().compare(msg.getParameters()[0]) == 0)
 	{
-		cl->setOperator(true);
+		cl->addMode(USERMODE_OP);
 		this->sendMsg(cl, 1, RPL_YOUREOPER(cl).c_str());
 	}
 	
@@ -367,7 +367,44 @@ void Server::MODE(Client *cl, Message msg)
 {
 	std::cout << "MODE from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
-	
+
+	if (msg.getParameters().size() == 0)
+	{
+		this->sendMsg(cl, 1, this->ERR_NEEDMOREPARAMS(cl, "MODE"));
+		return ;
+	}
+	std::string target = msg.getParameters().front();
+	if (target[0] != '#')
+	{
+		if (!this->_registeredclients.count(target))
+		{
+			this->sendMsg(cl, 1, this->ERR_NOSUCHNICK(cl, target));
+			return ;
+		}
+		if (target != cl->getNickname())
+		{
+			this->sendMsg(cl, 1, this->ERR_USERSDONTMATCH(cl, target));
+			return ;
+		}
+		if (msg.getParameters().size() == 1)
+		{
+			this->sendMsg(cl, 1, this->RPL_UMODEIS(cl));
+			return ;
+		}
+	}
+	else
+	{
+		if (!this->_channels.count(target))
+		{
+			this->sendMsg(cl, 1, this->ERR_NOSUCHCHANNEL(cl, target));
+			return ;
+		}
+		if (msg.getParameters().size() == 1)
+		{
+			this->sendMsg(cl, 1, this->RPL_CHANNELMODEIS(cl, &this->_channels[target]));
+			return ;
+		}
+	}
 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
