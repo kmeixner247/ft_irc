@@ -261,6 +261,8 @@ void Channel::setClient(std::string name, Client *client)
 }
 Client *Channel::getClient(std::string name)
 {
+	if (!this->_clients.count(name))
+		return (NULL);
 	return this->_clients[name];
 }
 void Channel::setTopic(std::string s)

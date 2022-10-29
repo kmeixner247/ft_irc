@@ -76,6 +76,19 @@ std::string Server::TOPICREPLY(Client *cl, Channel *ch, std::string topic)
 	return (msg);
 }
 
+std::string Server::KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment)
+{
+	std::string msg;
+	msg += makeClientPrefix(cl);
+	msg += " KICK ";
+	msg += ch->getName() + " ";
+	msg += target->getNickname() + " ";
+	if (comment != "")
+		msg += ":" + comment;
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_UMODEIS(Client *cl)
 {
 	std::string msg;

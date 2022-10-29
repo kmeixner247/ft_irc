@@ -347,7 +347,36 @@ void Server::KICK(Client *cl, Message msg)
 	std::cout << "KICK from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
 	
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	if (msg.getParameters().size() < 2)
+	{
+		this->sendMsg(cl, 1, this->ERR_NEEDMOREPARAMS(cl, "KICK"));
+		return ;
+	}
+	if (!this->_channels.count(msg.getParameters().front()))
+	{
+		this->sendMsg(cl, 1, this->ERR_NOSUCHCHANNEL(cl, msg.getParameters().front()));
+		return ;
+	}
+	Channel *ch = &this->_channels.at(msg.getParameters().front());
+	if (!ch->checkClientRight(cl, CHAN_OPERATOR))
+	{
+		this->sendMsg(cl, 1, ERR_CHANOPRIVSNEEDED(cl, ch));
+		return ;
+	}
+	if (!ch->ChannelHasClient(cl))
+	{
+		this->sendMsg(cl, 1, ERR_NOTONCHANNEL(cl, ch->getName()));
+		return ;
+	}
+	Client *target;
+	target = ch->getClient(msg.getParameters()[1]);
+	if (!target)
+	{
+		this->sendMsg(cl, 1, ERR_USERNOTINCHANNEL(cl, msg.getParameters()[1], ch->getName()));
+		return ;
+	}
+	std::string comment = (msg.getParameters().back()[0] == ':') ? msg.getParameters().back() : "";
+	this->sendMsg(ch, 1, KICKREPLY(cl, ch, target, comment));
 }
 
 void Server::MODE(Client *cl, Message msg)

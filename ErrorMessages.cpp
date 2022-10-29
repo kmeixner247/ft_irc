@@ -127,6 +127,19 @@ std::string Server::ERR_NICKNAMEINUSE(Client *cl)
 	return (msg);
 }
 
+std::string Server::ERR_USERNOTINCHANNEL(Client *cl, std::string nick, std::string channel)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 441 ";
+	msg += cl->getNickname() + " ";
+	msg += nick + " ";
+	msg += channel + " ";
+	msg += ":They aren't on that channel";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::ERR_NOTONCHANNEL(Client *cl, std::string channel)
 {
 	std::string msg;

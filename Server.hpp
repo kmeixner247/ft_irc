@@ -106,6 +106,7 @@ private:
 	std::string PARTREPLY(Client *cl, std::string channel, std::string reason);
 	std::string MODEREPLY(Client *cl, std::string target, std::string modestr);
 	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
+	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
 	/* RESPONSES */
 	// std::string RPL_WELCOME(Client *cl);
 	// std::string RPL_YOURHOST(Client *cl);
@@ -140,6 +141,7 @@ private:
 	std::string ERR_NONICKNAMEGIVEN(Client *cl);
 	std::string ERR_ERRONEUSNICKNAME(Client *cl);
 	std::string ERR_NICKNAMEINUSE(Client *cl);
+	std::string ERR_USERNOTINCHANNEL(Client *cl, std::string nick, std::string channel);
 	std::string ERR_NOTONCHANNEL(Client *cl, std::string channel);
 	std::string ERR_NOSUCHCHANNEL(Client *cl, std::string channel);
 	std::string ERR_BADCHANNELKEY(Client *cl, Channel *ch);
