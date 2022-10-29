@@ -208,3 +208,8 @@ void Channel::distributeMsg(std::string msg)
 		send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
 	}
 }
+
+bool Channel::ChannelHasClient(Client* cl)
+{
+	return(this->_clients.count(cl->getNickname()));
+}
