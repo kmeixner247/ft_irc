@@ -35,7 +35,7 @@
 // #define ERR_ERRONEUSNICKNAME ":<server> 432 <nick> :Erroneus nickname\r\n"
 // #define ERR_NICKNAMEINUSE ":<server> 433 <nick> <nick> :Nickname is already in use\r\n"
 #define ERR_NICKCOLLISION ":<server> 436 <nick> <nick> :Nickname collision KILL\r\n"
-#define ERR_USERNOTINCHANNEL ":<server> 441 <nick> <nick> <channel> :They aren't on that channel\r\n"
+// #define ERR_USERNOTINCHANNEL ":<server> 441 <nick> <nick> <channel> :They aren't on that channel\r\n"
 // #define ERR_NOTONCHANNEL ":<server> 442 <nick> <channel> :You're not on that channel\r\n"
 #define ERR_USERONCHANNEL ":<server> 443 <nick> <user> <channel> :is already on channel\r\n"
 #define ERR_NOLOGIN ":<server> 444 <nick> <user> :User not logged in\r\n"
