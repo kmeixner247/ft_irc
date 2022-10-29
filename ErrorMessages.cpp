@@ -162,6 +162,17 @@ std::string Server::ERR_ALREADYREGISTERED(Client *cl)
 	return (msg);
 }
 
+std::string Server::ERR_PASSWDMISMATCH(Client *cl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 464 ";
+	msg += cl->getNickname();
+	msg += " :Password incorrect";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::ERR_CHANNELISFULL(Client *cl, Channel *ch)
 {
 	std::string msg;
@@ -210,13 +221,37 @@ std::string Server::ERR_BADCHANNELKEY(Client *cl, Channel *ch)
 	return (msg);
 }
 
-std::string Server::ERR_PASSWDMISMATCH(Client *cl)
+std::string Server::ERR_CHANOPRIVSNEEDED(Client *cl, Channel *ch)
 {
 	std::string msg;
 	msg += ":" + this->getServerName();
-	msg += " 464 ";
+	msg += " 482 ";
+	msg += cl->getNickname() + " ";
+	msg += ch->getName();
+	msg += " :You're not channel operator";
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::ERR_UMODEUNKNOWNFLAG(Client *cl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 501 ";
 	msg += cl->getNickname();
-	msg += " :Password incorrect";
+	msg += " :Unknown MODE flag";
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::ERR_USERSDONTMATCH(Client *cl, std::string nick)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 502 ";
+	msg += cl->getNickname() + " ";
+	msg += nick;
+	msg += " :Can't change mode for other users";
 	msg += "\r\n";
 	return (msg);
 }

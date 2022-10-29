@@ -3,12 +3,8 @@
 Channel::Channel() : 
 	_name(""), 
 	_clients(std::map<std::string, Client *>()),
-	_privateChan(false),  
-	_secretChan(false), 
-	_inviteOnly(false), 
+	_chanmodes(0),
 	_topic(""), 
-	_noMsgFromOutside(false), 
-	_moderatedChan(false), 
 	_limit(99999), 
 	_key(""),
 	_clientRights(std::map<std::string, int>())
@@ -17,12 +13,8 @@ Channel::Channel() :
 Channel::Channel(const std::string &name) : 
 	_name(name), 
 	_clients(std::map<std::string, Client *>()),
-	_privateChan(false), 
-	_secretChan(false), 
-	_inviteOnly(false), 
+	_chanmodes(0),
 	_topic(""), 
-	_noMsgFromOutside(false), 
-	_moderatedChan(false), 
 	_limit(99999), 
 	_key(""),
 	_clientRights(std::map<std::string, int>())
@@ -43,17 +35,191 @@ Channel &Channel::operator=(const Channel &rhs)
 {
 	this->_name = rhs.getName();
 	this->_clients = rhs.getClients();
-	this->_privateChan = rhs.getPrivateChan();
-	this->_secretChan = rhs.getSecretChan();
-	this->_clientRights = rhs.getClientRights();
-	this->_inviteOnly = rhs.getInviteOnly();
 	this->_topic = rhs.getTopic();
-	this->_noMsgFromOutside = rhs.getNoMsgFromOutside();
-	this->_moderatedChan = rhs.getModeratedChan();
 	this->_limit = rhs.getLimit();
-	// this->_banMask = rhs._banMask;
 	this->_key = rhs.getKey();
 	return (*this);
+}
+
+bool Channel::addMode(int mode)
+{
+	if (!(this->_chanmodes & mode))
+	{
+		this->_chanmodes = this->_chanmodes | mode;
+		return (true);
+	}
+	return (false);
+}
+
+bool Channel::checkMode(int mode)
+{
+	return (this->_chanmodes & mode);
+}
+
+bool Channel::removeMode(int mode)
+{
+	if (this->_chanmodes & mode)
+	{
+		this->_chanmodes = this->_chanmodes & (~mode);
+		return (true);
+	}
+	return (false);
+}
+
+std::pair<std::string, bool> Channel::changeModes(std::vector<std::string> params)
+{
+	params.erase(params.begin());
+	std::string modestr = params.front();
+	params.erase(params.begin());
+	std::string changedmodes;
+	bool invalidmode = false;
+	size_t i = 0;
+	while (i < modestr.size())
+	{
+		if (modestr[i] == '+')
+		{
+			changedmodes += "+";
+			i++;
+			while (i < modestr.size() && !strchr("+-", modestr[i]))
+			{
+				if (modestr[i] == 'o')
+				{
+					if (params.size() && this->_clientRights.count(params.front()))
+					{
+						this->addClientRight(this->_clients.at(params.front()), CHAN_OPERATOR);
+						params.erase(params.begin());
+						changedmodes += "o";
+					}
+				}
+				else if (modestr[i] == 'b')
+				{
+					if (params.size())
+					{
+						this->addToBanList(params.front());
+						params.erase(params.begin());
+						changedmodes += "b";
+					}
+				}
+				else if (modestr[i] == 'e')
+				{
+					if (params.size())
+					{
+						this->addToExceptList(params.front());
+						params.erase(params.begin());
+						changedmodes += "e";
+					}
+				}
+				else if (modestr[i] == 'I')
+				{
+					if (params.size())
+					{
+						this->addToInviteList(params.front());
+						params.erase(params.begin());
+						changedmodes += "I";
+					}
+				}
+				else if (modestr[i] == 'l')
+				{
+					if (params.size())
+					{
+						this->addMode(CHANMODE_LIMIT);
+						this->setLimit(atoi(params.front().c_str()));
+						changedmodes += "l";
+					}
+				}
+				else if (modestr[i] == 'k')
+				{
+					if (params.size())
+					{
+						this->addMode(CHANMODE_KEY);
+						this->setKey(params.front());
+						changedmodes += "k";
+					}
+				}
+				else if (modestr[i] == 'i' && this->addMode(CHANMODE_INVITE))
+					changedmodes += "i";
+				else if (modestr[i] == 'm' && this->addMode(CHANMODE_MOD))
+					changedmodes += "m";
+				else if (modestr[i] == 's' && this->addMode(CHANMODE_SECRET))
+					changedmodes += "s";
+				else if (modestr[i] == 't' && this->addMode(CHANMODE_TOPIC))
+					changedmodes += "t";
+				else if (modestr[i] == 'n' && this->addMode(CHANMODE_NOMSGFROMOUTSIDE))
+					changedmodes += "n";
+				else if (!strchr("beIlkimstn", modestr[i]))
+					invalidmode = true;
+				i++;
+			}
+			if (changedmodes.back() == '+')
+				changedmodes.resize(changedmodes.size() - 1);
+		}
+		else if (modestr[i] == '-')
+		{
+			changedmodes += "-";
+			i++;
+			while (i < modestr.size() && !strchr("+-", modestr[i]))
+			{
+				if (modestr[i] == 'o')
+				{
+					if (params.size() && this->_clientRights.count(params.front()))
+					{
+						this->removeClientRight(this->_clients.at(params.front()), CHAN_OPERATOR);
+						params.erase(params.begin());
+						changedmodes += "o";
+					}
+				}
+				else if (modestr[i] == 'b')
+				{
+					if (params.size())
+					{
+						this->removeFromBanList(params.front());
+						params.erase(params.begin());
+						changedmodes += "b";
+					}
+				}
+				else if (modestr[i] == 'e')
+				{
+					if (!params.size())
+					{
+						this->removeFromExceptList(params.front());
+						params.erase(params.begin());
+						changedmodes += "e";
+					}
+				}
+				else if (modestr[i] == 'I')
+				{
+					if (!params.size())
+					{
+						this->removeFromInviteList(params.front());
+						params.erase(params.begin());
+						changedmodes += "I";
+					}
+				}
+				else if (modestr[i] == 'l' && this->removeMode(CHANMODE_LIMIT))
+					changedmodes += "l";
+				else if (modestr[i] == 'k' && this->removeMode(CHANMODE_KEY))
+					changedmodes += "k";
+				else if (modestr[i] == 'i' && this->removeMode(CHANMODE_INVITE))
+					changedmodes += "i";
+				else if (modestr[i] == 'm' && this->removeMode(CHANMODE_MOD))
+					changedmodes += "m";
+				else if (modestr[i] == 's' && this->removeMode(CHANMODE_SECRET))
+					changedmodes += "s";
+				else if (modestr[i] == 't' && this->removeMode(CHANMODE_TOPIC))
+					changedmodes += "t";
+				else if (modestr[i] == 'n' && this->removeMode(CHANMODE_NOMSGFROMOUTSIDE))
+					changedmodes += "n";
+				else if (!strchr("beIlkimstn", modestr[i]))
+					invalidmode = true;
+				i++;
+			}
+			if (changedmodes.back() == '-')
+				changedmodes.resize(changedmodes.size() - 1);
+		}
+		else
+			i++;
+	}
+	return (std::make_pair(changedmodes, invalidmode));
 }
 
 void Channel::addClientRight(Client *cl, int right)
@@ -97,30 +263,6 @@ Client *Channel::getClient(std::string name)
 {
 	return this->_clients[name];
 }
-void Channel::setPrivateChan(bool b)
-{
-	this->_privateChan = b;
-}
-bool Channel::getPrivateChan() const
-{
-	return this->_privateChan;
-}
-void Channel::setSecretChan(bool b)
-{
-	this->_secretChan = b;
-}
-bool Channel::getSecretChan() const
-{
-	return this->_secretChan;
-}
-void Channel::setInviteOnly(bool b)
-{
-	this->_inviteOnly = b;
-}
-bool Channel::getInviteOnly() const
-{
-	return this->_inviteOnly;
-}
 void Channel::setTopic(std::string s)
 {
 	this->_topic = s;
@@ -128,22 +270,6 @@ void Channel::setTopic(std::string s)
 std::string Channel::getTopic() const
 {
 	return this->_topic;
-}
-void Channel::setNoMsgFromOutside(bool b)
-{
-	this->_noMsgFromOutside = b;
-}
-bool Channel::getNoMsgFromOutside() const
-{
-	return this->_noMsgFromOutside;
-}
-void Channel::setModeratedChan(bool b)
-{
-	this->_moderatedChan = b;
-}
-bool Channel::getModeratedChan() const
-{
-	return this->_moderatedChan;
 }
 void Channel::setLimit(int i)
 {
@@ -212,4 +338,35 @@ void Channel::distributeMsg(std::string msg)
 bool Channel::ChannelHasClient(Client* cl)
 {
 	return(this->_clients.count(cl->getNickname()));
+}
+
+void Channel::addToBanList(std::string mask)
+{
+	this->_banlist.push_back(mask);
+}
+
+void Channel::removeFromBanList(std::string mask)
+{
+
+	this->_banlist.erase(std::find(this->_banlist.begin(), this->_banlist.end(), mask));
+}
+
+void Channel::addToExceptList(std::string mask)
+{
+	this->_exceptlist.push_back(mask);
+}
+
+void Channel::removeFromExceptList(std::string mask)
+{
+	this->_exceptlist.erase(std::find(this->_exceptlist.begin(), this->_banlist.end(), mask));
+}
+
+void Channel::addToInviteList(std::string mask)
+{
+	this->_invitelist.push_back(mask);
+}
+
+void Channel::removeFromInviteList(std::string mask)
+{
+	this->_invitelist.erase(std::find(this->_invitelist.begin(), this->_invitelist.end(), mask));
 }

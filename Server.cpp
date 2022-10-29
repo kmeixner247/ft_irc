@@ -250,7 +250,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			this->PASS(cl, *it);
 		else// if (this->clientIsRegistered(cl))
 		{
-			if (!cl->getPassbool())
+			if (!cl->checkMode(USERMODE_PASS))
 				return ;
 			if (!command.compare("USER")) this->USER(cl, *it);
 			else if (!command.compare("NICK")) this->NICK(cl, *it);

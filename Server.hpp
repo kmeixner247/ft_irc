@@ -104,19 +104,34 @@ private:
 	std::string NOTICEREPLY(Client *from, std::string to, std::string text);
 	std::string QUITREPLY(Client *cl, std::string reason);
 	std::string PARTREPLY(Client *cl, std::string channel, std::string reason);
+	std::string MODEREPLY(Client *cl, std::string target, std::string modestr);
 
 	/* RESPONSES */
-	std::string RPL_WELCOME(Client *cl);
-	std::string RPL_YOURHOST(Client *cl);
-	std::string RPL_CREATED(Client *cl);
-	std::string RPL_MYINFO(Client *cl);
+	// std::string RPL_WELCOME(Client *cl);
+	// std::string RPL_YOURHOST(Client *cl);
+	// std::string RPL_CREATED(Client *cl);
+	// std::string RPL_MYINFO(Client *cl);
+	std::string RPL_UMODEIS(Client *cl);
+	std::string RPL_CHANNELMODEIS(Client *cl, Channel *ch);
 	std::string RPL_TOPIC(Client *cl, Channel *ch);
+	std::string RPL_INVITELIST(Client *cl, Channel *ch);
+	std::string RPL_ENDOFINVITELIST(Client *cl);
+	std::string RPL_EXCEPTLIST(Client *cl, Channel *ch);
+	std::string RPL_ENDOFEXCEPTLIST(Client *cl);
 	std::string RPL_NAMREPLY(Client *cl, Channel *ch);
 	std::string RPL_ENDOFNAMES(Client *cl, Channel *ch);
-	std::string RPL_MOTDSTART(Client *cl);
+	std::string RPL_BANLIST(Client *cl, Channel *ch);
+	std::string RPL_ENDOFBANLIST(Client *cl);
 	std::string RPL_MOTD(Client *cl);
+	std::string RPL_MOTDSTART(Client *cl);
 	std::string RPL_ENDOFMOTD(Client *cl);
 	std::string RPL_YOUREOPER(Client *cl);
+	std::string RPL_BANLIST();
+	std::string RPL_ENDOFBANLIST();
+	std::string RPL_EXCEPTLIST();
+	std::string RPL_ENDOFEXCEPTLIST();
+	std::string RPL_INVITELIST();
+	std::string RPL_ENDOFINVITELIST();
 
 	/* ERRORS */
 	std::string ERR_ALREADYREGISTERED(Client *cl);
@@ -139,6 +154,9 @@ private:
 	std::string ERR_NOTOPLEVEL(Client *cl, std::string mask);
 	std::string ERR_WILDTOPLEVEL(Client *cl, std::string mask);
 	std::string ERR_PASSWDMISMATCH(Client *cl);
+	std::string ERR_CHANOPRIVSNEEDED(Client *cl, Channel *ch);
+	std::string ERR_UMODEUNKNOWNFLAG(Client *cl);
+	std::string ERR_USERSDONTMATCH(Client *cl, std::string nick);
 
 
 
