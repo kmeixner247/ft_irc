@@ -40,7 +40,7 @@ Channel &Channel::operator=(const Channel &rhs)
 	this->_key = rhs.getKey();
 	return (*this);
 }
-#include <iostream>
+
 bool Channel::addMode(int mode)
 {
 	if (!(this->_chanmodes & mode))
@@ -65,7 +65,7 @@ bool Channel::removeMode(int mode)
 	}
 	return (false);
 }
-#include <iostream>
+
 std::pair<std::string, bool> Channel::changeModes(std::vector<std::string> params)
 {
 	params.erase(params.begin());
@@ -82,7 +82,16 @@ std::pair<std::string, bool> Channel::changeModes(std::vector<std::string> param
 			i++;
 			while (i < modestr.size() && !strchr("+-", modestr[i]))
 			{
-				if (modestr[i] == 'b')
+				if (modestr[i] == 'o')
+				{
+					if (params.size() && this->_clientRights.count(params.front()))
+					{
+						this->addClientRight(this->_clients.at(params.front()), CHAN_OPERATOR);
+						params.erase(params.begin());
+						changedmodes += "o";
+					}
+				}
+				else if (modestr[i] == 'b')
 				{
 					if (params.size())
 					{
@@ -150,7 +159,16 @@ std::pair<std::string, bool> Channel::changeModes(std::vector<std::string> param
 			i++;
 			while (i < modestr.size() && !strchr("+-", modestr[i]))
 			{
-				if (modestr[i] == 'b')
+				if (modestr[i] == 'o')
+				{
+					if (params.size() && this->_clientRights.count(params.front()))
+					{
+						this->removeClientRight(this->_clients.at(params.front()), CHAN_OPERATOR);
+						params.erase(params.begin());
+						changedmodes += "o";
+					}
+				}
+				else if (modestr[i] == 'b')
 				{
 					if (params.size())
 					{
