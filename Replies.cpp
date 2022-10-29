@@ -54,6 +54,17 @@ std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reaso
 	return (msg);
 }
 
+std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr)
+{
+	std::string msg;
+	msg += makeClientPrefix(cl);
+	msg += " MODE ";
+	msg += target + " ";
+	msg += modestr;
+	msg += "\r\n";
+	return(msg);
+}
+
 std::string Server::RPL_UMODEIS(Client *cl)
 {
 	std::string msg;
@@ -62,10 +73,12 @@ std::string Server::RPL_UMODEIS(Client *cl)
 	msg += cl->getNickname() + " +";
 	if (cl->checkMode(USERMODE_INVIS))
 		msg += "i";
+	if (cl->checkMode(USERMODE_SERVERNOTICE))
+		msg += "s";
+	if (cl->checkMode(USERMODE_WALLOPRECEIVER))
+		msg += "w";	
 	if (cl->checkMode(USERMODE_OP))
 		msg += "o";
-	if (cl->checkMode(USERMODE_WALLOPRECEIVER))
-		msg += "w";
 	msg += "\r\n";
 	return (msg);
 }
@@ -112,6 +125,10 @@ std::string Server::RPL_TOPIC(Client *cl, Channel *ch)
 	msg += "\r\n";
 	return (msg);
 }
+//RPL_INVITELIST 336
+//RPL_ENDOFINVITELIST 337
+//RPL_EXCEPTLIST 348
+//RPL_ENDOFEXCEPTLIST 349
 
 std::string Server::RPL_NAMREPLY(Client *cl, Channel *ch)
 {
@@ -143,6 +160,11 @@ std::string Server::RPL_ENDOFNAMES(Client *cl, Channel *ch)
 	msg += "\r\n";
 	return (msg);
 }
+
+//RPL_BANLIST 367
+//RPL_ENDOFBANLIST 368
+
+
 
 std::string Server::RPL_MOTD(Client *cl)
 {

@@ -54,9 +54,9 @@
 // #define ERR_BANNEDFROMCHAN ":<server> 474 <nick> <channel> :Cannot join channel (+b)\r\n"
 // #define ERR_BADCHANNELKEY ":<server> 475 <nick> <channel> :Cannot join channel (+k)\r\n"
 #define ERR_NOPRIVILIGES ":<server> 481 <nick> :Permission Denied- You're not an IRC operator\r\n"
-#define ERR_CHANOPRIVSNEEDED ":<server> 482 <nick> <channel> :You're not channel operator\r\n"
+// #define ERR_CHANOPRIVSNEEDED ":<server> 482 <nick> <channel> :You're not channel operator\r\n"
 #define ERR_CANTKILLSERVER ":<server> 483 <nick> :You cant kill a server!\r\n"
 #define ERR_NOOPERHOST ":<server> 491 <nick> :No O-lines for your host\r\n"
-#define ERR_UMODEUNKNOWNFLAG ":<server> 501 <nick> :Unknown MODE flag\r\n"
+// #define ERR_UMODEUNKNOWNFLAG ":<server> 501 <nick> :Unknown MODE flag\r\n"
 // #define ERR_USERSDONTMATCH ":<server> 502 <nick> :Can't change mode for other users\r\n"
 #endif

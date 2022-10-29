@@ -6,11 +6,11 @@
 #include <vector>
 #include "Channel.hpp"
 #include <utility>
-#define USERMODE_OP 1
-#define USERMODE_PASS 2
-#define USERMODE_INVIS 4
-#define USERMODE_SERVERNOTICE 8
-#define USERMODE_WALLOPRECEIVER 16
+#define USERMODE_PASS 1
+#define USERMODE_INVIS 2
+#define USERMODE_SERVERNOTICE 4
+#define USERMODE_WALLOPRECEIVER 8
+#define USERMODE_OP 16
 class Channel;
 class Client
 {
@@ -32,9 +32,10 @@ public:
 	std::string getNickname();
 	std::string getUsername();
 	std::string getRealname();
-	void addMode(int mode);
+	bool addMode(int mode);
 	bool checkMode(int mode);
-	void removeMode(int mode);
+	bool removeMode(int mode);
+	std::pair<std::string, bool> changeModes(std::string modestr);
 	int getSocket();
 	std::string getBuffer();
 	void catBuffer(char *str);

@@ -37,14 +37,18 @@ Channel &Channel::operator=(const Channel &rhs)
 	this->_clients = rhs.getClients();
 	this->_topic = rhs.getTopic();
 	this->_limit = rhs.getLimit();
-	// this->_banMask = rhs._banMask;
 	this->_key = rhs.getKey();
 	return (*this);
 }
-
-void Channel::addMode(int mode)
+#include <iostream>
+bool Channel::addMode(int mode)
 {
-	this->_chanmodes = this->_chanmodes | mode;
+	if (!(this->_chanmodes & mode))
+	{
+		this->_chanmodes = this->_chanmodes | mode;
+		return (true);
+	}
+	return (false);
 }
 
 bool Channel::checkMode(int mode)
@@ -52,9 +56,152 @@ bool Channel::checkMode(int mode)
 	return (this->_chanmodes & mode);
 }
 
-void Channel::removeMode(int mode)
+bool Channel::removeMode(int mode)
 {
-	this->_chanmodes = this->_chanmodes & (~mode);
+	if (this->_chanmodes & mode)
+	{
+		this->_chanmodes = this->_chanmodes & (~mode);
+		return (true);
+	}
+	return (false);
+}
+#include <iostream>
+std::pair<std::string, bool> Channel::changeModes(std::vector<std::string> params)
+{
+	params.erase(params.begin());
+	std::string modestr = params.front();
+	params.erase(params.begin());
+	std::string changedmodes;
+	bool invalidmode = false;
+	size_t i = 0;
+	while (i < modestr.size())
+	{
+		if (modestr[i] == '+')
+		{
+			changedmodes += "+";
+			i++;
+			while (i < modestr.size() && !strchr("+-", modestr[i]))
+			{
+				if (modestr[i] == 'b')
+				{
+					if (params.size())
+					{
+						this->addToBanList(params.front());
+						params.erase(params.begin());
+						changedmodes += "b";
+					}
+				}
+				else if (modestr[i] == 'e')
+				{
+					if (params.size())
+					{
+						this->addToExceptList(params.front());
+						params.erase(params.begin());
+						changedmodes += "e";
+					}
+				}
+				else if (modestr[i] == 'I')
+				{
+					if (params.size())
+					{
+						this->addToInviteList(params.front());
+						params.erase(params.begin());
+						changedmodes += "I";
+					}
+				}
+				else if (modestr[i] == 'l')
+				{
+					if (params.size())
+					{
+						this->addMode(CHANMODE_LIMIT);
+						this->setLimit(atoi(params.front().c_str()));
+						changedmodes += "l";
+					}
+				}
+				else if (modestr[i] == 'k')
+				{
+					if (params.size())
+					{
+						this->addMode(CHANMODE_KEY);
+						this->setKey(params.front());
+						changedmodes += "k";
+					}
+				}
+				else if (modestr[i] == 'i' && this->addMode(CHANMODE_INVITE))
+					changedmodes += "i";
+				else if (modestr[i] == 'm' && this->addMode(CHANMODE_MOD))
+					changedmodes += "m";
+				else if (modestr[i] == 's' && this->addMode(CHANMODE_SECRET))
+					changedmodes += "s";
+				else if (modestr[i] == 't' && this->addMode(CHANMODE_TOPIC))
+					changedmodes += "t";
+				else if (modestr[i] == 'n' && this->addMode(CHANMODE_NOMSGFROMOUTSIDE))
+					changedmodes += "n";
+				else if (!strchr("beIlkimstn", modestr[i]))
+					invalidmode = true;
+				i++;
+			}
+			if (changedmodes.back() == '+')
+				changedmodes.resize(changedmodes.size() - 1);
+		}
+		else if (modestr[i] == '-')
+		{
+			changedmodes += "-";
+			i++;
+			while (i < modestr.size() && !strchr("+-", modestr[i]))
+			{
+				if (modestr[i] == 'b')
+				{
+					if (params.size())
+					{
+						this->removeFromBanList(params.front());
+						params.erase(params.begin());
+						changedmodes += "b";
+					}
+				}
+				else if (modestr[i] == 'e')
+				{
+					if (!params.size())
+					{
+						this->removeFromExceptList(params.front());
+						params.erase(params.begin());
+						changedmodes += "e";
+					}
+				}
+				else if (modestr[i] == 'I')
+				{
+					if (!params.size())
+					{
+						this->removeFromInviteList(params.front());
+						params.erase(params.begin());
+						changedmodes += "I";
+					}
+				}
+				else if (modestr[i] == 'l' && this->removeMode(CHANMODE_LIMIT))
+					changedmodes += "l";
+				else if (modestr[i] == 'k' && this->removeMode(CHANMODE_KEY))
+					changedmodes += "k";
+				else if (modestr[i] == 'i' && this->removeMode(CHANMODE_INVITE))
+					changedmodes += "i";
+				else if (modestr[i] == 'm' && this->removeMode(CHANMODE_MOD))
+					changedmodes += "m";
+				else if (modestr[i] == 's' && this->removeMode(CHANMODE_SECRET))
+					changedmodes += "s";
+				else if (modestr[i] == 't' && this->removeMode(CHANMODE_TOPIC))
+					changedmodes += "t";
+				else if (modestr[i] == 'n' && this->removeMode(CHANMODE_NOMSGFROMOUTSIDE))
+					changedmodes += "n";
+				else if (!strchr("beIlkimstn", modestr[i]))
+					invalidmode = true;
+				i++;
+			}
+			if (changedmodes.back() == '-')
+				changedmodes.resize(changedmodes.size() - 1);
+		}
+		else
+			i++;
+	}
+	return (std::make_pair(changedmodes, invalidmode));
 }
 
 void Channel::addClientRight(Client *cl, int right)
@@ -173,4 +320,35 @@ void Channel::distributeMsg(std::string msg)
 bool Channel::ChannelHasClient(Client* cl)
 {
 	return(this->_clients.count(cl->getNickname()));
+}
+
+void Channel::addToBanList(std::string mask)
+{
+	this->_banlist.push_back(mask);
+}
+
+void Channel::removeFromBanList(std::string mask)
+{
+
+	this->_banlist.erase(std::find(this->_banlist.begin(), this->_banlist.end(), mask));
+}
+
+void Channel::addToExceptList(std::string mask)
+{
+	this->_exceptlist.push_back(mask);
+}
+
+void Channel::removeFromExceptList(std::string mask)
+{
+	this->_exceptlist.erase(std::find(this->_exceptlist.begin(), this->_banlist.end(), mask));
+}
+
+void Channel::addToInviteList(std::string mask)
+{
+	this->_invitelist.push_back(mask);
+}
+
+void Channel::removeFromInviteList(std::string mask)
+{
+	this->_invitelist.erase(std::find(this->_invitelist.begin(), this->_invitelist.end(), mask));
 }

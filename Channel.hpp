@@ -33,6 +33,9 @@ private:
 	int _limit;
 	std::string _key;
 	std::map<std::string, int> _clientRights;
+	std::vector<std::string> _banlist;
+	std::vector<std::string> _exceptlist;
+	std::vector<std::string> _invitelist;
 
 public:
 	Channel();
@@ -44,9 +47,10 @@ public:
 	void addClientRight(Client *cl, int right);
 	bool checkClientRight(Client *cl, int right);
 	void removeClientRight(Client *cl, int right);
-	void addMode(int mode);
+	bool addMode(int mode);
 	bool checkMode(int mode);
-	void removeMode(int mode); 
+	bool removeMode(int mode); 
+	std::pair<std::string, bool> changeModes(std::vector<std::string> params);
 	size_t getSize() const;
 	void addClient(Client *cl);
 	size_t removeClient(Client *cl);
@@ -77,6 +81,12 @@ public:
 	void setClients(std::map<std::string, Client*> clients);
 	void distributeMsg(std::string msg);
 	bool ChannelHasClient(Client* cl);
+	void addToBanList(std::string mask);
+	void removeFromBanList(std::string mask);
+	void addToExceptList(std::string mask);
+	void removeFromExceptList(std::string mask);
+	void addToInviteList(std::string mask);
+	void removeFromInviteList(std::string mask);
 };
 
 #endif

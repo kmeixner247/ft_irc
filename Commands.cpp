@@ -136,7 +136,6 @@ void Server::JOIN(Client *cl, Message msg)
 		}
 		while (pos != std::string::npos);
 	}
-	/* !!!CAN'T HANDLE MULTIPLE CHANNELS YET!!! */
 
 	//ERR_NEEDMOREPARAMS
 	if (msg.getParameters().size() == 0)
@@ -146,17 +145,14 @@ void Server::JOIN(Client *cl, Message msg)
 	}
 	for (it = channelPW.begin(); it != channelPW.end(); it++)
 	{
-		std::cerr << "CURRENT CHANNEL KEY PAIR IS " << "|" << it->first << "|" << it->second << "|" <<  std::endl;
 		if (it->first[0] != '#')
 		{
-			std::cout << "sending nosuchchannel" << std::endl;
 			this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, it->first));
 			continue ;
 		}
 		if (!this->_channels.count(it->first)) 
 		{	//create channel, make client op
 			newChan.setName(it->first);
-			std::cerr << "XXXXXXXXXXXXXXXXXXXX" << it->second << "XXXXXXXXXXXXXXXXXXXX" << std::endl;
 			newChan.setKey(it->second);
 			ch = this->addChannel(newChan);
 			ch->addClient(cl);
@@ -166,7 +162,6 @@ void Server::JOIN(Client *cl, Message msg)
 		else
 		{
 			ch = &(this->_channels[it->first]);
-			std::cerr << "KEY|" <<  ((ch->getKey() != "") ? ch->getKey() : "KEY IS EMPTY") << "|" << std::endl;
 			//ERR_BADCHANNELKEY
 			if (ch->getKey() != "" && ch->getKey().compare(it->second))
 			{
@@ -220,11 +215,11 @@ void Server::QUIT(Client *cl, Message msg)
 
 void Server::WHO(Client *cl, Message msg)
 {
-	std::cout << "WHO" << std::endl;
+	std::cout << "WHO from " << cl->getNickname() <<  std::endl;
 	std::cout << msg << std::endl;
-	std::cout << "My nickname is " << cl->getNickname() << std::endl;
-	std::cout << "My realname is " << cl->getRealname() << std::endl;
-	std::cout << "My username is " << cl->getUsername() << std::endl;
+	// std::cout << "My nickname is " << cl->getNickname() << std::endl;
+	// std::cout << "My realname is " << cl->getRealname() << std::endl;
+	// std::cout << "My username is " << cl->getUsername() << std::endl;
 } 
 
 void Server::KILL(Client *cl, Message msg)
@@ -391,6 +386,11 @@ void Server::MODE(Client *cl, Message msg)
 			this->sendMsg(cl, 1, this->RPL_UMODEIS(cl));
 			return ;
 		}
+		std::pair<std::string, bool> changedmodes = cl->changeModes(msg.getParameters()[1]);
+		if (changedmodes.first != "")
+			this->sendMsg(cl, 1, this->MODEREPLY(cl, cl->getNickname(), changedmodes.first));
+		if (changedmodes.second)
+			this->sendMsg(cl, 1, this->ERR_UMODEUNKNOWNFLAG(cl));
 	}
 	else
 	{
@@ -399,11 +399,22 @@ void Server::MODE(Client *cl, Message msg)
 			this->sendMsg(cl, 1, this->ERR_NOSUCHCHANNEL(cl, target));
 			return ;
 		}
+		Channel *ch = &this->_channels[target];
 		if (msg.getParameters().size() == 1)
 		{
-			this->sendMsg(cl, 1, this->RPL_CHANNELMODEIS(cl, &this->_channels[target]));
+			this->sendMsg(cl, 1, this->RPL_CHANNELMODEIS(cl, ch));
 			return ;
 		}
+		if (!ch->checkClientRight(cl, CHAN_OPERATOR))
+		{
+			this->sendMsg(cl, 1, this->ERR_CHANOPRIVSNEEDED(cl, ch));
+			return ;
+		}
+		std::pair<std::string, bool> changedmodes = ch->changeModes(msg.getParameters());
+		if (changedmodes.first != "")
+			this->sendMsg(ch, 1, this->MODEREPLY(cl, ch->getName(), changedmodes.first));
+		if (changedmodes.second)
+			this->sendMsg(cl, 1, this->ERR_UMODEUNKNOWNFLAG(cl));
 	}
 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
@@ -452,9 +463,6 @@ void Server::PART(Client *cl, Message msg)
 			ch = &this->_channels[channels.substr(0, pos)];
 			this->sendMsg(ch, 1, this->PARTREPLY(cl, ch->getName(), reason));
 			this->removeClientFromChannel(cl, ch);
-			// this->sendMsg(cl, 1, this->PARTREPLY(cl, ch->getName(), reason));
-			//leave_channel(channels.substr(0, pos));
-			// std::cerr << channels.substr(0, pos) << std::endl;
 		}
 		channels = channels.substr(pos+1, channels.back());
 	}
