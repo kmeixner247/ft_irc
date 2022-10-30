@@ -77,7 +77,7 @@ private:
 	int init();
 	// std::vector<Message> parseMessages(char *input);
 	std::vector<Message> parseMessages(Client *cl, std::string input);
-	std::string makeClientPrefix(Client *cl);
+	std::string makeNickMask(Client *cl);
 	void removeClientFromChannel(Client *cl, Channel *ch);
 	// commands
 	void PASS(Client *cl, Message msg);

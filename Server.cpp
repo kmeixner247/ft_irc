@@ -223,10 +223,10 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 	return (msgs);
 }
 
-std::string Server::makeClientPrefix(Client *cl)
+std::string Server::makeNickMask(Client *cl)
 {
 	std::string prefix;
-	prefix += ":" + cl->getNickname() + "!" + cl->getUsername() + "@" + this->_host;
+	prefix += cl->getNickname() + "!" + cl->getUsername() + "@" + this->_host;
 	return (prefix);
 }
 

@@ -3,7 +3,7 @@ std::string Server::JOINREPLY(Client *cl, Channel *ch)
 {
 	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
 	std::string msg;
-	msg += this->makeClientPrefix(cl);
+	msg +=  ":" +this->makeNickMask(cl);
 	msg += " JOIN :";
 	msg += ch->getName();
 	msg += "\r\n";
@@ -13,7 +13,7 @@ std::string Server::JOINREPLY(Client *cl, Channel *ch)
 std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
 {
 	std::string msg;
-	msg += this->makeClientPrefix(from);
+	msg += ":" + this->makeNickMask(from);
 	msg += " PRIVMSG ";
 	msg += to + " :";
 	msg += text;
@@ -24,7 +24,7 @@ std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
 std::string Server::NOTICEREPLY(Client *from, std::string to, std::string text)
 {
 	std::string msg;
-	msg += this->makeClientPrefix(from);
+	msg += ":" + this->makeNickMask(from);
 	msg += " NOTICE ";
 	msg += to + " :";
 	msg += text;
@@ -35,7 +35,7 @@ std::string Server::NOTICEREPLY(Client *from, std::string to, std::string text)
 std::string Server::QUITREPLY(Client *cl, std::string reason)
 {
 	std::string msg;
-	msg += this->makeClientPrefix(cl);
+	msg += ":" + this->makeNickMask(cl);
 	msg += " QUIT ";
 	msg += ":" + reason;
 	msg += "\r\n";
@@ -45,7 +45,7 @@ std::string Server::QUITREPLY(Client *cl, std::string reason)
 std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reason)
 {
 	std::string msg;
-	msg += makeClientPrefix(cl);
+	msg += ":" + this->makeNickMask(cl);
 	msg += " PART ";
 	msg += channel;
 	if (reason != "")
@@ -57,7 +57,7 @@ std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reaso
 std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr, std::vector<std::string> args)
 {
 	std::string msg;
-	msg += makeClientPrefix(cl);
+	msg += ":" + this->makeNickMask(cl);
 	msg += " MODE ";
 	msg += target + " ";
 	msg += modestr;
@@ -73,7 +73,7 @@ std::string Server::MODEREPLY(Client *cl, std::string target, std::string modest
 std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg)
 {
 	std::string msg;
-	msg += makeClientPrefix(cl);
+	msg += ":" + this->makeNickMask(cl);
 	msg += " MODE ";
 	msg += target + " ";
 	msg += modestr;
@@ -85,7 +85,7 @@ std::string Server::MODEREPLY(Client *cl, std::string target, std::string modest
 std::string Server::TOPICREPLY(Client *cl, Channel *ch, std::string topic)
 {
 	std::string msg;
-	msg += makeClientPrefix(cl);
+	msg += ":" + makeNickMask(cl);
 	msg += " TOPIC ";
 	msg += ch->getName() + " ";
 	msg += topic;
@@ -96,7 +96,7 @@ std::string Server::TOPICREPLY(Client *cl, Channel *ch, std::string topic)
 std::string Server::KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment)
 {
 	std::string msg;
-	msg += makeClientPrefix(cl);
+	msg += ":" + makeNickMask(cl);
 	msg += " KICK ";
 	msg += ch->getName() + " ";
 	msg += target->getNickname() + " ";

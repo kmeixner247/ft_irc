@@ -169,13 +169,13 @@ void Server::JOIN(Client *cl, Message msg)
 				continue ;
 			}
 			//ERR_INVITEONLYCHAN
-			if (ch->checkMode(CHANMODE_INVITE) && ch->checkClientRight(cl, CHAN_INVITE))
+			if (ch->checkMode(CHANMODE_INVITE) && ch->isOnInviteList(this->makeNickMask(cl)))
 			{
 				this->sendMsg(cl, 1, ERR_INVITEONLYCHAN(cl, ch));
 				continue ;
 			}
 			//ERR_BANNED MCHAN
-			if (ch->checkClientRight(cl, CHAN_BAN))
+			if (ch->isBanned(this->makeNickMask(cl)) && !ch->isOnExcept(this->makeNickMask(cl)))
 			{
 				this->sendMsg(cl, 1, ERR_BANNEDFROMCHAN(cl, ch));
 				continue ;
@@ -374,6 +374,9 @@ void Server::KICK(Client *cl, Message msg)
 		this->sendMsg(cl, 1, this->ERR_NEEDMOREPARAMS(cl, "KICK"));
 		return ;
 	}
+	std::string targetnick = msg.getParameters()[1];
+	if (targetnick.back() == ',')
+		targetnick.resize(targetnick.size() - 1);
 	if (!this->_channels.count(msg.getParameters().front()))
 	{
 		this->sendMsg(cl, 1, this->ERR_NOSUCHCHANNEL(cl, msg.getParameters().front()));
@@ -391,14 +394,15 @@ void Server::KICK(Client *cl, Message msg)
 		return ;
 	}
 	Client *target;
-	target = ch->getClient(msg.getParameters()[1]);
+	target = ch->getClient(targetnick);
 	if (!target)
 	{
-		this->sendMsg(cl, 1, ERR_USERNOTINCHANNEL(cl, msg.getParameters()[1], ch->getName()));
+		this->sendMsg(cl, 1, ERR_USERNOTINCHANNEL(cl, targetnick, ch->getName()));
 		return ;
 	}
-	std::string comment = (msg.getParameters().back()[0] == ':') ? msg.getParameters().back() : "";
+	std::string comment = (targetnick[0] == ':') ? targetnick : "";
 	this->sendMsg(ch, 1, KICKREPLY(cl, ch, target, comment));
+	this->removeClientFromChannel(target, ch);
 }
 
 void Server::MODE(Client *cl, Message msg)

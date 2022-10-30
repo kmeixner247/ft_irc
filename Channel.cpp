@@ -327,7 +327,7 @@ void Channel::setClients(std::map<std::string, Client *> clients)
 {
 	this->_clients = clients;
 }
-#include <iostream>
+
 void Channel::distributeMsg(std::string msg)
 {
 	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
@@ -353,6 +353,18 @@ void Channel::removeFromBanList(std::string mask)
 	this->_banlist.erase(std::find(this->_banlist.begin(), this->_banlist.end(), mask));
 }
 
+bool Channel::isBanned(std::string mask)
+{
+	std::cerr << "mask: " << mask << std::endl;
+	for (std::vector<std::string>::iterator it = this->_banlist.begin(); it != this->_banlist.end(); it++)
+	{
+		std::cout << *it << std::endl;
+		if (this->matchMask(*it, mask))
+			return (true);
+	}
+	return (false);
+}
+
 void Channel::addToExceptList(std::string mask)
 {
 	this->_exceptlist.push_back(mask);
@@ -363,6 +375,21 @@ void Channel::removeFromExceptList(std::string mask)
 	this->_exceptlist.erase(std::find(this->_exceptlist.begin(), this->_banlist.end(), mask));
 }
 
+bool Channel::isOnExcept(std::string mask)
+{
+	// std::cerr << "is " << mask << " on my list of size " << this->_exceptlist.size();
+	for (std::vector<std::string>::iterator it = this->_exceptlist.begin(); it != this->_exceptlist.end(); it++)
+	{
+		// std::cerr << "checking against mask " << *it << std::endl;
+		if (this->matchMask(*it, mask))
+		{
+			// std::cerr << "yup" << std::endl;
+			return (true);
+		}
+	}
+	return (false);
+}
+
 void Channel::addToInviteList(std::string mask)
 {
 	this->_invitelist.push_back(mask);
@@ -371,4 +398,57 @@ void Channel::addToInviteList(std::string mask)
 void Channel::removeFromInviteList(std::string mask)
 {
 	this->_invitelist.erase(std::find(this->_invitelist.begin(), this->_invitelist.end(), mask));
+}
+
+bool Channel::isOnInviteList(std::string mask)
+{
+	for (std::vector<std::string>::iterator it = this->_exceptlist.begin(); it != this->_exceptlist.end(); it++)
+		if (!it->compare(mask))
+			return (true);
+	return (false);
+}
+bool Channel::matchMask(std::string mask, std::string str)
+{
+	if (mask == "")
+		return (false);
+	if (mask.find('*') == mask.npos)
+		return (!mask.compare(str));
+	std::vector<std::string> splits;
+	std::string temp = mask;
+	size_t pos;
+	do
+	{
+		pos = temp.find('*');
+		splits.push_back(temp.substr(0, pos));
+		if (splits.back() == "")
+			splits.pop_back();
+		temp = temp.substr(pos+1, temp.npos);
+	}
+	while (pos != temp.npos);
+	if (!splits.size())
+		return (true);
+	pos = 0;
+	if (mask.front() != '*')
+	{
+		pos = splits.front().size();
+		if (str.substr(0, pos).compare(splits.front()))
+			return (false);
+		str = str.substr(pos, str.npos);
+		splits.erase(splits.begin());
+	}
+	while (splits.size() > 1)
+	{
+		if ((pos = str.find(splits.front())) == std::string::npos)
+			return (false);
+		pos += splits.front().size();
+		str = str.substr(pos, str.npos);
+		splits.erase(splits.begin());
+	}
+	if ((splits.size() && (pos = str.rfind(splits.front())) == std::string::npos))
+		return (false);
+	if (splits.size())
+		pos += splits.front().size();
+	if (mask.back() == '*' || pos >= str.size())
+		return (true);
+	return (false);
 }
