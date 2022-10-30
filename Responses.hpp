@@ -37,7 +37,7 @@
 #define ERR_NICKCOLLISION ":<server> 436 <nick> <nick> :Nickname collision KILL\r\n"
 // #define ERR_USERNOTINCHANNEL ":<server> 441 <nick> <nick> <channel> :They aren't on that channel\r\n"
 // #define ERR_NOTONCHANNEL ":<server> 442 <nick> <channel> :You're not on that channel\r\n"
-#define ERR_USERONCHANNEL ":<server> 443 <nick> <user> <channel> :is already on channel\r\n"
+// #define ERR_USERONCHANNEL ":<server> 443 <nick> <user> <channel> :is already on channel\r\n"
 #define ERR_NOLOGIN ":<server> 444 <nick> <user> :User not logged in\r\n"
 #define ERR_SUMMONDISABLED ":<server> 445 <nick> :Summon has been disabled\r\n"
 #define ERR_USERSDISABLED ":<server> 446 <nick> :USERS has been disabled\r\n"

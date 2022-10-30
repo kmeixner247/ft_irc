@@ -460,7 +460,6 @@ void Server::MODE(Client *cl, Message msg)
 		if (changedmodes.second)
 			this->sendMsg(cl, 1, this->ERR_UMODEUNKNOWNFLAG(cl));
 	}
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::INVITE(Client *cl, Message msg)
@@ -468,7 +467,41 @@ void Server::INVITE(Client *cl, Message msg)
 	std::cout << "INVITE from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
 	
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	if (msg.getParameters().size() < 2)
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "INVITE"));
+		return ;
+	}
+	std::string channel = msg.getParameters().back();
+	if (!this->_channels.count(channel))
+	{
+		this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, channel));
+		return ;
+	}
+	Channel *ch = &this->_channels.at(channel);
+	if (!cl->ClientIsInChannel(ch))
+	{
+		this->sendMsg(cl, 1, ERR_NOTONCHANNEL(cl, channel));
+		return ;
+	}
+	if (ch->checkMode(CHAN_INVITE) && !ch->checkClientRight(cl, CHAN_OPERATOR))
+	{
+		this->sendMsg(cl, 1, ERR_CHANOPRIVSNEEDED(cl, ch));
+		return ;
+	}
+	if (!this->_registeredclients.count(msg.getParameters().front()))
+	{
+		this->sendMsg(cl, 1, ERR_NOSUCHNICK(cl, msg.getParameters().front()));
+		return ;
+	}
+	Client *target = this->_registeredclients.at(msg.getParameters().front());
+	if (ch->ChannelHasClient(target))
+	{
+		this->sendMsg(cl, 1, ERR_USERONCHANNEL(cl, ch, msg.getParameters().front()));
+		return ;
+	}
+	this->sendMsg(cl, 1, RPL_INVITING(cl, msg.getParameters().front(), msg.getParameters().back()));
+	this->sendMsg(target, 1, INVITEREPLY(target, ch, cl));
 }
 
 void Server::TOPIC(Client *cl, Message msg)
