@@ -185,7 +185,8 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 		else
 			str = va_arg(args, const char*);
 	}
-		std::cerr << "##############\nSENDING...\n" << msg << "...to" << cl->getNickname()<<"\n##############" << std::endl;
+		// std::cerr << "##############\nSENDING...\n" << msg << "...to" << cl->getNickname()<<"\n##############" << std::endl;
+		std::cerr << "send user ===> " << cl->getNickname() << " : " << msg << std::endl;
 	send(cl->getSocket(), msg.c_str(), msg.length(), 0);
 }
 
@@ -237,6 +238,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 	// std::vector<Message> msgs = parseMessages(buffer);
 	for (std::vector<Message>::iterator it = msgs.begin(); it != msgs.end(); it++)
 	{
+		std::cerr << "receive user <=== " << cl->getNickname() << " : " << *it << "\n" << std::endl;
 		//errors?
 		std::string command = it->getCommand();
 		if (!(command.compare("PASS")))
@@ -252,7 +254,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
 			else if (!(command.compare("OPER"))) this->OPER(cl, *it);
 			else if (!(command.compare("PRIVMSG"))) this->PRIVMSG(cl, *it);
-			else if (!(command.compare("WALLOPS"))) this->WALLOPS(cl, *it);
+			// else if (!(command.compare("WALLOPS"))) this->WALLOPS(cl, *it);
 			else if (!(command.compare("NOTICE"))) this->NOTICE(cl, *it);
 			else if (!(command.compare("KICK"))) this->KICK(cl, *it);
 			else if (!(command.compare("MODE"))) this->MODE(cl, *it);
@@ -261,7 +263,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("WHO"))) this->WHO(cl, *it);
 			else if (!(command.compare("PART"))) this->PART(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
-			else std::cout << "NONE OF THOSE1\n" << *it << std::endl;
+			else std::cout << "NONE OF THOSE:  " << *it << "\n" << std::endl;
 		}
 /* else if(!(this->clientIsRegistered(cl)))
 		{

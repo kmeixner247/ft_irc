@@ -40,8 +40,6 @@ void Server::NICK(Client *cl, Message msg)
 	// to avoid collisions in naming usernames are stored in lowercase
 	// if there is a prefix; change user with nick prefix to parameter
 	// if no prefix, introducing new nick for user
-	std::cout << "NICK" << std::endl;
-	std::cout << msg << std::endl;
 	if (msg.getParameters().size() == 0)
 	{
 		this->sendMsg(cl, 1, ERR_NONICKNAMEGIVEN(cl));
@@ -84,8 +82,6 @@ void Server::NICK(Client *cl, Message msg)
 
 void Server::USER(Client *cl, Message msg)
 {
-	std::cout << "USER" << std::endl;
-	std::cout << msg << std::endl;
 	if (this->clientIsRegistered(cl))
 	{
 		this->sendMsg(cl, 1, ERR_ALREADYREGISTERED(cl));
@@ -191,7 +187,10 @@ void Server::JOIN(Client *cl, Message msg)
 		}
 		//send JOIN with nick as prefix to channel)
 		this->sendMsg(ch, 1, JOINREPLY(cl, ch));
-		this->sendMsg(cl, 1, RPL_TOPIC(cl, ch).c_str());
+		if (ch->getTopic() != "")
+			this->sendMsg(cl, 1, RPL_TOPIC(cl, ch).c_str());
+		else
+			this->sendMsg(cl, 1, RPL_NOTOPIC(cl, ch));
 		this->sendMsg(cl, 1, RPL_NAMREPLY(cl, ch).c_str());
 		this->sendMsg(cl, 1, RPL_ENDOFNAMES(cl, ch).c_str());
 	}
@@ -199,8 +198,6 @@ void Server::JOIN(Client *cl, Message msg)
 
 void Server::QUIT(Client *cl, Message msg)
 {
-	std::cout << "QUIT" << std::endl;
-	std::cout << msg << std::endl;
 	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 	{
 		if (it->second.getClients().count(cl->getNickname()))
@@ -218,9 +215,6 @@ void Server::QUIT(Client *cl, Message msg)
 
 void Server::WHO(Client *cl, Message msg)
 {
-	std::cout << "WHO from " << cl->getNickname() <<  std::endl;
-	std::cout << msg << std::endl;
-
 	if (!msg.getParameters().size())
 		return ;
 	std::string mask = msg.getParameters().front();
@@ -239,10 +233,11 @@ void Server::WHO(Client *cl, Message msg)
 	{
 		for (std::map<std::string, Client*>::iterator it = this->_registeredclients.begin(); it != this->_registeredclients.end(); it++)
 		{
-			if (matchMask(mask, makeNickMask(this, cl)))
-				std::cerr << "asdf" << std::endl;	
+			if (matchMask(mask, makeNickMask(this, it->second)))
+				this->sendMsg(cl, 1, RPL_WHOREPLY(cl, it->second));
 		}
 	}
+	this->sendMsg(cl, 1, RPL_ENDOFWHO(cl, mask));
 	// std::cout << "My nickname is " << cl->getNickname() << std::endl;
 	// std::cout << "My realname is " << cl->getRealname() << std::endl;
 	// std::cout << "My username is " << cl->getUsername() << std::endl;
@@ -250,8 +245,6 @@ void Server::WHO(Client *cl, Message msg)
 
 void Server::KILL(Client *cl, Message msg)
 {
-	std::cout << "KILL from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 	
 	if (msg.getParameters().size() < 2)
 	{
@@ -301,8 +294,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 	Client *toCl;
 	Channel *toCh;
 	std::string text;
-	std::cout << "PRIVMSG from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 	
     // ERR_NOSUCHNICK (401)
     // ERR_NOSUCHSERVER (402)
@@ -340,21 +331,17 @@ void Server::PRIVMSG(Client *cl, Message msg)
 }
 
 
-void Server::WALLOPS(Client *cl, Message msg)
-{
-	std::cout << "WALLOPS from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
+// void Server::WALLOPS(Client *cl, Message msg)
+// {
 	
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
-}
+// 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+// }
 
 void Server::NOTICE(Client *cl, Message msg)
 {
 	Client *toCl;
 	Channel *toCh;
 	std::string text;
-	std::cout << "NOTICE from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 
 	text = msg.getParameters().back();
 	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
@@ -386,8 +373,6 @@ void Server::NOTICE(Client *cl, Message msg)
 
 void Server::KICK(Client *cl, Message msg)
 {
-	std::cout << "KICK from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 	
 	if (msg.getParameters().size() < 2)
 	{
@@ -427,8 +412,6 @@ void Server::KICK(Client *cl, Message msg)
 
 void Server::MODE(Client *cl, Message msg)
 {
-	std::cout << "MODE from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 
 	if (msg.getParameters().size() == 0)
 	{
@@ -487,8 +470,6 @@ void Server::MODE(Client *cl, Message msg)
 
 void Server::INVITE(Client *cl, Message msg)
 {
-	std::cout << "INVITE from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 	
 	if (msg.getParameters().size() < 2)
 	{
@@ -507,7 +488,7 @@ void Server::INVITE(Client *cl, Message msg)
 		this->sendMsg(cl, 1, ERR_NOTONCHANNEL(cl, channel));
 		return ;
 	}
-	if (ch->checkMode(CHAN_INVITE) && !ch->checkClientRight(cl, CHAN_OPERATOR))
+	if (ch->checkMode(CHANMODE_INVITE) && !ch->checkClientRight(cl, CHAN_OPERATOR))
 	{
 		this->sendMsg(cl, 1, ERR_CHANOPRIVSNEEDED(cl, ch));
 		return ;
@@ -529,8 +510,6 @@ void Server::INVITE(Client *cl, Message msg)
 
 void Server::TOPIC(Client *cl, Message msg)
 {
-	std::cout << "TOPIC from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 
 	if (msg.getParameters().size() == 0)
 	{
@@ -569,8 +548,6 @@ void Server::TOPIC(Client *cl, Message msg)
 
 void Server::PART(Client *cl, Message msg)
 {
-	std::cout << "PART from " << cl->getNickname() << std::endl;
-	std::cout << msg << std::endl;
 	Channel *ch;
 	std::string reason;
 	std::string name;

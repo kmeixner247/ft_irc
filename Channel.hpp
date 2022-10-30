@@ -20,8 +20,6 @@
 #define CHANMODE_NOMSGFROMOUTSIDE 512
 #define CHAN_OPERATOR 1
 #define CHAN_MODERATOR 2
-#define CHAN_BAN 4
-#define CHAN_INVITE 8
 
 class Client;
 

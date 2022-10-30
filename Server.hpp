@@ -41,7 +41,6 @@ public:
 	void serverloop();
 	void connectClient(int socket);
 	void disconnectClient(Client *cl);
-	// void interpretMessages(Client *cl, char *buffer);
 	void receiveMessage(Client *cl, char *buffer);
 	void interpretMessages(Client *cl, std::vector<Message> msgs);
 	void sendMsg(Client *cl, int argNum, std::string str, ...) const;
@@ -116,6 +115,7 @@ private:
 	// std::string RPL_CREATED(Client *cl);
 	// std::string RPL_MYINFO(Client *cl);
 	std::string RPL_UMODEIS(Client *cl);
+	std::string RPL_ENDOFWHO(Client *cl, std::string mask);
 	std::string RPL_CHANNELMODEIS(Client *cl, Channel *ch);
 	std::string RPL_NOTOPIC(Client *cl, Channel *ch);
 	std::string RPL_TOPIC(Client *cl, Channel *ch);

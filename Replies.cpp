@@ -146,6 +146,18 @@ std::string Server::RPL_UMODEIS(Client *cl)
 	return (msg);
 }
 
+std::string Server::RPL_ENDOFWHO(Client *cl, std::string mask)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 315 ";
+	msg += cl->getNickname() + " ";
+	msg += mask;
+	msg += " :End of WHO list";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_CHANNELMODEIS(Client *cl, Channel *ch)
 {
 	std::string msg;

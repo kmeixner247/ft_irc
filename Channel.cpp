@@ -332,7 +332,8 @@ void Channel::distributeMsg(std::string msg)
 {
 	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
 	{
-		std::cerr << "##############\nSENDING...\n" << msg << "...to " << it->second->getNickname()<<"\n##############" << std::endl;
+		// std::cerr << "##############\nSENDING...\n" << msg << "...to " << it->second->getNickname()<<"\n##############" << std::endl;
+		std::cerr << "send channel ===> " << it->second->getNickname() << "!" << this->getName() << " : " << msg << std::endl;
 		send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
 	}
 }
