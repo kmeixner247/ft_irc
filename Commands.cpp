@@ -296,6 +296,7 @@ void Server::PRIVMSG(Client *cl, Message msg)
 {
 	Client *toCl;
 	Channel *toCh;
+	std::string target;
 	std::string text;
 	
     // ERR_NOSUCHNICK (401)
@@ -307,14 +308,27 @@ void Server::PRIVMSG(Client *cl, Message msg)
     // ERR_NOTOPLEVEL (413)
     // ERR_WILDTOPLEVEL (414)
     // RPL_AWAY (301)
-
 	text = msg.getParameters().back();
 	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
 	{
+		target = msg.getParameters()[i];
 
-		if (msg.getParameters()[i][0] == '#')
+		if (target[0] == '#')
 		{
-			toCh = &this->_channels[msg.getParameters()[i]];
+			if (!this->_channels.count(target))
+			{
+				this->sendMsg(cl, 1, ERR_NOSUCHCHANNEL(cl, target));
+				continue ;
+			}
+			toCh = &this->_channels[target];
+			if (toCh->isBanned(makeNickMask(this, cl)) && !toCh->isOnExcept(makeNickMask(this, cl)))
+				continue ;
+			if ((!cl->ClientIsInChannel(toCh) && toCh->checkMode(CHANMODE_NOMSGFROMOUTSIDE)) || \
+				(toCh->checkMode(CHANMODE_MOD) && !toCh->checkClientRight(cl, CHAN_MODERATOR)))
+			{
+				this->sendMsg(cl, 1, ERR_CANNOTSENDTOCHAN(cl, toCh->getName()));
+				continue ;
+			}
 			std::map<std::string, Client*> temptest = toCh->getClients();
 			for (std::map<std::string, Client*>::iterator it = temptest.begin(); it != temptest.end(); it++)
 			{
@@ -327,7 +341,12 @@ void Server::PRIVMSG(Client *cl, Message msg)
 		}
 		else
 		{
-			toCl = this->_registeredclients[msg.getParameters()[i]];
+			if (!this->_registeredclients.count(target))
+			{
+				this->sendMsg(cl, 1, ERR_NOSUCHNICK(cl, target));
+				continue ;
+			}
+			toCl = this->_registeredclients[target];
 			this->sendMsg(toCl, 1, this->PRIVMSGREPLY(cl, toCl->getNickname(), text));
 		}
 	}
@@ -539,7 +558,7 @@ void Server::TOPIC(Client *cl, Message msg)
 	}
 	else
 	{
-		if (!ch->checkClientRight(cl, CHAN_OPERATOR))
+		if (ch->checkMode(CHANMODE_TOPIC) && !ch->checkClientRight(cl, CHAN_OPERATOR))
 			this->sendMsg(cl, 1, ERR_CHANOPRIVSNEEDED(cl, ch));
 		else
 		{
