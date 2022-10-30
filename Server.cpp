@@ -223,13 +223,6 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 	return (msgs);
 }
 
-std::string Server::makeNickMask(Client *cl)
-{
-	std::string prefix;
-	prefix += cl->getNickname() + "!" + cl->getUsername() + "@" + this->_host;
-	return (prefix);
-}
-
 void Server::removeClientFromChannel(Client *cl, Channel *ch)
 {
 	cl->removeChannel(ch);
@@ -411,4 +404,57 @@ int Server::getPort() const
 void Server::setPassword(std::string password)
 {
 	this->_password = password;
+}
+
+std::string makeNickMask(Server *sv, Client *cl)
+{
+	std::string prefix;
+	prefix += cl->getNickname() + "!" + cl->getUsername() + "@" + sv->getHost();
+	return (prefix);
+}
+
+bool matchMask(std::string mask, std::string str)
+{
+	if (mask == "")
+		return (false);
+	if (mask.find('*') == mask.npos)
+		return (!mask.compare(str));
+	std::vector<std::string> splits;
+	std::string temp = mask;
+	size_t pos;
+	do
+	{
+		pos = temp.find('*');
+		splits.push_back(temp.substr(0, pos));
+		if (splits.back() == "")
+			splits.pop_back();
+		temp = temp.substr(pos+1, temp.npos);
+	}
+	while (pos != temp.npos);
+	if (!splits.size())
+		return (true);
+	pos = 0;
+	if (mask.front() != '*')
+	{
+		pos = splits.front().size();
+		if (str.substr(0, pos).compare(splits.front()))
+			return (false);
+		str = str.substr(pos, str.npos);
+		splits.erase(splits.begin());
+	}
+	while (splits.size() > 1)
+	{
+		if ((pos = str.find(splits.front())) == std::string::npos)
+			return (false);
+		pos += splits.front().size();
+		str = str.substr(pos, str.npos);
+		splits.erase(splits.begin());
+	}
+	if ((splits.size() && (pos = str.rfind(splits.front())) == std::string::npos))
+		return (false);
+	if (splits.size())
+		pos += splits.front().size();
+	if (mask.back() == '*' || pos >= str.size())
+		return (true);
+	return (false);
 }

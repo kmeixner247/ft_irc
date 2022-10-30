@@ -1,6 +1,7 @@
 #pragma once
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
+#include "Server.hpp"
 #include "Client.hpp"
 #include <map>
 #include <string>
@@ -81,8 +82,8 @@ public:
 	void addToInviteList(std::string mask);
 	void removeFromInviteList(std::string mask);
 	bool isOnInviteList(std::string mask);
-	bool matchMask(std::string mask, std::string str);
 };
+// bool matchMask(std::string mask, std::string str);
 
 #endif
 

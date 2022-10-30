@@ -15,7 +15,8 @@
 #include "Message.hpp"
 #include "Responses.hpp"
 #include "Channel.hpp"
-
+class Client;
+class Channel;
 class Server
 {
 	typedef std::map<int, Client>::iterator	iterator;
@@ -77,7 +78,6 @@ private:
 	int init();
 	// std::vector<Message> parseMessages(char *input);
 	std::vector<Message> parseMessages(Client *cl, std::string input);
-	std::string makeNickMask(Client *cl);
 	void removeClientFromChannel(Client *cl, Channel *ch);
 	// commands
 	void PASS(Client *cl, Message msg);
@@ -124,6 +124,7 @@ private:
 	std::string RPL_EXCEPTLIST(Client *cl, Channel *ch);
 	std::string RPL_ENDOFEXCEPTLIST(Client *cl);
 	std::string RPL_INVITING(Client *cl, std::string nick, std::string channel);
+	std::string RPL_WHOREPLY(Client *cl, Client *target);
 	std::string RPL_NAMREPLY(Client *cl, Channel *ch);
 	std::string RPL_ENDOFNAMES(Client *cl, Channel *ch);
 	std::string RPL_BANLIST(Client *cl, Channel *ch);
@@ -177,5 +178,6 @@ private:
 	bool clientIsRegistered(Client *cl);
 
 };
-
+bool matchMask(std::string mask, std::string str);
+std::string makeNickMask(Server *sv, Client *cl);
 #endif

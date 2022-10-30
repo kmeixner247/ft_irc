@@ -359,7 +359,7 @@ bool Channel::isBanned(std::string mask)
 	for (std::vector<std::string>::iterator it = this->_banlist.begin(); it != this->_banlist.end(); it++)
 	{
 		std::cout << *it << std::endl;
-		if (this->matchMask(*it, mask))
+		if (matchMask(*it, mask))
 			return (true);
 	}
 	return (false);
@@ -381,7 +381,7 @@ bool Channel::isOnExcept(std::string mask)
 	for (std::vector<std::string>::iterator it = this->_exceptlist.begin(); it != this->_exceptlist.end(); it++)
 	{
 		// std::cerr << "checking against mask " << *it << std::endl;
-		if (this->matchMask(*it, mask))
+		if (matchMask(*it, mask))
 		{
 			// std::cerr << "yup" << std::endl;
 			return (true);
@@ -405,50 +405,5 @@ bool Channel::isOnInviteList(std::string mask)
 	for (std::vector<std::string>::iterator it = this->_exceptlist.begin(); it != this->_exceptlist.end(); it++)
 		if (!it->compare(mask))
 			return (true);
-	return (false);
-}
-bool Channel::matchMask(std::string mask, std::string str)
-{
-	if (mask == "")
-		return (false);
-	if (mask.find('*') == mask.npos)
-		return (!mask.compare(str));
-	std::vector<std::string> splits;
-	std::string temp = mask;
-	size_t pos;
-	do
-	{
-		pos = temp.find('*');
-		splits.push_back(temp.substr(0, pos));
-		if (splits.back() == "")
-			splits.pop_back();
-		temp = temp.substr(pos+1, temp.npos);
-	}
-	while (pos != temp.npos);
-	if (!splits.size())
-		return (true);
-	pos = 0;
-	if (mask.front() != '*')
-	{
-		pos = splits.front().size();
-		if (str.substr(0, pos).compare(splits.front()))
-			return (false);
-		str = str.substr(pos, str.npos);
-		splits.erase(splits.begin());
-	}
-	while (splits.size() > 1)
-	{
-		if ((pos = str.find(splits.front())) == std::string::npos)
-			return (false);
-		pos += splits.front().size();
-		str = str.substr(pos, str.npos);
-		splits.erase(splits.begin());
-	}
-	if ((splits.size() && (pos = str.rfind(splits.front())) == std::string::npos))
-		return (false);
-	if (splits.size())
-		pos += splits.front().size();
-	if (mask.back() == '*' || pos >= str.size())
-		return (true);
 	return (false);
 }

@@ -169,13 +169,13 @@ void Server::JOIN(Client *cl, Message msg)
 				continue ;
 			}
 			//ERR_INVITEONLYCHAN
-			if (ch->checkMode(CHANMODE_INVITE) && ch->isOnInviteList(this->makeNickMask(cl)))
+			if (ch->checkMode(CHANMODE_INVITE) && ch->isOnInviteList(makeNickMask(this, cl)))
 			{
 				this->sendMsg(cl, 1, ERR_INVITEONLYCHAN(cl, ch));
 				continue ;
 			}
 			//ERR_BANNED MCHAN
-			if (ch->isBanned(this->makeNickMask(cl)) && !ch->isOnExcept(this->makeNickMask(cl)))
+			if (ch->isBanned(makeNickMask(this, cl)) && !ch->isOnExcept(makeNickMask(this, cl)))
 			{
 				this->sendMsg(cl, 1, ERR_BANNEDFROMCHAN(cl, ch));
 				continue ;
@@ -220,6 +220,29 @@ void Server::WHO(Client *cl, Message msg)
 {
 	std::cout << "WHO from " << cl->getNickname() <<  std::endl;
 	std::cout << msg << std::endl;
+
+	if (!msg.getParameters().size())
+		return ;
+	std::string mask = msg.getParameters().front();
+	if (mask.front() == '#')
+	{
+		if (!this->_channels.count(mask))
+			return ;
+		Channel *ch = &this->_channels.at(mask);
+		std::map<std::string, Client*> clients = ch->getClients();
+		for (std::map<std::string, Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+			this->sendMsg(cl, 1, RPL_WHOREPLY(cl, it->second));
+	}
+	else if (this->_registeredclients.count(mask))
+		this->sendMsg(cl, 1, RPL_WHOREPLY(cl, this->_registeredclients.at(mask)));
+	else
+	{
+		for (std::map<std::string, Client*>::iterator it = this->_registeredclients.begin(); it != this->_registeredclients.end(); it++)
+		{
+			if (matchMask(mask, makeNickMask(this, cl)))
+				std::cerr << "asdf" << std::endl;	
+		}
+	}
 	// std::cout << "My nickname is " << cl->getNickname() << std::endl;
 	// std::cout << "My realname is " << cl->getRealname() << std::endl;
 	// std::cout << "My username is " << cl->getUsername() << std::endl;
