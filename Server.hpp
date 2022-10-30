@@ -81,6 +81,7 @@ private:
 	std::vector<Message> parseMessages(Client *cl, std::string input);
 	void removeClientFromChannel(Client *cl, Channel *ch);
 	// commands
+	void AWAY(Client *cl, Message msg);
 	void PASS(Client *cl, Message msg);
 	void USER(Client *cl, Message msg);
 	void NICK(Client *cl, Message msg);
@@ -118,6 +119,9 @@ private:
 	// std::string RPL_MYINFO(Client *cl);
 	std::string RPL_UMODEIS(Client *cl);
 	std::string RPL_ENDOFWHO(Client *cl, std::string mask);
+	std::string RPL_AWAY(Client *cl, Client *toCl);
+	std::string RPL_UNAWAY(Client *cl);
+	std::string RPL_NOWAWAY(Client *cl);
 	std::string RPL_CHANNELMODEIS(Client *cl, Channel *ch);
 	std::string RPL_NOTOPIC(Client *cl, Channel *ch);
 	std::string RPL_TOPIC(Client *cl, Channel *ch);

@@ -179,6 +179,16 @@ void Client::setBuffer(std::string buffer)
 	this->_buffer = buffer;
 }
 
+void Client::setAwayMsg(std::string msg)
+{
+	this->_awaymsg = msg;
+}
+
+std::string Client::getAwayMsg()
+{
+	return (this->_awaymsg);
+}
+
 void Client::addChannel(Channel *ch)
 {
 	this->_channel.insert(std::make_pair(ch->getName(), ch));

@@ -20,6 +20,21 @@ bool strIsASCII(const std::string& str)
 	return (true);
 }
 
+void Server::AWAY(Client *cl, Message msg)
+{
+	if (!msg.getParameters().size())
+	{
+		cl->removeMode(USERMODE_AWAY);
+		this->sendMsg(cl, 1, RPL_UNAWAY(cl));
+	}
+	else
+	{
+		cl->addMode(USERMODE_AWAY);
+		cl->setAwayMsg(msg.getParameters().front());
+		this->sendMsg(cl, 1, RPL_NOWAWAY(cl));
+	}
+}
+
 // commands
 void Server::PASS(Client *cl, Message msg)
 {
@@ -241,9 +256,6 @@ void Server::WHO(Client *cl, Message msg)
 		}
 	}
 	this->sendMsg(cl, 1, RPL_ENDOFWHO(cl, mask));
-	// std::cout << "My nickname is " << cl->getNickname() << std::endl;
-	// std::cout << "My realname is " << cl->getRealname() << std::endl;
-	// std::cout << "My username is " << cl->getUsername() << std::endl;
 } 
 
 void Server::KILL(Client *cl, Message msg)
@@ -266,8 +278,6 @@ void Server::KILL(Client *cl, Message msg)
 	}
 	Client *target = this->_registeredclients.at(msg.getParameters().front());
 	this->QUIT(target, msg);
-	// this->sendMsg(target, 1, QUITREPLY(target, msg.getParameters().back()));
-	// this->disconnectClient(target);
 }
 
 void Server::OPER(Client *cl, Message msg)
@@ -299,9 +309,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 	std::string target;
 	std::string text;
 	
-    // ERR_NOSUCHNICK (401)
-    // ERR_NOSUCHSERVER (402)
-    // ERR_CANNOTSENDTOCHAN (404)
     // ERR_TOOMANYTARGETS (407)
     // ERR_NORECIPIENT (411)
     // ERR_NOTEXTTOSEND (412)
@@ -323,11 +330,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 			toCh = &this->_channels[target];
 			if (toCh->isBanned(makeNickMask(this, cl)) && !toCh->isOnExcept(makeNickMask(this, cl)))
 				continue ;
-			std::cerr << std::boolalpha << !cl->ClientIsInChannel(toCh) << std::endl;
-			std::cerr << std::boolalpha << toCh->checkMode(CHANMODE_NOMSGFROMOUTSIDE) << std::endl;
-			std::cerr << std::boolalpha << toCh->checkMode(CHANMODE_MOD) << std::endl;
-			std::cerr << std::boolalpha << !toCh->checkClientRight(cl, CHAN_MODERATOR);
-
 			if (!cl->ClientIsInChannel(toCh) && toCh->checkMode(CHANMODE_NOMSGFROMOUTSIDE))
 			{
 				this->sendMsg(cl, 1, ERR_CANNOTSENDTOCHAN(cl, toCh->getName()));
@@ -351,6 +353,9 @@ void Server::PRIVMSG(Client *cl, Message msg)
 				continue ;
 			}
 			toCl = this->_registeredclients[target];
+			std::cerr << "AM I AWAY? " << std::boolalpha << toCl->checkMode(USERMODE_AWAY)<<std::endl;
+			if (toCl->checkMode(USERMODE_AWAY))
+				this->sendMsg(cl, 1, this->RPL_AWAY(cl, toCl));
 			this->sendMsg(toCl, 1, this->PRIVMSGREPLY(cl, toCl->getNickname(), text));
 		}
 	}
@@ -385,7 +390,6 @@ void Server::NOTICE(Client *cl, Message msg)
 					send(it->second->getSocket(), text.c_str(), text.size(), 0);
 				}
 			}
-			// this->sendMsg(toCh, 1, this->PRIVMSGREPLY(cl, toCh->getName(), text));
 		}
 		else
 		{
@@ -393,8 +397,6 @@ void Server::NOTICE(Client *cl, Message msg)
 			this->sendMsg(toCl, 1, this->NOTICEREPLY(cl, toCl->getNickname(), text));
 		}
 	}
-
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 void Server::KICK(Client *cl, Message msg)
