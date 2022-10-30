@@ -4,6 +4,8 @@
 #include <sys/select.h>
 #include <cstring>
 
+bool Server::s_active = true;
+
 Server::Server() : 
 _port(0), 
 _password(""), 
@@ -82,7 +84,7 @@ void Server::serverloop()
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
 	std::string temp;
-	while (42)
+	while (s_active)
 	{
 		// checking whether there's a new client trying to connect
 		// (make this a loop in case several try to connect at the same time?)

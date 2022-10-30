@@ -202,7 +202,10 @@ void Server::QUIT(Client *cl, Message msg)
 	{
 		if (it->second.getClients().count(cl->getNickname()))
 		{
-			this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
+			if (msg.getParameters().size())
+				this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
+			else
+				this->sendMsg(&it->second, 1, QUITREPLY(cl, ""));
 			this->removeClientFromChannel(cl, &it->second);
 			if (this->_channels.size() == 0)
 				break ;

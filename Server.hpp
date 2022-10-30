@@ -19,7 +19,7 @@ class Client;
 class Channel;
 class Server
 {
-	typedef std::map<int, Client>::iterator	iterator;
+typedef std::map<int, Client>::iterator	iterator;
 private:
 	int _port;
 	std::string _password;
@@ -36,6 +36,7 @@ private:
 	std::map<std::string, Channel> _channels;
 
 public:
+	static bool s_active;
 	Server(int port, std::string pw);
 	~Server();
 	void serverloop();
@@ -70,6 +71,7 @@ public:
 	int getServerfd() const;
 	void setServerfd(int fd);
 private:
+	void sigint_handler(int sig);
 	std::string msgMaker(int argNum, std::string, ...);
 	Server();
 	Server(const Server &rhs);

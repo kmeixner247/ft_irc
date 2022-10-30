@@ -1,6 +1,9 @@
 #include <iostream>
 #include "Server.hpp"
 #include <cstdlib>
+#include <signal.h>
+
+// bool s_active = true;
 
 int inputValidation(int argc, char **argv)
 {
@@ -26,11 +29,22 @@ int inputValidation(int argc, char **argv)
 	return (0);
 }
 
-int main(int argc, char **argv)
+void sigint_handler(int sig)
 {
+	std::cerr << "I AM GRACEFULLY SHUTTING DOWN BECAUSE I SAY SO" << std::endl;
+	std::cerr << "LOOK HOW GRACEFUL I AM" << std::endl;
+	if (sig == SIGINT)
+		Server::s_active = false;
+}
+
+int main(int argc, char **argv)
+{	
+	signal(SIGINT, sigint_handler);
+
 	if (inputValidation(argc, argv) < 0)
 		return (1);
 	Server test(std::atoi(argv[1]), std::string(argv[2]));
+	
 
 	test.serverloop();
 }
