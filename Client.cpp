@@ -165,7 +165,10 @@ void Client::setRealname(std::string realname)
 {
 	this->_realname = realname;
 }
-
+std::map<std::string, Channel*> Client::getChannels()
+{
+	return (this->_channel);
+}
 void Client::setSocket(int socket)
 {
 	this->_socket = socket;

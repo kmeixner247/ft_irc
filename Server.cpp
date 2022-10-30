@@ -185,7 +185,8 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 		else
 			str = va_arg(args, const char*);
 	}
-		std::cerr << "##############\nSENDING...\n" << msg << "...to" << cl->getNickname()<<"\n##############" << std::endl;
+		// std::cerr << "##############\nSENDING...\n" << msg << "...to" << cl->getNickname()<<"\n##############" << std::endl;
+		std::cerr << "send user ===> " << cl->getNickname() << " : " << msg << std::endl;
 	send(cl->getSocket(), msg.c_str(), msg.length(), 0);
 }
 
@@ -223,13 +224,6 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 	return (msgs);
 }
 
-std::string Server::makeNickMask(Client *cl)
-{
-	std::string prefix;
-	prefix += cl->getNickname() + "!" + cl->getUsername() + "@" + this->_host;
-	return (prefix);
-}
-
 void Server::removeClientFromChannel(Client *cl, Channel *ch)
 {
 	cl->removeChannel(ch);
@@ -244,6 +238,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 	// std::vector<Message> msgs = parseMessages(buffer);
 	for (std::vector<Message>::iterator it = msgs.begin(); it != msgs.end(); it++)
 	{
+		std::cerr << "receive user <=== " << cl->getNickname() << " : " << *it << "\n" << std::endl;
 		//errors?
 		std::string command = it->getCommand();
 		if (!(command.compare("PASS")))
@@ -259,7 +254,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
 			else if (!(command.compare("OPER"))) this->OPER(cl, *it);
 			else if (!(command.compare("PRIVMSG"))) this->PRIVMSG(cl, *it);
-			else if (!(command.compare("WALLOPS"))) this->WALLOPS(cl, *it);
+			// else if (!(command.compare("WALLOPS"))) this->WALLOPS(cl, *it);
 			else if (!(command.compare("NOTICE"))) this->NOTICE(cl, *it);
 			else if (!(command.compare("KICK"))) this->KICK(cl, *it);
 			else if (!(command.compare("MODE"))) this->MODE(cl, *it);
@@ -268,7 +263,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("WHO"))) this->WHO(cl, *it);
 			else if (!(command.compare("PART"))) this->PART(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
-			else std::cout << "NONE OF THOSE1\n" << *it << std::endl;
+			else std::cout << "NONE OF THOSE:  " << *it << "\n" << std::endl;
 		}
 /* else if(!(this->clientIsRegistered(cl)))
 		{
@@ -411,4 +406,57 @@ int Server::getPort() const
 void Server::setPassword(std::string password)
 {
 	this->_password = password;
+}
+
+std::string makeNickMask(Server *sv, Client *cl)
+{
+	std::string prefix;
+	prefix += cl->getNickname() + "!" + cl->getUsername() + "@" + sv->getHost();
+	return (prefix);
+}
+
+bool matchMask(std::string mask, std::string str)
+{
+	if (mask == "")
+		return (false);
+	if (mask.find('*') == mask.npos)
+		return (!mask.compare(str));
+	std::vector<std::string> splits;
+	std::string temp = mask;
+	size_t pos;
+	do
+	{
+		pos = temp.find('*');
+		splits.push_back(temp.substr(0, pos));
+		if (splits.back() == "")
+			splits.pop_back();
+		temp = temp.substr(pos+1, temp.npos);
+	}
+	while (pos != temp.npos);
+	if (!splits.size())
+		return (true);
+	pos = 0;
+	if (mask.front() != '*')
+	{
+		pos = splits.front().size();
+		if (str.substr(0, pos).compare(splits.front()))
+			return (false);
+		str = str.substr(pos, str.npos);
+		splits.erase(splits.begin());
+	}
+	while (splits.size() > 1)
+	{
+		if ((pos = str.find(splits.front())) == std::string::npos)
+			return (false);
+		pos += splits.front().size();
+		str = str.substr(pos, str.npos);
+		splits.erase(splits.begin());
+	}
+	if ((splits.size() && (pos = str.rfind(splits.front())) == std::string::npos))
+		return (false);
+	if (splits.size())
+		pos += splits.front().size();
+	if (mask.back() == '*' || pos >= str.size())
+		return (true);
+	return (false);
 }
