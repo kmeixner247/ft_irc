@@ -72,7 +72,7 @@ void Server::disconnectClient(Client *cl)
 	this->_registeredclients.erase(cl->getNickname());
 	if (!this->_connectedclients.erase(cl->getSocket()))
 		throw "invalid socket disconnect";
-	close(cl->getSocket());
+	std::cerr << "CLOSE RETURN : "  << close(cl->getSocket()) << std::endl;
 }
 
 void Server::serverloop()
@@ -134,8 +134,7 @@ void Server::serverloop()
 		}
 	}
 	std::cerr << "Bye" << std::endl;
-	std::cerr << shutdown(this->_serverfd, SHUT_RDWR) << std::endl;
-	perror("asdf");
+	std::cerr << close(this->_serverfd) << std::endl;
 	// std::cerr << close(this->_serverfd) << std::endl;
 }
 
@@ -193,7 +192,6 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 		else
 			str = va_arg(args, const char*);
 	}
-		// std::cerr << "##############\nSENDING...\n" << msg << "...to" << cl->getNickname()<<"\n##############" << std::endl;
 		std::cerr << "send user ===> " << cl->getNickname() << " : " << msg << std::endl;
 	send(cl->getSocket(), msg.c_str(), msg.length(), 0);
 }
@@ -256,6 +254,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			if (!cl->checkMode(USERMODE_PASS))
 				return ;
 			if (!command.compare("USER")) this->USER(cl, *it);
+			else if (!command.compare("AWAY")) this->AWAY(cl, *it);
 			else if (!command.compare("NICK")) this->NICK(cl, *it);
 			else if (!(command.compare("QUIT"))) this->QUIT(cl, *it);
 			else if (!(command.compare("JOIN"))) this->JOIN(cl, *it);
@@ -380,7 +379,6 @@ std::map<std::string, Channel> Server::getChannels() const
 Channel *Server::addChannel(Channel ch)
 {
 	std::map<std::string, Channel>::iterator it = this->_channels.insert(std::make_pair(ch.getName(), ch)).first;
-	// return (this->_channels.insert(std::make_pair(ch.getName(), ch)));
 	return (&it->second);
 }
 void Server::setPasswordOper(std::string password)

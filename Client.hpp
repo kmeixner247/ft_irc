@@ -23,6 +23,7 @@ private:
 	int _usermodes;
 	std::map<std::string, Channel *> _channel;
 	std::string _buffer;
+	std::string _awaymsg;
 
 public:
 	Client();
@@ -46,8 +47,11 @@ public:
 	void setRealname(std::string realname);
 	void setSocket(int socket);
 	void setBuffer(std::string buffer);
+	void setAwayMsg(std::string msg);
+	std::string getAwayMsg();
 	void addChannel(Channel *ch);
 	size_t removeChannel(Channel *ch);
 	bool ClientIsInChannel(Channel *ch);
+
 };
 #endif

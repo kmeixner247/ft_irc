@@ -146,6 +146,40 @@ std::string Server::RPL_UMODEIS(Client *cl)
 	return (msg);
 }
 
+std::string Server::RPL_AWAY(Client *cl, Client *toCl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 301 ";
+	msg += cl->getNickname() + " ";
+	msg += toCl->getNickname() + " ";
+	msg += ":" + toCl->getAwayMsg();
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::RPL_UNAWAY(Client *cl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 305 ";
+	msg += cl->getNickname() + " ";
+  	msg += ":You are no longer marked as being away";
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::RPL_NOWAWAY(Client *cl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 306 ";
+	msg += cl->getNickname() + " ";
+  	msg += ":You have been marked as being away";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_ENDOFWHO(Client *cl, std::string mask)
 {
 	std::string msg;
