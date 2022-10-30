@@ -108,6 +108,7 @@ private:
 	std::string MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg);
 	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
 	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
+	std::string ERROR(Client *cl, std::string reason);
 	/* RESPONSES */
 	// std::string RPL_WELCOME(Client *cl);
 	// std::string RPL_YOURHOST(Client *cl);

@@ -201,14 +201,10 @@ void Server::QUIT(Client *cl, Message msg)
 {
 	std::cout << "QUIT" << std::endl;
 	std::cout << msg << std::endl;
-	std::cerr << this->_channels.size() << std::endl;
-	size_t i = 0;
 	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 	{
-		std::cerr << i << std::endl;
 		if (it->second.getClients().count(cl->getNickname()))
 		{
-			// it->second.getClients().erase(cl->getNickname());
 			this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
 			this->removeClientFromChannel(cl, &it->second);
 			if (this->_channels.size() == 0)
@@ -216,6 +212,7 @@ void Server::QUIT(Client *cl, Message msg)
 			it = this->_channels.begin();
 		}
 	}
+	this->sendMsg(cl, 1, this->ERROR(cl, "Quitting.."));
 	this->disconnectClient(cl);
 }
 

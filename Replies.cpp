@@ -106,6 +106,17 @@ std::string Server::KICKREPLY(Client *cl, Channel *ch, Client *target, std::stri
 	return (msg);
 }
 
+std::string Server::ERROR(Client *cl, std::string reason)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " ERROR ";
+	msg += cl->getNickname() + " ";
+	msg += reason;
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_UMODEIS(Client *cl)
 {
 	std::string msg;
