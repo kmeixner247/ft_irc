@@ -104,7 +104,7 @@ private:
 	std::string NOTICEREPLY(Client *from, std::string to, std::string text);
 	std::string QUITREPLY(Client *cl, std::string reason);
 	std::string PARTREPLY(Client *cl, std::string channel, std::string reason);
-	std::string MODEREPLY(Client *cl, std::string target, std::string modestr);
+	std::string MODEREPLY(Client *cl, std::string target, std::string modestr, std::vector<std::string> args);
 	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
 	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
 	/* RESPONSES */

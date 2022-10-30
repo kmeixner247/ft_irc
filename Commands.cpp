@@ -243,9 +243,9 @@ void Server::KILL(Client *cl, Message msg)
 		return ;
 	}
 	Client *target = this->_registeredclients.at(msg.getParameters().front());
-	this->sendMsg(target, 1, QUITREPLY(target, msg.getParameters().back()));
-	this->disconnectClient(target);
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	this->QUIT(target, msg);
+	// this->sendMsg(target, 1, QUITREPLY(target, msg.getParameters().back()));
+	// this->disconnectClient(target);
 }
 
 void Server::OPER(Client *cl, Message msg)
@@ -260,12 +260,13 @@ void Server::OPER(Client *cl, Message msg)
 		this->sendMsg(cl, 1, ERR_PASSWDMISMATCH(cl));
 		return ;
 	}
-	if (cl->getUsername().compare(msg.getParameters()[0]) == 0)
+	if (cl->getNickname().compare(msg.getParameters()[0]) == 0)
 	{
 		cl->addMode(USERMODE_OP);
 		this->sendMsg(cl, 1, RPL_YOUREOPER(cl).c_str());
 	}
-	
+	for (std::map<std::string, Client*>::iterator it = this->_registeredclients.begin(); it != this->_registeredclients.end(); it++)
+		this->sendMsg(it->second, 1, MODEREPLY(cl, cl->getNickname(), "+o", msg.getParameters()));
 	// MODE MSG NEEDED
 }
 
@@ -427,7 +428,7 @@ void Server::MODE(Client *cl, Message msg)
 		}
 		std::pair<std::string, bool> changedmodes = cl->changeModes(msg.getParameters()[1]);
 		if (changedmodes.first != "")
-			this->sendMsg(cl, 1, this->MODEREPLY(cl, cl->getNickname(), changedmodes.first));
+			this->sendMsg(cl, 1, this->MODEREPLY(cl, cl->getNickname(), changedmodes.first, msg.getParameters()));
 		if (changedmodes.second)
 			this->sendMsg(cl, 1, this->ERR_UMODEUNKNOWNFLAG(cl));
 	}
@@ -451,7 +452,7 @@ void Server::MODE(Client *cl, Message msg)
 		}
 		std::pair<std::string, bool> changedmodes = ch->changeModes(msg.getParameters());
 		if (changedmodes.first != "")
-			this->sendMsg(ch, 1, this->MODEREPLY(cl, ch->getName(), changedmodes.first));
+			this->sendMsg(ch, 1, this->MODEREPLY(cl, ch->getName(), changedmodes.first, msg.getParameters()));
 		if (changedmodes.second)
 			this->sendMsg(cl, 1, this->ERR_UMODEUNKNOWNFLAG(cl));
 	}
