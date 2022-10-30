@@ -247,6 +247,7 @@ void Channel::addClient(Client *cl)
 
 size_t Channel::removeClient(Client *cl)
 {
+	this->_clientRights.erase(cl->getNickname());
 	return(this->_clients.erase(cl->getNickname()));
 }
 
