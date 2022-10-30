@@ -106,6 +106,17 @@ std::string Server::KICKREPLY(Client *cl, Channel *ch, Client *target, std::stri
 	return (msg);
 }
 
+std::string Server::INVITEREPLY(Client *cl, Channel *ch, Client *from)
+{
+	std::string msg;
+	msg += ":" + makeNickMask(from);
+	msg += " INVITE ";
+	msg += cl->getNickname() + " ";
+	msg += ch->getName();
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::ERROR(Client *cl, std::string reason)
 {
 	std::string msg;
@@ -194,14 +205,24 @@ std::string Server::RPL_TOPIC(Client *cl, Channel *ch)
 //RPL_EXCEPTLIST 348
 //RPL_ENDOFEXCEPTLIST 349
 
+std::string Server::RPL_INVITING(Client *cl, std::string nick, std::string channel)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 341 ";
+	msg += cl->getNickname() + " ";
+	msg += nick + " ";
+	msg += channel + " ";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_NAMREPLY(Client *cl, Channel *ch)
 {
 	std::string msg;
 	msg += ":" + this->getServerName();
 	msg += " 353 ";
 	msg += cl->getNickname();
-	// if (ch->getPrivateChan())
-	// 	msg += " * ";
 	if (ch->checkMode(CHANMODE_SECRET))
 		msg += " @ ";
 	else
@@ -214,7 +235,6 @@ std::string Server::RPL_NAMREPLY(Client *cl, Channel *ch)
 
 std::string Server::RPL_ENDOFNAMES(Client *cl, Channel *ch)
 {
-//":<server> 366 <nick> #test :End of /NAMES list\r\n"			  //??
 	std::string msg;
 	msg += ":" + this->getServerName();
 	msg += " 366 ";

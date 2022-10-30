@@ -108,6 +108,7 @@ private:
 	std::string MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg);
 	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
 	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
+	std::string INVITEREPLY(Client *cl, Channel *ch, Client *target);
 	std::string ERROR(Client *cl, std::string reason);
 	/* RESPONSES */
 	// std::string RPL_WELCOME(Client *cl);
@@ -122,6 +123,7 @@ private:
 	std::string RPL_ENDOFINVITELIST(Client *cl);
 	std::string RPL_EXCEPTLIST(Client *cl, Channel *ch);
 	std::string RPL_ENDOFEXCEPTLIST(Client *cl);
+	std::string RPL_INVITING(Client *cl, std::string nick, std::string channel);
 	std::string RPL_NAMREPLY(Client *cl, Channel *ch);
 	std::string RPL_ENDOFNAMES(Client *cl, Channel *ch);
 	std::string RPL_BANLIST(Client *cl, Channel *ch);
@@ -145,6 +147,7 @@ private:
 	std::string ERR_NICKNAMEINUSE(Client *cl);
 	std::string ERR_USERNOTINCHANNEL(Client *cl, std::string nick, std::string channel);
 	std::string ERR_NOTONCHANNEL(Client *cl, std::string channel);
+	std::string ERR_USERONCHANNEL(Client *cl, Channel *ch, std::string target);
 	std::string ERR_NOSUCHCHANNEL(Client *cl, std::string channel);
 	std::string ERR_BADCHANNELKEY(Client *cl, Channel *ch);
 	std::string ERR_INVITEONLYCHAN(Client *cl, Channel *ch);
