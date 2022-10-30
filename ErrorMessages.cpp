@@ -36,6 +36,18 @@ std::string Server::ERR_NOSUCHCHANNEL(Client *cl, std::string channel)
 	return (msg);
 }
 
+std::string Server::ERR_CANNOTSENDTOCHAN(Client *cl, std::string target)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 404 ";
+	msg += cl->getNickname() + " ";
+	msg += target + " ";
+	msg += ": Cannot send to channel";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::ERR_TOOMANYTARGETS(Client *cl, std::string target)
 {
 	std::string msg;
@@ -47,6 +59,7 @@ std::string Server::ERR_TOOMANYTARGETS(Client *cl, std::string target)
 	msg += "\r\n";
 	return (msg);
 }
+
 
 std::string Server::ERR_NORECIPIENT(Client *cl, std::string command)
 {

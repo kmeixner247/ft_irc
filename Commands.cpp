@@ -307,7 +307,7 @@ void Server::PRIVMSG(Client *cl, Message msg)
 			if (toCh->isBanned(makeNickMask(cl)) && !toCh->isOnExcept(makeNickMask(cl)))
 				continue ;
 			if ((!cl->ClientIsInChannel(toCh) && toCh->checkMode(CHANMODE_NOMSGFROMOUTSIDE)) || \
-				toCh->checkMode(CHANMODE_MOD) && !toCh->checkClientRight(cl, CHAN_MODERATOR))
+				(toCh->checkMode(CHANMODE_MOD) && !toCh->checkClientRight(cl, CHAN_MODERATOR)))
 			{
 				this->sendMsg(cl, 1, ERR_CANNOTSENDTOCHAN(cl, toCh->getName()));
 				continue ;
@@ -520,7 +520,7 @@ void Server::TOPIC(Client *cl, Message msg)
 	}
 	else
 	{
-		if (!ch->checkClientRight(cl, CHAN_OPERATOR))
+		if (ch->checkMode(CHANMODE_TOPIC) && !ch->checkClientRight(cl, CHAN_OPERATOR))
 			this->sendMsg(cl, 1, ERR_CHANOPRIVSNEEDED(cl, ch));
 		else
 		{
