@@ -267,6 +267,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("TOPIC"))) this->TOPIC(cl, *it);
 			else if (!(command.compare("WHO"))) this->WHO(cl, *it);
 			else if (!(command.compare("PART"))) this->PART(cl, *it);
+			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
 			else std::cout << "NONE OF THOSE1\n" << *it << std::endl;
 		}
 /* else if(!(this->clientIsRegistered(cl)))

@@ -54,13 +54,30 @@ std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reaso
 	return (msg);
 }
 
-std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr)
+std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr, std::vector<std::string> args)
 {
 	std::string msg;
 	msg += makeClientPrefix(cl);
 	msg += " MODE ";
 	msg += target + " ";
 	msg += modestr;
+	std::vector<std::string>::iterator it = args.begin();
+	it++;
+	it++;
+	for (; it != args.end(); it++)
+		msg += " " + *it;
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg)
+{
+	std::string msg;
+	msg += makeClientPrefix(cl);
+	msg += " MODE ";
+	msg += target + " ";
+	msg += modestr;
+	msg += " " + arg;
 	msg += "\r\n";
 	return (msg);
 }
@@ -243,6 +260,3 @@ std::string Server::RPL_YOUREOPER(Client *cl)
 	msg += "\r\n";
 	return (msg);
 }
-	// this->sendResponse(cl, RPL_MOTDSTART);
-	// this->sendResponse(cl, RPL_MOTD);
-	// this->sendResponse(cl, RPL_ENDOFMOTD);

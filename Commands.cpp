@@ -201,13 +201,19 @@ void Server::QUIT(Client *cl, Message msg)
 {
 	std::cout << "QUIT" << std::endl;
 	std::cout << msg << std::endl;
-
+	std::cerr << this->_channels.size() << std::endl;
+	size_t i = 0;
 	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 	{
+		std::cerr << i << std::endl;
 		if (it->second.getClients().count(cl->getNickname()))
 		{
-			it->second.getClients().erase(cl->getNickname());
+			// it->second.getClients().erase(cl->getNickname());
 			this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
+			this->removeClientFromChannel(cl, &it->second);
+			if (this->_channels.size() == 0)
+				break ;
+			it = this->_channels.begin();
 		}
 	}
 	this->disconnectClient(cl);
@@ -227,7 +233,25 @@ void Server::KILL(Client *cl, Message msg)
 	std::cout << "KILL from " << cl->getNickname() << std::endl;
 	std::cout << msg << std::endl;
 	
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
+	if (msg.getParameters().size() < 2)
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "KILL"));
+		return ;
+	}
+	if (!cl->checkMode(USERMODE_OP))
+	{
+		this->sendMsg(cl, 1, ERR_NOPRIVILEGES(cl));
+		return ;
+	}
+	if (!this->_registeredclients.count(msg.getParameters().front()))
+	{
+		this->sendMsg(cl, 1, ERR_NOSUCHNICK(cl, msg.getParameters().front()));
+		return ;
+	}
+	Client *target = this->_registeredclients.at(msg.getParameters().front());
+	this->QUIT(target, msg);
+	// this->sendMsg(target, 1, QUITREPLY(target, msg.getParameters().back()));
+	// this->disconnectClient(target);
 }
 
 void Server::OPER(Client *cl, Message msg)
@@ -242,12 +266,13 @@ void Server::OPER(Client *cl, Message msg)
 		this->sendMsg(cl, 1, ERR_PASSWDMISMATCH(cl));
 		return ;
 	}
-	if (cl->getUsername().compare(msg.getParameters()[0]) == 0)
+	if (cl->getNickname().compare(msg.getParameters()[0]) == 0)
 	{
 		cl->addMode(USERMODE_OP);
 		this->sendMsg(cl, 1, RPL_YOUREOPER(cl).c_str());
+		for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+			this->sendMsg(&it->second, 1, MODEREPLY(cl, it->second.getName(), "+o", cl->getNickname()));
 	}
-	
 	// MODE MSG NEEDED
 }
 
@@ -285,7 +310,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 					send(it->second->getSocket(), text.c_str(), text.size(), 0);
 				}
 			}
-			// this->sendMsg(toCh, 1, this->PRIVMSGREPLY(cl, toCh->getName(), text));
 		}
 		else
 		{
@@ -293,8 +317,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 			this->sendMsg(toCl, 1, this->PRIVMSGREPLY(cl, toCl->getNickname(), text));
 		}
 	}
-
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 
@@ -409,7 +431,7 @@ void Server::MODE(Client *cl, Message msg)
 		}
 		std::pair<std::string, bool> changedmodes = cl->changeModes(msg.getParameters()[1]);
 		if (changedmodes.first != "")
-			this->sendMsg(cl, 1, this->MODEREPLY(cl, cl->getNickname(), changedmodes.first));
+			this->sendMsg(cl, 1, this->MODEREPLY(cl, cl->getNickname(), changedmodes.first, msg.getParameters()));
 		if (changedmodes.second)
 			this->sendMsg(cl, 1, this->ERR_UMODEUNKNOWNFLAG(cl));
 	}
@@ -433,7 +455,7 @@ void Server::MODE(Client *cl, Message msg)
 		}
 		std::pair<std::string, bool> changedmodes = ch->changeModes(msg.getParameters());
 		if (changedmodes.first != "")
-			this->sendMsg(ch, 1, this->MODEREPLY(cl, ch->getName(), changedmodes.first));
+			this->sendMsg(ch, 1, this->MODEREPLY(cl, ch->getName(), changedmodes.first, msg.getParameters()));
 		if (changedmodes.second)
 			this->sendMsg(cl, 1, this->ERR_UMODEUNKNOWNFLAG(cl));
 	}

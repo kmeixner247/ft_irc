@@ -234,6 +234,17 @@ std::string Server::ERR_BADCHANNELKEY(Client *cl, Channel *ch)
 	return (msg);
 }
 
+std::string Server::ERR_NOPRIVILEGES(Client *cl)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 481 ";
+	msg += cl->getNickname() + " ";
+	msg += ":Permission Denied- You're not an IRC operator";
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::ERR_CHANOPRIVSNEEDED(Client *cl, Channel *ch)
 {
 	std::string msg;

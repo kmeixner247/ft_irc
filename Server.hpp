@@ -104,7 +104,8 @@ private:
 	std::string NOTICEREPLY(Client *from, std::string to, std::string text);
 	std::string QUITREPLY(Client *cl, std::string reason);
 	std::string PARTREPLY(Client *cl, std::string channel, std::string reason);
-	std::string MODEREPLY(Client *cl, std::string target, std::string modestr);
+	std::string MODEREPLY(Client *cl, std::string target, std::string modestr, std::vector<std::string> args);
+	std::string MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg);
 	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
 	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
 	/* RESPONSES */
@@ -157,15 +158,15 @@ private:
 	std::string ERR_NOTOPLEVEL(Client *cl, std::string mask);
 	std::string ERR_WILDTOPLEVEL(Client *cl, std::string mask);
 	std::string ERR_PASSWDMISMATCH(Client *cl);
+	std::string ERR_NOPRIVILEGES(Client *cl);
 	std::string ERR_CHANOPRIVSNEEDED(Client *cl, Channel *ch);
 	std::string ERR_UMODEUNKNOWNFLAG(Client *cl);
 	std::string ERR_USERSDONTMATCH(Client *cl, std::string nick);
 
 
-
-	void sendWelcome(Client *cl);
-	std::string replace_thingies(std::string msg, Client *cl);
-	std::string replace_thingies(std::string msg, Client *cl, Channel *ch);
+	// void sendWelcome(Client *cl);
+	// std::string replace_thingies(std::string msg, Client *cl);
+	// std::string replace_thingies(std::string msg, Client *cl, Channel *ch);
 	void sendResponse(Client *cl, std::string msg);
 	void sendResponse(Client *cl, Channel *ch, std::string msg);
 	bool clientIsConnected(Client *cl);
