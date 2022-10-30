@@ -15,7 +15,8 @@
 #include "Message.hpp"
 #include "Responses.hpp"
 #include "Channel.hpp"
-
+class Client;
+class Channel;
 class Server
 {
 	typedef std::map<int, Client>::iterator	iterator;
@@ -40,7 +41,6 @@ public:
 	void serverloop();
 	void connectClient(int socket);
 	void disconnectClient(Client *cl);
-	// void interpretMessages(Client *cl, char *buffer);
 	void receiveMessage(Client *cl, char *buffer);
 	void interpretMessages(Client *cl, std::vector<Message> msgs);
 	void sendMsg(Client *cl, int argNum, std::string str, ...) const;
@@ -77,7 +77,6 @@ private:
 	int init();
 	// std::vector<Message> parseMessages(char *input);
 	std::vector<Message> parseMessages(Client *cl, std::string input);
-	std::string makeNickMask(Client *cl);
 	void removeClientFromChannel(Client *cl, Channel *ch);
 	// commands
 	void PASS(Client *cl, Message msg);
@@ -108,6 +107,7 @@ private:
 	std::string MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg);
 	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
 	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
+	std::string INVITEREPLY(Client *cl, Channel *ch, Client *target);
 	std::string ERROR(Client *cl, std::string reason);
 	/* RESPONSES */
 	// std::string RPL_WELCOME(Client *cl);
@@ -115,6 +115,7 @@ private:
 	// std::string RPL_CREATED(Client *cl);
 	// std::string RPL_MYINFO(Client *cl);
 	std::string RPL_UMODEIS(Client *cl);
+	std::string RPL_ENDOFWHO(Client *cl, std::string mask);
 	std::string RPL_CHANNELMODEIS(Client *cl, Channel *ch);
 	std::string RPL_NOTOPIC(Client *cl, Channel *ch);
 	std::string RPL_TOPIC(Client *cl, Channel *ch);
@@ -122,6 +123,8 @@ private:
 	std::string RPL_ENDOFINVITELIST(Client *cl);
 	std::string RPL_EXCEPTLIST(Client *cl, Channel *ch);
 	std::string RPL_ENDOFEXCEPTLIST(Client *cl);
+	std::string RPL_INVITING(Client *cl, std::string nick, std::string channel);
+	std::string RPL_WHOREPLY(Client *cl, Client *target);
 	std::string RPL_NAMREPLY(Client *cl, Channel *ch);
 	std::string RPL_ENDOFNAMES(Client *cl, Channel *ch);
 	std::string RPL_BANLIST(Client *cl, Channel *ch);
@@ -145,6 +148,7 @@ private:
 	std::string ERR_NICKNAMEINUSE(Client *cl);
 	std::string ERR_USERNOTINCHANNEL(Client *cl, std::string nick, std::string channel);
 	std::string ERR_NOTONCHANNEL(Client *cl, std::string channel);
+	std::string ERR_USERONCHANNEL(Client *cl, Channel *ch, std::string target);
 	std::string ERR_NOSUCHCHANNEL(Client *cl, std::string channel);
 	std::string ERR_BADCHANNELKEY(Client *cl, Channel *ch);
 	std::string ERR_INVITEONLYCHAN(Client *cl, Channel *ch);
@@ -174,5 +178,6 @@ private:
 	bool clientIsRegistered(Client *cl);
 
 };
-
+bool matchMask(std::string mask, std::string str);
+std::string makeNickMask(Server *sv, Client *cl);
 #endif

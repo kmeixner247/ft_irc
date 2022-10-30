@@ -1,6 +1,7 @@
 #pragma once
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
+#include "Server.hpp"
 #include "Client.hpp"
 #include <map>
 #include <string>
@@ -19,8 +20,6 @@
 #define CHANMODE_NOMSGFROMOUTSIDE 512
 #define CHAN_OPERATOR 1
 #define CHAN_MODERATOR 2
-#define CHAN_BAN 4
-#define CHAN_INVITE 8
 
 class Client;
 
@@ -81,8 +80,8 @@ public:
 	void addToInviteList(std::string mask);
 	void removeFromInviteList(std::string mask);
 	bool isOnInviteList(std::string mask);
-	bool matchMask(std::string mask, std::string str);
 };
+// bool matchMask(std::string mask, std::string str);
 
 #endif
 

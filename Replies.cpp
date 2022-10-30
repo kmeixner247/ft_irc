@@ -3,7 +3,7 @@ std::string Server::JOINREPLY(Client *cl, Channel *ch)
 {
 	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
 	std::string msg;
-	msg +=  ":" +this->makeNickMask(cl);
+	msg +=  ":" + makeNickMask(this, cl);
 	msg += " JOIN :";
 	msg += ch->getName();
 	msg += "\r\n";
@@ -13,7 +13,7 @@ std::string Server::JOINREPLY(Client *cl, Channel *ch)
 std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
 {
 	std::string msg;
-	msg += ":" + this->makeNickMask(from);
+	msg += ":" + makeNickMask(this, from);
 	msg += " PRIVMSG ";
 	msg += to + " :";
 	msg += text;
@@ -24,7 +24,7 @@ std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
 std::string Server::NOTICEREPLY(Client *from, std::string to, std::string text)
 {
 	std::string msg;
-	msg += ":" + this->makeNickMask(from);
+	msg += ":" + makeNickMask(this, from);
 	msg += " NOTICE ";
 	msg += to + " :";
 	msg += text;
@@ -35,7 +35,7 @@ std::string Server::NOTICEREPLY(Client *from, std::string to, std::string text)
 std::string Server::QUITREPLY(Client *cl, std::string reason)
 {
 	std::string msg;
-	msg += ":" + this->makeNickMask(cl);
+	msg += ":" + makeNickMask(this, cl);
 	msg += " QUIT ";
 	msg += ":" + reason;
 	msg += "\r\n";
@@ -45,7 +45,7 @@ std::string Server::QUITREPLY(Client *cl, std::string reason)
 std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reason)
 {
 	std::string msg;
-	msg += ":" + this->makeNickMask(cl);
+	msg += ":" + makeNickMask(this, cl);
 	msg += " PART ";
 	msg += channel;
 	if (reason != "")
@@ -57,7 +57,7 @@ std::string Server::PARTREPLY(Client *cl, std::string channel, std::string reaso
 std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr, std::vector<std::string> args)
 {
 	std::string msg;
-	msg += ":" + this->makeNickMask(cl);
+	msg += ":" + makeNickMask(this, cl);
 	msg += " MODE ";
 	msg += target + " ";
 	msg += modestr;
@@ -73,7 +73,7 @@ std::string Server::MODEREPLY(Client *cl, std::string target, std::string modest
 std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg)
 {
 	std::string msg;
-	msg += ":" + this->makeNickMask(cl);
+	msg += ":" + makeNickMask(this, cl);
 	msg += " MODE ";
 	msg += target + " ";
 	msg += modestr;
@@ -85,7 +85,7 @@ std::string Server::MODEREPLY(Client *cl, std::string target, std::string modest
 std::string Server::TOPICREPLY(Client *cl, Channel *ch, std::string topic)
 {
 	std::string msg;
-	msg += ":" + makeNickMask(cl);
+	msg += ":" + makeNickMask(this, cl);
 	msg += " TOPIC ";
 	msg += ch->getName() + " ";
 	msg += topic;
@@ -96,12 +96,23 @@ std::string Server::TOPICREPLY(Client *cl, Channel *ch, std::string topic)
 std::string Server::KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment)
 {
 	std::string msg;
-	msg += ":" + makeNickMask(cl);
+	msg += ":" + makeNickMask(this, cl);
 	msg += " KICK ";
 	msg += ch->getName() + " ";
 	msg += target->getNickname() + " ";
 	if (comment != "")
 		msg += ":" + comment;
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::INVITEREPLY(Client *cl, Channel *ch, Client *from)
+{
+	std::string msg;
+	msg += ":" + makeNickMask(this, from);
+	msg += " INVITE ";
+	msg += cl->getNickname() + " ";
+	msg += ch->getName();
 	msg += "\r\n";
 	return (msg);
 }
@@ -131,6 +142,18 @@ std::string Server::RPL_UMODEIS(Client *cl)
 		msg += "w";	
 	if (cl->checkMode(USERMODE_OP))
 		msg += "o";
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::RPL_ENDOFWHO(Client *cl, std::string mask)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 315 ";
+	msg += cl->getNickname() + " ";
+	msg += mask;
+	msg += " :End of WHO list";
 	msg += "\r\n";
 	return (msg);
 }
@@ -194,14 +217,49 @@ std::string Server::RPL_TOPIC(Client *cl, Channel *ch)
 //RPL_EXCEPTLIST 348
 //RPL_ENDOFEXCEPTLIST 349
 
+std::string Server::RPL_INVITING(Client *cl, std::string nick, std::string channel)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 341 ";
+	msg += cl->getNickname() + " ";
+	msg += nick + " ";
+	msg += channel + " ";
+	msg += "\r\n";
+	return (msg);
+}
+//   "<client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
+std::string Server::RPL_WHOREPLY(Client *cl, Client *target)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 352 ";
+	msg += cl->getNickname() + " ";
+	if (!target->getChannels().size())
+		msg += "*";
+	else
+		msg += target->getChannels().begin()->second->getName();
+	msg += " " + target->getUsername() + " ";
+	msg += this->_host + " ";
+	msg += target->getNickname() + " ";
+	if (target->checkMode(USERMODE_AWAY))
+		msg += "G";
+	else
+		msg += "H";
+	if (target->checkMode(USERMODE_OP))
+		msg += "*";
+	msg += " :0 ";
+	msg += target->getRealname();
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::RPL_NAMREPLY(Client *cl, Channel *ch)
 {
 	std::string msg;
 	msg += ":" + this->getServerName();
 	msg += " 353 ";
 	msg += cl->getNickname();
-	// if (ch->getPrivateChan())
-	// 	msg += " * ";
 	if (ch->checkMode(CHANMODE_SECRET))
 		msg += " @ ";
 	else
@@ -214,7 +272,6 @@ std::string Server::RPL_NAMREPLY(Client *cl, Channel *ch)
 
 std::string Server::RPL_ENDOFNAMES(Client *cl, Channel *ch)
 {
-//":<server> 366 <nick> #test :End of /NAMES list\r\n"			  //??
 	std::string msg;
 	msg += ":" + this->getServerName();
 	msg += " 366 ";

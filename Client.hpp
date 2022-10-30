@@ -11,6 +11,7 @@
 #define USERMODE_SERVERNOTICE 4
 #define USERMODE_WALLOPRECEIVER 8
 #define USERMODE_OP 16
+#define USERMODE_AWAY 32
 class Channel;
 class Client
 {
@@ -32,6 +33,7 @@ public:
 	std::string getNickname();
 	std::string getUsername();
 	std::string getRealname();
+	std::map<std::string, Channel*> getChannels();
 	bool addMode(int mode);
 	bool checkMode(int mode);
 	bool removeMode(int mode);

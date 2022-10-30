@@ -164,6 +164,18 @@ std::string Server::ERR_NOTONCHANNEL(Client *cl, std::string channel)
 	msg += "\r\n";
 	return (msg);
 }
+std::string Server::ERR_USERONCHANNEL(Client *cl, Channel *ch, std::string target) 
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " 443 ";
+	msg += cl->getNickname() + " ";
+	msg += target + " ";
+	msg += ch->getName() + " ";
+	msg += ":is already on channel";
+	msg += "\r\n";
+	return (msg);
+}
 
 std::string Server::ERR_NEEDMOREPARAMS(Client *cl, std::string command)
 {
