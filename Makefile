@@ -15,12 +15,13 @@ $(NAME):	$(SRCS)
 
 run:		
 			make re
-			./server 6969 test
+			./server 6969 12345
 
 clean:		
 			$(RM) -f $(NAME)
 
 fclean:		clean
+			$(RM) -rf $(NAME).dSYM
 
 re:			fclean all
 

@@ -1,10 +1,12 @@
 #pragma once
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
-#include <map>
 #include "Client.hpp"
+#include <map>
 #include <string>
 #include <utility>
+#include <sys/socket.h>
+#include <iostream>
 #define CHANMODE_BAN 1
 #define CHANMODE_EXCEPT 2
 #define CHANMODE_LIMIT 4
@@ -19,7 +21,6 @@
 #define CHAN_MODERATOR 2
 #define CHAN_BAN 4
 #define CHAN_INVITE 8
-#include <sys/socket.h>
 
 class Client;
 
@@ -56,18 +57,8 @@ public:
 	size_t removeClient(Client *cl);
 	Client *getClient(std::string name);
 	void setClient(std::string name, Client *client);
-	void setPrivateChan(bool);
-	bool getPrivateChan() const;
-	void setSecretChan(bool);
-	bool getSecretChan() const;
-	void setInviteOnly(bool);
-	bool getInviteOnly() const;
 	void setTopic(std::string);
 	std::string getTopic() const;
-	void setNoMsgFromOutside(bool);
-	bool getNoMsgFromOutside() const;
-	void setModeratedChan(bool);
-	bool getModeratedChan() const;
 	void setLimit(int);
 	size_t getLimit() const;
 	void setKey(std::string);
@@ -83,10 +74,14 @@ public:
 	bool ChannelHasClient(Client* cl);
 	void addToBanList(std::string mask);
 	void removeFromBanList(std::string mask);
+	bool isBanned(std::string mask);
 	void addToExceptList(std::string mask);
+	bool isOnExcept(std::string mask);
 	void removeFromExceptList(std::string mask);
 	void addToInviteList(std::string mask);
 	void removeFromInviteList(std::string mask);
+	bool isOnInviteList(std::string mask);
+	bool matchMask(std::string mask, std::string str);
 };
 
 #endif
