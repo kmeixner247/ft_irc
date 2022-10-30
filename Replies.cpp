@@ -70,6 +70,18 @@ std::string Server::MODEREPLY(Client *cl, std::string target, std::string modest
 	return (msg);
 }
 
+std::string Server::MODEREPLY(Client *cl, std::string target, std::string modestr, std::string arg)
+{
+	std::string msg;
+	msg += makeClientPrefix(cl);
+	msg += " MODE ";
+	msg += target + " ";
+	msg += modestr;
+	msg += " " + arg;
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::TOPICREPLY(Client *cl, Channel *ch, std::string topic)
 {
 	std::string msg;

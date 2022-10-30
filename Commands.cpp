@@ -201,13 +201,19 @@ void Server::QUIT(Client *cl, Message msg)
 {
 	std::cout << "QUIT" << std::endl;
 	std::cout << msg << std::endl;
-
+	std::cerr << this->_channels.size() << std::endl;
+	size_t i = 0;
 	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 	{
+		std::cerr << i << std::endl;
 		if (it->second.getClients().count(cl->getNickname()))
 		{
-			it->second.getClients().erase(cl->getNickname());
+			// it->second.getClients().erase(cl->getNickname());
 			this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
+			this->removeClientFromChannel(cl, &it->second);
+			if (this->_channels.size() == 0)
+				break ;
+			it = this->_channels.begin();
 		}
 	}
 	this->disconnectClient(cl);
@@ -264,9 +270,9 @@ void Server::OPER(Client *cl, Message msg)
 	{
 		cl->addMode(USERMODE_OP);
 		this->sendMsg(cl, 1, RPL_YOUREOPER(cl).c_str());
+		for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+			this->sendMsg(&it->second, 1, MODEREPLY(cl, it->second.getName(), "+o", cl->getNickname()));
 	}
-	for (std::map<std::string, Client*>::iterator it = this->_registeredclients.begin(); it != this->_registeredclients.end(); it++)
-		this->sendMsg(it->second, 1, MODEREPLY(cl, cl->getNickname(), "+o", msg.getParameters()));
 	// MODE MSG NEEDED
 }
 
@@ -304,7 +310,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 					send(it->second->getSocket(), text.c_str(), text.size(), 0);
 				}
 			}
-			// this->sendMsg(toCh, 1, this->PRIVMSGREPLY(cl, toCh->getName(), text));
 		}
 		else
 		{
@@ -312,8 +317,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 			this->sendMsg(toCl, 1, this->PRIVMSGREPLY(cl, toCl->getNickname(), text));
 		}
 	}
-
-	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
 }
 
 
