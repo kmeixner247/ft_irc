@@ -318,7 +318,7 @@ void Server::PRIVMSG(Client *cl, Message msg)
 				continue ;
 			}
 			toCh = &this->_channels[target];
-			if (toCh->isBanned(makeNickMask(cl)) && !toCh->isOnExcept(makeNickMask(cl)))
+			if (toCh->isBanned(makeNickMask(this, cl)) && !toCh->isOnExcept(makeNickMask(this, cl)))
 				continue ;
 			if ((!cl->ClientIsInChannel(toCh) && toCh->checkMode(CHANMODE_NOMSGFROMOUTSIDE)) || \
 				(toCh->checkMode(CHANMODE_MOD) && !toCh->checkClientRight(cl, CHAN_MODERATOR)))
