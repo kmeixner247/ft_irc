@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <sys/select.h>
+#include <unistd.h>
 #include <cstring>
 
 bool Server::s_active = true;
@@ -71,6 +72,7 @@ void Server::disconnectClient(Client *cl)
 	this->_registeredclients.erase(cl->getNickname());
 	if (!this->_connectedclients.erase(cl->getSocket()))
 		throw "invalid socket disconnect";
+	close(cl->getSocket());
 }
 
 void Server::serverloop()
@@ -112,7 +114,7 @@ void Server::serverloop()
 					if (FD_ISSET(it->first, &readfds))
 					{
 						FD_CLR(it->first, &readfds);
-						if (!recv(it->first, buffer, 1024, 0))
+						if (!recv(it->first, buffer, 1023, 0))
 						{
 							this->disconnectClient(&it->second);
 						}
@@ -131,6 +133,10 @@ void Server::serverloop()
 			}
 		}
 	}
+	std::cerr << "Bye" << std::endl;
+	std::cerr << shutdown(this->_serverfd, SHUT_RDWR) << std::endl;
+	perror("asdf");
+	// std::cerr << close(this->_serverfd) << std::endl;
 }
 
 int Server::init()
