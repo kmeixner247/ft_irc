@@ -37,7 +37,7 @@ Server::Server(const Server &rhs)
 	*this = rhs;
 }
 
-Server::Server(int port, std::string pw) : 
+Server::Server(int port, std::string pw, BehaviourBot *bot) : 
 _port(port), 
 _password(pw), 
 _serverfd(0),
@@ -45,10 +45,13 @@ _host("127.0.0.1"),
 _servername("awesomeserverofawesomeness"), 
 _version("69.69"), 
 _motd("kacper smells"),
-_passwordOper("42069")
+_passwordOper("42069"),
+_karen(bot)
 {
 	if (this->init())
 		throw "something went wrong in init";
+	this->_bots.insert(std::make_pair("behaviourbot", *this->_karen->getBotClient()));
+	this->_registeredclients.insert(std::make_pair("behaviourbot", this->_karen->getBotClient()));
 }
 
 Server::~Server()
@@ -117,9 +120,7 @@ void Server::serverloop()
 				{
 					FD_CLR(it->first, &readfds);
 					if (!recv(it->first, buffer, 1023, 0))
-					{
 						this->disconnectClient(&it->second);
-					}
 					else
 						this->receiveMessage(&it->second, buffer);
 					memset(buffer, 0, 1024);
@@ -279,6 +280,11 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("PART"))) this->PART(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
 			else if (!(command.compare("DIE"))) this->DIE(cl);
+			else if (!(command.compare("ADDBAD"))) this->ADDBAD(cl, *it);
+			else if (!(command.compare("RMBAD"))) this->RMBAD(cl, *it);
+			else if (!(command.compare("ADDGOOD"))) this->ADDGOOD(cl, *it);
+			else if (!(command.compare("RMGOOD"))) this->RMGOOD(cl, *it);
+			else if (!(command.compare("BHVLIST"))) this->BHVLIST(cl);
 			else std::cout << "NONE OF THOSE:  " << *it << "\n" << std::endl;
 		}
 	}

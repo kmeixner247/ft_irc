@@ -43,7 +43,9 @@ int main(int argc, char **argv)
 
 	if (inputValidation(argc, argv) < 0)
 		return (1);
-	Server test(std::atoi(argv[1]), std::string(argv[2]));
+	Client botcl;
+	BehaviourBot karen(&botcl);
+	Server test(std::atoi(argv[1]), std::string(argv[2]), &karen);
 	
 
 	test.serverloop();

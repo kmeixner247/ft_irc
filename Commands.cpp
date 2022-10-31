@@ -164,6 +164,7 @@ void Server::JOIN(Client *cl, Message msg)
 			newChan.setName(it->first);
 			newChan.setKey(it->second);
 			ch = this->addChannel(newChan);
+			ch->addClient(&this->_bots.begin()->second);
 			ch->addClient(cl);
 			ch->addClientRight(cl, CHAN_OPERATOR);
 			cl->addChannel(ch);
@@ -313,11 +314,11 @@ void Server::PRIVMSG(Client *cl, Message msg)
     // ERR_NOTOPLEVEL (413)
     // ERR_WILDTOPLEVEL (414)
     // RPL_AWAY (301)
-	text = msg.getParameters().back();
 	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
 	{
 		target = msg.getParameters()[i];
-
+		if (this->_bots.count(target))
+			continue;
 		if (target[0] == '#')
 		{
 			if (!this->_channels.count(target))
@@ -336,22 +337,32 @@ void Server::PRIVMSG(Client *cl, Message msg)
 			std::map<std::string, Client*> temptest = toCh->getClients();
 			for (std::map<std::string, Client*>::iterator it = temptest.begin(); it != temptest.end(); it++)
 			{
+				text = msg.getParameters().back();
 				if (it->second->getNickname() != cl->getNickname())
 				{
 					text = this->PRIVMSGREPLY(cl, toCh->getName(), text);
+					std::cerr << "send channel ===> " << it->second->getNickname() << "!" << toCh->getName() << " : " << text << std::endl;
 					send(it->second->getSocket(), text.c_str(), text.size(), 0);
+				}
+			}
+			if (toCh->ChannelHasClient(&this->_bots.at("behaviourbot")))
+			{
+				if (this->_karen->checkBehaviour(text))
+				{
+					this->sendMsg(toCh, 1, KICKREPLY(&this->_bots["behaviourbot"], toCh, cl, "I'M A CHATMAN Bi-Ba-Ba-Ba-Ba-Bob https://www.youtube.com/watch?v=Hy8kmNEo1i8"));
+					this->removeClientFromChannel(cl, toCh);
 				}
 			}
 		}
 		else
 		{
+			text = msg.getParameters().back();
 			if (!this->_registeredclients.count(target))
 			{
 				this->sendMsg(cl, 1, ERR_NOSUCHNICK(cl, target));
 				continue ;
 			}
 			toCl = this->_registeredclients[target];
-			std::cerr << "AM I AWAY? " << std::boolalpha << toCl->checkMode(USERMODE_AWAY)<<std::endl;
 			if (toCl->checkMode(USERMODE_AWAY))
 				this->sendMsg(cl, 1, this->RPL_AWAY(cl, toCl));
 			this->sendMsg(toCl, 1, this->PRIVMSGREPLY(cl, toCl->getNickname(), text));
@@ -620,4 +631,129 @@ void Server::DIE(Client *cl)
 {
 	if (cl->checkMode(USERMODE_OP))
 		Server::s_active = false;
+}
+
+void Server::ADDBAD(Client *cl, Message msg)
+{
+	if (!cl->checkMode(USERMODE_OP))
+		return ;
+	std::vector<std::string> words = msg.getParameters();
+	std::string text;
+	size_t count = 0;
+	text += cl->getNickname() + " added the word";
+	if (words.size() > 1)
+		text += "s";
+	text += " ( ";
+	for (std::vector<std::string>::iterator it = words.begin(); it != words.end(); it++)
+	{
+		if (this->_karen->addBadWord(*it))
+		{
+			text += *it + " ";
+			count++;
+		}
+	}
+	if (!count)
+		return;
+	text.resize(text.size() - 1);
+	text += " ) to the BAD word pool.";
+	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	{
+		if (it->second.ChannelHasClient(this->_karen->getBotClient()))
+			this->sendMsg(&it->second, 1, this->BOTREPLY(it->second.getName(), text));
+	}
+}
+
+void Server::RMBAD(Client *cl, Message msg)
+{
+	if (!cl->checkMode(USERMODE_OP))
+		return ;
+	std::vector<std::string> words = msg.getParameters();
+	std::string text;
+	size_t count = 0;
+	text += cl->getNickname() + " removed the word";
+	if (words.size() > 1)
+		text += "s";
+	text += " ( ";
+	for (std::vector<std::string>::iterator it = words.begin(); it != words.end(); it++)
+	{
+		if (this->_karen->removeBadWord(*it))
+		{
+			text += *it + " ";
+			count++;
+		}
+	}
+	if (!count)
+		return;
+	text.resize(text.size() - 1);
+	text += " ) from the BAD word pool.";
+	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	{
+		if (it->second.ChannelHasClient(this->_karen->getBotClient()))
+			this->sendMsg(&it->second, 1, this->BOTREPLY(it->second.getName(), text));
+	}
+}
+void Server::ADDGOOD(Client *cl, Message msg)
+{
+	if (!cl->checkMode(USERMODE_OP))
+		return ;
+	std::vector<std::string> words = msg.getParameters();
+	std::string text;
+	size_t count = 0;
+	text += cl->getNickname() + " added the word";
+	if (words.size() > 1)
+		text += "s";
+	text += " ( ";
+	for (std::vector<std::string>::iterator it = words.begin(); it != words.end(); it++)
+	{
+		if (this->_karen->addGoodWord(*it))
+		{
+			text += *it + " ";
+			count++;
+		}
+	}
+	if (!count)
+		return;
+	text.resize(text.size() - 1);
+	text += " ) to the GOOD word pool.";
+	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	{
+		if (it->second.ChannelHasClient(this->_karen->getBotClient()))
+			this->sendMsg(&it->second, 1, this->BOTREPLY(it->second.getName(), text));
+	}
+}
+
+void Server::RMGOOD(Client *cl, Message msg)
+{
+	if (!cl->checkMode(USERMODE_OP))
+		return ;
+	std::vector<std::string> words = msg.getParameters();
+	std::string text;
+	size_t count = 0;
+	text += cl->getNickname() + " removed the word";
+	if (words.size() > 1)
+		text += "s";
+	text += " ( ";
+	for (std::vector<std::string>::iterator it = words.begin(); it != words.end(); it++)
+	{
+		if (this->_karen->removeGoodWord(*it))
+		{
+			text += *it + " ";
+			count++;
+		}
+	}
+	if (!count)
+		return;
+	text.resize(text.size() - 1);
+	text += " ) to the BAD word pool.";
+	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	{
+		if (it->second.ChannelHasClient(this->_karen->getBotClient()))
+			this->sendMsg(&it->second, 1, this->BOTREPLY(it->second.getName(), text));
+	}
+}
+
+void Server::BHVLIST(Client *cl)
+{
+	this->sendMsg(cl, 1, BHVLISTREPLY(cl, this->_karen->getGoodWords()));
+	this->sendMsg(cl, 1, BHVLISTREPLY(cl, this->_karen->getBadWords()));
 }

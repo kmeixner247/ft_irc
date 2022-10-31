@@ -20,6 +20,17 @@ std::string Server::PRIVMSGREPLY(Client *from, std::string to, std::string text)
 	return (msg);
 }
 
+std::string Server::BOTREPLY(std::string to, std::string text)
+{
+	std::string msg;
+	msg += ":behaviourbot!karen@127.0.0.1";
+	msg += " PRIVMSG ";
+	msg += to;
+	msg += " :" + text;
+	msg += "\r\n";
+	return (msg);
+}
+
 std::string Server::NOTICEREPLY(Client *from, std::string to, std::string text)
 {
 	std::string msg;
@@ -123,6 +134,17 @@ std::string Server::ERROR(Client *cl, std::string reason)
 	msg += " ERROR ";
 	msg += cl->getNickname() + " ";
 	msg += reason;
+	msg += "\r\n";
+	return (msg);
+}
+
+std::string Server::BHVLISTREPLY(Client *cl, std::string text)
+{
+	std::string msg;
+	msg += ":behaviourbot!karen@127.0.0.1";
+	msg += " PRIVMSG ";
+	msg += cl->getNickname() + " ";
+	msg += ":" + text;
 	msg += "\r\n";
 	return (msg);
 }

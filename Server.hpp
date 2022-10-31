@@ -15,8 +15,10 @@
 #include "Message.hpp"
 #include "Responses.hpp"
 #include "Channel.hpp"
+#include "BehaviourBot.hpp"
 class Client;
 class Channel;
+class BehaviourBot;
 class Server
 {
 typedef std::map<int, Client>::iterator	iterator;
@@ -34,10 +36,12 @@ private:
 	std::string _motd;
 	std::string _passwordOper;
 	std::map<std::string, Channel> _channels;
+	std::map<std::string, Client> _bots;
+	BehaviourBot *_karen;
 
 public:
 	static bool s_active;
-	Server(int port, std::string pw);
+	Server(int port, std::string pw, BehaviourBot *bot);
 	~Server();
 	void serverloop();
 	void connectClient(int socket);
@@ -99,7 +103,11 @@ private:
 	void WHO(Client *cl, Message msg);
 	void PART(Client *cl, Message msg);
 	void DIE(Client *cl);
-
+	void ADDBAD(Client *cl, Message msg);
+	void RMBAD(Client *cl, Message msg);
+	void ADDGOOD(Client *cl, Message msg);
+	void RMGOOD(Client *cl, Message msg);
+	void BHVLIST(Client *cl);
 	/* CHANNEL DISTRIBUTION STUFF? */
 	std::string JOINREPLY(Client *cl, Channel *ch);
 	std::string PRIVMSGREPLY(Client *from, std::string to, std::string text);
@@ -112,6 +120,8 @@ private:
 	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
 	std::string INVITEREPLY(Client *cl, Channel *ch, Client *target);
 	std::string ERROR(Client *cl, std::string reason);
+	std::string BOTREPLY(std::string to, std::string text);
+	std::string BHVLISTREPLY(Client *cl, std::string text);
 	/* RESPONSES */
 	std::string RPL_UMODEIS(Client *cl);
 	std::string RPL_ENDOFWHO(Client *cl, std::string mask);
@@ -135,12 +145,6 @@ private:
 	std::string RPL_MOTDSTART(Client *cl);
 	std::string RPL_ENDOFMOTD(Client *cl);
 	std::string RPL_YOUREOPER(Client *cl);
-	std::string RPL_BANLIST();
-	std::string RPL_ENDOFBANLIST();
-	std::string RPL_EXCEPTLIST();
-	std::string RPL_ENDOFEXCEPTLIST();
-	std::string RPL_INVITELIST();
-	std::string RPL_ENDOFINVITELIST();
 
 	/* ERRORS */
 	std::string ERR_ALREADYREGISTERED(Client *cl);

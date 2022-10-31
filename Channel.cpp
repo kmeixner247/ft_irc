@@ -333,7 +333,6 @@ void Channel::distributeMsg(std::string msg)
 {
 	for (std::map<std::string, Client*>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
 	{
-		// std::cerr << "##############\nSENDING...\n" << msg << "...to " << it->second->getNickname()<<"\n##############" << std::endl;
 		std::cerr << "send channel ===> " << it->second->getNickname() << "!" << this->getName() << " : " << msg << std::endl;
 		send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
 	}
@@ -357,7 +356,6 @@ void Channel::removeFromBanList(std::string mask)
 
 bool Channel::isBanned(std::string mask)
 {
-	std::cerr << "mask: " << mask << std::endl;
 	for (std::vector<std::string>::iterator it = this->_banlist.begin(); it != this->_banlist.end(); it++)
 	{
 		std::cout << *it << std::endl;
@@ -379,13 +377,10 @@ void Channel::removeFromExceptList(std::string mask)
 
 bool Channel::isOnExcept(std::string mask)
 {
-	// std::cerr << "is " << mask << " on my list of size " << this->_exceptlist.size();
 	for (std::vector<std::string>::iterator it = this->_exceptlist.begin(); it != this->_exceptlist.end(); it++)
 	{
-		// std::cerr << "checking against mask " << *it << std::endl;
 		if (matchMask(*it, mask))
 		{
-			// std::cerr << "yup" << std::endl;
 			return (true);
 		}
 	}
