@@ -53,7 +53,12 @@ _passwordOper("42069")
 
 Server::~Server()
 {
-	shutdown(this->_serverfd, SHUT_RDWR);
+	for (std::map<int, Client>::iterator it = this->_connectedclients.begin(); this->_connectedclients.size(); it = this->_connectedclients.begin())
+	{
+		close(it->first);
+		this->_connectedclients.erase(it);
+	}
+	std::cerr << "closing serverfd: " << close(this->_serverfd) << std::endl;
 }
 
 void Server::connectClient(int socket)
@@ -72,7 +77,7 @@ void Server::disconnectClient(Client *cl)
 	this->_registeredclients.erase(cl->getNickname());
 	if (!this->_connectedclients.erase(cl->getSocket()))
 		throw "invalid socket disconnect";
-	std::cerr << "CLOSE RETURN : "  << close(cl->getSocket()) << std::endl;
+	close(cl->getSocket());
 }
 
 void Server::serverloop()
@@ -115,27 +120,20 @@ void Server::serverloop()
 					{
 						FD_CLR(it->first, &readfds);
 						if (!recv(it->first, buffer, 1023, 0))
-						{
 							this->disconnectClient(&it->second);
-						}
 						else
 							this->receiveMessage(&it->second, buffer);
 						memset(buffer, 0, 1024);
 						tempend = this->_connectedclients.end();
 						it = this->_connectedclients.begin();
 						if (_connectedclients.size() == 0)
-						{
-							memset(buffer, 0, 1024);
 							break ;
-						}
 					}
 				}
 			}
 		}
 	}
 	std::cerr << "Bye" << std::endl;
-	std::cerr << close(this->_serverfd) << std::endl;
-	// std::cerr << close(this->_serverfd) << std::endl;
 }
 
 int Server::init()
