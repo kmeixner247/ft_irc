@@ -1,7 +1,6 @@
 #include "Server.hpp"
 std::string Server::JOINREPLY(Client *cl, Channel *ch)
 {
-	// this->sendResponse(cl, ch, ":<nick> JOIN #test\r\n");
 	std::string msg;
 	msg +=  ":" + makeNickMask(this, cl);
 	msg += " JOIN :";

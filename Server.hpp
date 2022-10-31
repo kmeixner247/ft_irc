@@ -77,7 +77,6 @@ private:
 	Server(const Server &rhs);
 	Server &operator=(const Server &rhs);
 	int init();
-	// std::vector<Message> parseMessages(char *input);
 	std::vector<Message> parseMessages(Client *cl, std::string input);
 	void removeClientFromChannel(Client *cl, Channel *ch);
 	// commands
@@ -99,7 +98,8 @@ private:
 	void TOPIC(Client *cl, Message msg);
 	void WHO(Client *cl, Message msg);
 	void PART(Client *cl, Message msg);
-	
+	void DIE(Client *cl);
+
 	/* CHANNEL DISTRIBUTION STUFF? */
 	std::string JOINREPLY(Client *cl, Channel *ch);
 	std::string PRIVMSGREPLY(Client *from, std::string to, std::string text);
@@ -113,10 +113,6 @@ private:
 	std::string INVITEREPLY(Client *cl, Channel *ch, Client *target);
 	std::string ERROR(Client *cl, std::string reason);
 	/* RESPONSES */
-	// std::string RPL_WELCOME(Client *cl);
-	// std::string RPL_YOURHOST(Client *cl);
-	// std::string RPL_CREATED(Client *cl);
-	// std::string RPL_MYINFO(Client *cl);
 	std::string RPL_UMODEIS(Client *cl);
 	std::string RPL_ENDOFWHO(Client *cl, std::string mask);
 	std::string RPL_AWAY(Client *cl, Client *toCl);
@@ -174,12 +170,6 @@ private:
 	std::string ERR_UMODEUNKNOWNFLAG(Client *cl);
 	std::string ERR_USERSDONTMATCH(Client *cl, std::string nick);
 
-
-	// void sendWelcome(Client *cl);
-	// std::string replace_thingies(std::string msg, Client *cl);
-	// std::string replace_thingies(std::string msg, Client *cl, Channel *ch);
-	void sendResponse(Client *cl, std::string msg);
-	void sendResponse(Client *cl, Channel *ch, std::string msg);
 	bool clientIsConnected(Client *cl);
 	bool clientIsRegistered(Client *cl);
 

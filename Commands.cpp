@@ -100,13 +100,11 @@ void Server::USER(Client *cl, Message msg)
 	if (this->clientIsRegistered(cl))
 	{
 		this->sendMsg(cl, 1, ERR_ALREADYREGISTERED(cl));
-		// this->sendResponse(cl, ERR_ALREADYREGISTRED);
 		return;
 	}
 	else if (msg.getParameters().size() < 4 || msg.getParameters().at(3) == "")//check with Pidgin/Adim if that is really the right min amount of params
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "USER"));
-		// this->sendResponse(cl, ERR_NEEDMOREPARAMS);
 		return;
 	}
 	cl->setUsername(msg.getParameters()[0]);
@@ -476,7 +474,7 @@ void Server::MODE(Client *cl, Message msg)
 			this->sendMsg(cl, 1, this->RPL_CHANNELMODEIS(cl, ch));
 			return ;
 		}
-		if (!ch->checkClientRight(cl, CHAN_OPERATOR))
+		if (!ch->checkClientRight(cl, CHAN_OPERATOR) && !ch->checkMode(USERMODE_OP))
 		{
 			this->sendMsg(cl, 1, this->ERR_CHANOPRIVSNEEDED(cl, ch));
 			return ;
@@ -616,4 +614,10 @@ void Server::WALLOPS(Client *cl, Message msg)
 		if ((*it).second->checkMode(USERMODE_WALLOPRECEIVER))
 			this->sendMsg(it->second, 1, NOTICEREPLY(cl, it->second->getNickname(), msg.getParameters().front())); 
 	}
+}
+
+void Server::DIE(Client *cl)
+{
+	if (cl->checkMode(USERMODE_OP))
+		Server::s_active = false;
 }

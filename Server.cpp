@@ -75,9 +75,9 @@ void Server::disconnectClient(Client *cl)
 	// FD_CLR(cl->getSocket(), &this->_readfds);
 
 	this->_registeredclients.erase(cl->getNickname());
+	close(cl->getSocket());
 	if (!this->_connectedclients.erase(cl->getSocket()))
 		throw "invalid socket disconnect";
-	close(cl->getSocket());
 }
 
 void Server::serverloop()
@@ -98,7 +98,6 @@ void Server::serverloop()
 		else
 			highest_socket = this->_serverfd;
 		readfds = this->_readfds;
-		//pls prettify oh god this is rly ugly
 		if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
 		{
 			if (FD_ISSET(this->_serverfd, &readfds))
@@ -279,16 +278,9 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("WHO"))) this->WHO(cl, *it);
 			else if (!(command.compare("PART"))) this->PART(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
+			else if (!(command.compare("DIE"))) this->DIE(cl);
 			else std::cout << "NONE OF THOSE:  " << *it << "\n" << std::endl;
 		}
-/* else if(!(this->clientIsRegistered(cl)))
-		{
-			if (!cl->getPassbool())
-				return ;
-			if (!command.compare("USER")) this->USER(cl, *it);
-			else if (!command.compare("NICK")) this->NICK(cl, *it);
-			else std::cout << "NONE OF THOSE2\n" << *it << std::endl;
-		} */
 	}
 }
 
