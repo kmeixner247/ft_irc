@@ -361,13 +361,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 	}
 }
 
-
-// void Server::WALLOPS(Client *cl, Message msg)
-// {
-	
-// 	// this->disconnectClient(cl); //PLACEHOLDER TO BE REPLACED
-// }
-
 void Server::NOTICE(Client *cl, Message msg)
 {
 	Client *toCl;
@@ -604,4 +597,23 @@ void Server::PART(Client *cl, Message msg)
 		channels = channels.substr(pos+1, channels.back());
 	}
 	while (pos != std::string::npos);
+}
+
+void Server::WALLOPS(Client *cl, Message msg)
+{
+	if (!msg.getParameters().size())
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "WALLOPS"));
+		return ;
+	}
+	if (!cl->checkMode(USERMODE_OP))
+	{
+		this->sendMsg(cl, 1, ERR_NOPRIVILEGES(cl));
+		return ;
+	}
+	for (std::map<std::string, Client *>::iterator it = this->_registeredclients.begin(); it != this->_registeredclients.end(); it++)
+	{
+		if ((*it).second->checkMode(USERMODE_WALLOPRECEIVER))
+			this->sendMsg(it->second, 1, NOTICEREPLY(cl, it->second->getNickname(), msg.getParameters().front())); 
+	}
 }
