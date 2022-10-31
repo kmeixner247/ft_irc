@@ -88,46 +88,44 @@ void Server::serverloop()
 	std::string temp;
 	while (s_active)
 	{
-		// checking whether there's a new client trying to connect
-		// (make this a loop in case several try to connect at the same time?)
-		if ((newfd = accept(this->_serverfd, (struct sockaddr *)&this->_address, (socklen_t *)&(addrlen))) > 0)
-		{
-			// making the client fd nonblocking (is this necessary?)
-			if (fcntl(newfd, F_SETFL, O_NONBLOCK) == -1)
-			{
-				perror("fcntl failed");
-				exit(EXIT_FAILURE);
-			} 
-			this->connectClient(newfd);
-		}
 		if (this->_connectedclients.size() > 0)
 			highest_socket = this->_connectedclients.rbegin()->first;
+		else
+			highest_socket = this->_serverfd;
 		readfds = this->_readfds;
-		if (highest_socket > 0)
+		//pls prettify oh god this is rly ugly
+		if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
 		{
-			//pls prettify oh god this is rly ugly
-			if (select(highest_socket + 1, &readfds, NULL, NULL, &tv) > 0)
+			std::cerr << "hello" << std::endl;
+			if (FD_ISSET(this->_serverfd, &readfds))
 			{
-				iterator tempend = this->_connectedclients.end();
-				for (iterator it = this->_connectedclients.begin(); it != tempend; it++)
+				newfd = accept(this->_serverfd, (struct sockaddr *)&this->_address, (socklen_t *)&(addrlen));
+				if (fcntl(newfd, F_SETFL, O_NONBLOCK) == -1)
 				{
-					if (FD_ISSET(it->first, &readfds))
+					perror("fcntl failed");
+					exit (EXIT_FAILURE);
+				}
+				this->connectClient(newfd);
+			}
+			iterator tempend = this->_connectedclients.end();
+			for (iterator it = this->_connectedclients.begin(); it != tempend; it++)
+			{
+				if (FD_ISSET(it->first, &readfds))
+				{
+					FD_CLR(it->first, &readfds);
+					if (!recv(it->first, buffer, 1023, 0))
 					{
-						FD_CLR(it->first, &readfds);
-						if (!recv(it->first, buffer, 1023, 0))
-						{
-							this->disconnectClient(&it->second);
-						}
-						else
-							this->receiveMessage(&it->second, buffer);
+						this->disconnectClient(&it->second);
+					}
+					else
+						this->receiveMessage(&it->second, buffer);
+					memset(buffer, 0, 1024);
+					tempend = this->_connectedclients.end();
+					it = this->_connectedclients.begin();
+					if (_connectedclients.size() == 0)
+					{
 						memset(buffer, 0, 1024);
-						tempend = this->_connectedclients.end();
-						it = this->_connectedclients.begin();
-						if (_connectedclients.size() == 0)
-						{
-							memset(buffer, 0, 1024);
-							break ;
-						}
+						break ;
 					}
 				}
 			}
@@ -174,6 +172,7 @@ int Server::init()
 		perror("fcntl failed");
 		return (-1);
 	}
+	FD_SET(this->_serverfd, &this->_readfds);
 	return (0);
 }
 
