@@ -100,9 +100,7 @@ std::pair<std::string, bool> Client::changeModes(std::string modestr)
 					changedmodes += "s";
 				else if (modestr[i] == 'w' && this->addMode(USERMODE_WALLOPRECEIVER))
 					changedmodes += "w";
-				else if (modestr[i] == 'o' && this->addMode(USERMODE_OP))
-					changedmodes += "o";
-				else if (!strchr("iswo", modestr[i]))
+				else if (!strchr("isw", modestr[i]))
 					invalidmode = true;
 				i++;
 			}

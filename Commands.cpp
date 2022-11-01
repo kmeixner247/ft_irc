@@ -263,7 +263,8 @@ void Server::WHO(Client *cl, Message msg)
 
 void Server::KILL(Client *cl, Message msg)
 {
-
+	if (msg.getParameters().front() == "behaviourbot")
+		return ;
 	if (msg.getParameters().size() < 2)
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "KILL"));
@@ -426,7 +427,7 @@ void Server::KICK(Client *cl, Message msg)
 		return ;
 	}
 	Channel *ch = &this->_channels.at(msg.getParameters().front());
-	if (!ch->checkClientRight(cl, CHAN_OPERATOR))
+	if (!ch->checkClientRight(cl, CHAN_OPERATOR) && !cl->checkMode(USERMODE_OP))
 	{
 		this->sendMsg(cl, 1, ERR_CHANOPRIVSNEEDED(cl, ch));
 		return ;

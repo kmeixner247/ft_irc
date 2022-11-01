@@ -69,13 +69,10 @@ void Server::connectClient(int socket)
 	FD_SET(socket, &this->_readfds);
 	Client newclient(socket);
 	this->_connectedclients[socket] = newclient;
-	std::cout << "client connected" << std::endl;
 }
 
 void Server::disconnectClient(Client *cl)
 {
-	std::cout << "client disconnected" << std::endl;
-
 	this->_registeredclients.erase(cl->getNickname());
 	close(cl->getSocket());
 	FD_CLR(cl->getSocket(), &this->_readfds);
