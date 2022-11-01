@@ -44,7 +44,7 @@ _serverfd(0),
 _host("127.0.0.1"), 
 _servername("awesomeserverofawesomeness"), 
 _version("69.69"), 
-_motd("kacper smells"),
+_motd("Geography rocks"),
 _passwordOper("42069"),
 _karen(bot)
 {
