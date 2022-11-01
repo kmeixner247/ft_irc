@@ -75,10 +75,10 @@ void Server::connectClient(int socket)
 void Server::disconnectClient(Client *cl)
 {
 	std::cout << "client disconnected" << std::endl;
-	// FD_CLR(cl->getSocket(), &this->_readfds);
 
 	this->_registeredclients.erase(cl->getNickname());
 	close(cl->getSocket());
+	FD_CLR(cl->getSocket(), &this->_readfds);
 	if (!this->_connectedclients.erase(cl->getSocket()))
 		throw "invalid socket disconnect";
 }
@@ -88,7 +88,7 @@ void Server::serverloop()
 	int addrlen = sizeof(this->_address);
 	int newfd;
 	int highest_socket;
-	char buffer[1024] = {0};
+	char buffer[512] = {0};
 	fd_set readfds;
 	struct timeval tv;
 	tv.tv_sec = 0;
@@ -119,26 +119,15 @@ void Server::serverloop()
 				if (FD_ISSET(it->first, &readfds))
 				{
 					FD_CLR(it->first, &readfds);
-					if (!recv(it->first, buffer, 1023, 0))
+					if (!recv(it->first, buffer, 511, 0))
 						this->disconnectClient(&it->second);
 					else
 						this->receiveMessage(&it->second, buffer);
-					memset(buffer, 0, 1024);
+					if (!this->_connectedclients.size())
+						break ;
+					memset(buffer, 0, 512);
 					tempend = this->_connectedclients.end();
 					it = this->_connectedclients.begin();
-					if (_connectedclients.size() == 0)
-					{
-						FD_CLR(it->first, &readfds);
-						if (!recv(it->first, buffer, 1023, 0))
-							this->disconnectClient(&it->second);
-						else
-							this->receiveMessage(&it->second, buffer);
-						memset(buffer, 0, 1024);
-						tempend = this->_connectedclients.end();
-						it = this->_connectedclients.begin();
-						if (_connectedclients.size() == 0)
-							break ;
-					}
 				}
 			}
 		}
@@ -188,7 +177,6 @@ int Server::init()
 
 void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 {
-	//prettify?
 	std::string msg;
 	va_list args;
 	va_start(args, str);
@@ -241,24 +229,24 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 
 void Server::removeClientFromChannel(Client *cl, Channel *ch)
 {
+	//bot?
 	cl->removeChannel(ch);
 	ch->removeClient(cl);
 	if (ch->getClients().size() == 0)
+	{
 		this->_channels.erase(ch->getName());
+	}
 }
 
-// void Server::interpretMessages(Client *cl, char *buffer)
 void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 {
-	// std::vector<Message> msgs = parseMessages(buffer);
 	for (std::vector<Message>::iterator it = msgs.begin(); it != msgs.end(); it++)
 	{
 		std::cerr << "receive user <=== " << cl->getNickname() << " : " << *it << "\n" << std::endl;
-		//errors?
 		std::string command = it->getCommand();
 		if (!(command.compare("PASS")))
 			this->PASS(cl, *it);
-		else// if (this->clientIsRegistered(cl))
+		else
 		{
 			if (!cl->checkMode(USERMODE_PASS))
 				return ;
@@ -286,7 +274,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("ADDGOOD"))) this->ADDGOOD(cl, *it);
 			else if (!(command.compare("RMGOOD"))) this->RMGOOD(cl, *it);
 			else if (!(command.compare("BHVLIST"))) this->BHVLIST(cl);
-			else std::cout << "NONE OF THOSE:  " << *it << "\n" << std::endl;
+			else std::cerr << "NONE OF THOSE:  " << *it << "\n" << std::endl;
 		}
 	}
 }

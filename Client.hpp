@@ -12,6 +12,7 @@
 #define USERMODE_WALLOPRECEIVER 8
 #define USERMODE_OP 16
 #define USERMODE_AWAY 32
+
 class Channel;
 class Client
 {

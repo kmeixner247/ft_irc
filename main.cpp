@@ -47,6 +47,5 @@ int main(int argc, char **argv)
 	BehaviourBot karen(&botcl);
 	Server test(std::atoi(argv[1]), std::string(argv[2]), &karen);
 	
-
 	test.serverloop();
 }

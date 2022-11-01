@@ -217,9 +217,13 @@ void Server::QUIT(Client *cl, Message msg)
 		if (it->second.getClients().count(cl->getNickname()))
 		{
 			if (msg.getParameters().size())
+			{
 				this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
+			}
 			else
+			{
 				this->sendMsg(&it->second, 1, QUITREPLY(cl, ""));
+			}
 			this->removeClientFromChannel(cl, &it->second);
 			if (this->_channels.size() == 0)
 				break ;
@@ -227,7 +231,7 @@ void Server::QUIT(Client *cl, Message msg)
 		}
 	}
 	this->sendMsg(cl, 1, this->ERROR(cl, "Quitting.."));
-	this->disconnectClient(cl);
+	// this->disconnectClient(cl);
 }
 
 void Server::WHO(Client *cl, Message msg)
@@ -259,7 +263,7 @@ void Server::WHO(Client *cl, Message msg)
 
 void Server::KILL(Client *cl, Message msg)
 {
-	
+
 	if (msg.getParameters().size() < 2)
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "KILL"));
@@ -316,12 +320,8 @@ void Server::PRIVMSG(Client *cl, Message msg)
 	std::string target;
 	std::string text;
 	
-    // ERR_TOOMANYTARGETS (407)
     // ERR_NORECIPIENT (411)
     // ERR_NOTEXTTOSEND (412)
-    // ERR_NOTOPLEVEL (413)
-    // ERR_WILDTOPLEVEL (414)
-    // RPL_AWAY (301)
 	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
 	{
 		target = msg.getParameters()[i];
