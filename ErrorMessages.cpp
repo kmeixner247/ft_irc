@@ -60,53 +60,6 @@ std::string Server::ERR_TOOMANYTARGETS(Client *cl, std::string target)
 	return (msg);
 }
 
-
-std::string Server::ERR_NORECIPIENT(Client *cl, std::string command)
-{
-	std::string msg;
-	msg += ":" + this->getServerName();
-	msg += " 411 ";
-	msg += cl->getNickname() + " ";
-	msg += ":No recipient given (" + command + ")";
-	msg += "\r\n";
-	return (msg);
-}
-
-std::string Server::ERR_NOTEXTTOSEND(Client *cl)
-{
-	std::string msg;
-	msg += ":" + this->getServerName();
-	msg += " 412 ";
-	msg += cl->getNickname() + " ";
-	msg += ":No text to send";
-	msg += "\r\n";
-	return (msg);
-}
-
-std::string Server::ERR_NOTOPLEVEL(Client *cl, std::string mask)
-{
-	std::string msg;
-	msg += ":" + this->getServerName();
-	msg += " 413 ";
-	msg += cl->getNickname() + " ";
-	msg += mask;
-	msg += " :No toplevel domain specified";
-	msg += "\r\n";
-	return (msg);
-}
-
-std::string Server::ERR_WILDTOPLEVEL(Client *cl, std::string mask)
-{
-	std::string msg;
-	msg += ":" + this->getServerName();
-	msg += " 414 ";
-	msg += cl->getNickname() + " ";
-	msg += mask;
-	msg += " :Wildcard in toplevel domain";
-	msg += "\r\n";
-	return (msg);
-}
-
 std::string Server::ERR_NONICKNAMEGIVEN(Client *cl)
 {
 	std::string msg;

@@ -267,10 +267,6 @@ std::string Server::RPL_TOPIC(Client *cl, Channel *ch)
 	msg += "\r\n";
 	return (msg);
 }
-//RPL_INVITELIST 336
-//RPL_ENDOFINVITELIST 337
-//RPL_EXCEPTLIST 348
-//RPL_ENDOFEXCEPTLIST 349
 
 std::string Server::RPL_INVITING(Client *cl, std::string nick, std::string channel)
 {
@@ -283,7 +279,7 @@ std::string Server::RPL_INVITING(Client *cl, std::string nick, std::string chann
 	msg += "\r\n";
 	return (msg);
 }
-//   "<client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
+
 std::string Server::RPL_WHOREPLY(Client *cl, Client *target)
 {
 	std::string msg;
@@ -336,11 +332,6 @@ std::string Server::RPL_ENDOFNAMES(Client *cl, Channel *ch)
 	msg += "\r\n";
 	return (msg);
 }
-
-//RPL_BANLIST 367
-//RPL_ENDOFBANLIST 368
-
-
 
 std::string Server::RPL_MOTD(Client *cl)
 {

@@ -81,7 +81,6 @@ public:
 	void removeFromInviteList(std::string mask);
 	bool isOnInviteList(std::string mask);
 };
-// bool matchMask(std::string mask, std::string str);
 
 #endif
 

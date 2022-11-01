@@ -82,7 +82,7 @@ private:
 	int init();
 	std::vector<Message> parseMessages(Client *cl, std::string input);
 	void removeClientFromChannel(Client *cl, Channel *ch);
-	// commands
+	/* COMMANDS */
 	void AWAY(Client *cl, Message msg);
 	void PASS(Client *cl, Message msg);
 	void USER(Client *cl, Message msg);

@@ -35,19 +35,16 @@ void Server::AWAY(Client *cl, Message msg)
 	}
 }
 
-// commands
 void Server::PASS(Client *cl, Message msg)
 {
 	if (msg.getParameters().size() == 0)
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PASS"));
 	else if (!msg.getParameters().back().compare(this->_password) && !cl->checkMode(USERMODE_PASS))
 		cl->addMode(USERMODE_PASS);
-	else if (this->clientIsRegistered(cl)) //check, if adium/pidgin enter here when passbool is true, but cl not registered
+	else if (this->clientIsRegistered(cl))
 		this->sendMsg(cl, 1, ERR_ALREADYREGISTERED(cl));
 	else
 		cl->removeMode(USERMODE_PASS);
-	std::cout << "PASS " << std::endl;
-	std::cout << msg << std::endl;
 }
 
 void Server::NICK(Client *cl, Message msg)
@@ -60,7 +57,7 @@ void Server::NICK(Client *cl, Message msg)
 		this->sendMsg(cl, 1, ERR_NONICKNAMEGIVEN(cl));
 		return;
 	}
-	else if (!(strIsASCII(msg.getParameters().back()))) //check with ref client if it is really ascii
+	else if (!(strIsASCII(msg.getParameters().back())))
 	{
 		this->sendMsg(cl, 1, ERR_ERRONEUSNICKNAME(cl));
 		return;
@@ -97,7 +94,7 @@ void Server::NICK(Client *cl, Message msg)
 
 void Server::USER(Client *cl, Message msg)
 {
-	if (msg.getParameters().size() < 4 || msg.getParameters().at(3) == "")//check with Pidgin/Adim if that is really the right min amount of params
+	if (msg.getParameters().size() < 4)
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "USER"));
 		return;
@@ -108,7 +105,10 @@ void Server::USER(Client *cl, Message msg)
 		return;
 	}
 	cl->setUsername(msg.getParameters()[0]);
-	cl->setRealname(msg.getParameters().back());
+	if (msg.getParameters().at(3) == "")
+		cl->setRealname("RealMcRealFace");
+	else
+		cl->setRealname(msg.getParameters().back());
 	if (cl->getNickname() != "")
 	{
 	this->_registeredclients[cl->getNickname()] = cl;
@@ -124,7 +124,7 @@ void Server::JOIN(Client *cl, Message msg)
 	std::vector<std::pair<std::string, std::string> > channelPW;
 	std::vector<std::pair<std::string, std::string> >::iterator it;
 	size_t pos;
-	//ERR_NEEDMOREPARAMS
+
 	if (!msg.getParameters().size())
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "JOIN"));
@@ -201,7 +201,6 @@ void Server::JOIN(Client *cl, Message msg)
 			ch->addClient(cl);
 			cl->addChannel(ch);
 		}
-		//send JOIN with nick as prefix to channel)
 		this->sendMsg(ch, 1, JOINREPLY(cl, ch));
 		if (ch->getTopic() != "")
 			this->sendMsg(cl, 1, RPL_TOPIC(cl, ch).c_str());
@@ -322,8 +321,6 @@ void Server::PRIVMSG(Client *cl, Message msg)
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PRIVMSG"));
 		return ;
 	}
-    // ERR_NORECIPIENT (411)
-    // ERR_NOTEXTTOSEND (412)
 	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
 	{
 		target = msg.getParameters()[i];

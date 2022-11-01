@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include <signal.h>
 
-// bool s_active = true;
-
 int inputValidation(int argc, char **argv)
 {
 	if (argc != 3)

@@ -73,8 +73,6 @@ void Server::connectClient(int socket)
 
 void Server::disconnectClient(Client *cl)
 {
-	static int test = 0;
-	std::cerr << "I AM BEING CALLED FOR THE " << test << "th TIME" << std::endl;
 	if (clientIsRegistered(cl))
 		this->_registeredclients.erase(cl->getNickname());
 	close(cl->getSocket());
@@ -122,7 +120,6 @@ void Server::serverloop()
 					FD_CLR(it->first, &readfds);
 					if (!recv(it->first, buffer, 511, 0))
 						this->unexpectedQuit(&it->second);
-						// this->disconnectClient(&it->second);
 					else
 						this->receiveMessage(&it->second, buffer);
 					if (!this->_connectedclients.size())
@@ -198,7 +195,6 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 
 void Server::sendMsg(Channel *ch, int argNum, std::string str, ...) const
 {
-	//prettify?
 	std::string msg;
 	va_list args;
 	va_start(args, str);
@@ -465,7 +461,6 @@ bool matchMask(std::string mask, std::string str)
 
 void Server::unexpectedQuit(Client *cl)
 {
-	std::cerr << "OTHER QUIT START?" << std::endl;
 	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 	{
 		if (it->second.ChannelHasClient(cl))

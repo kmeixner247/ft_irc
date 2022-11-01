@@ -403,16 +403,8 @@ void Channel::removeFromInviteList(std::string mask)
 
 bool Channel::isOnInviteList(std::string mask)
 {
-	std::cerr << "checking whether mask " << mask << " is on invite list" << std::endl;
 	for (std::vector<std::string>::iterator it = this->_invitelist.begin(); it != this->_invitelist.end(); it++)
-	{
-		std::cerr << "comparing [" << mask << "] with [" << *it << std::endl;
 		if (!it->compare(mask))
-		{
-			std::cerr << "YUP" << std::endl;
 			return (true);
-		}
-	}
-	std::cerr << "NOPE" << std::endl;
 	return (false);
 }
