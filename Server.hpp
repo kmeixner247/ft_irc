@@ -177,6 +177,7 @@ private:
 
 	bool clientIsConnected(Client *cl);
 	bool clientIsRegistered(Client *cl);
+	void unexpectedQuit(Client *cl);
 
 };
 bool matchMask(std::string mask, std::string str);

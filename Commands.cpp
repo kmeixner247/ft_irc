@@ -97,14 +97,14 @@ void Server::NICK(Client *cl, Message msg)
 
 void Server::USER(Client *cl, Message msg)
 {
+	if (msg.getParameters().size() < 4 || msg.getParameters().at(3) == "")//check with Pidgin/Adim if that is really the right min amount of params
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "USER"));
+		return;
+	}
 	if (this->clientIsRegistered(cl))
 	{
 		this->sendMsg(cl, 1, ERR_ALREADYREGISTERED(cl));
-		return;
-	}
-	else if (msg.getParameters().size() < 4 || msg.getParameters().at(3) == "")//check with Pidgin/Adim if that is really the right min amount of params
-	{
-		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "USER"));
 		return;
 	}
 	cl->setUsername(msg.getParameters()[0]);
@@ -124,6 +124,12 @@ void Server::JOIN(Client *cl, Message msg)
 	std::vector<std::pair<std::string, std::string> > channelPW;
 	std::vector<std::pair<std::string, std::string> >::iterator it;
 	size_t pos;
+	//ERR_NEEDMOREPARAMS
+	if (!msg.getParameters().size())
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "JOIN"));
+		return ;
+	}
 	std::string temp = msg.getParameters().front();
 	do
 	{
@@ -146,12 +152,6 @@ void Server::JOIN(Client *cl, Message msg)
 		while (pos != std::string::npos);
 	}
 
-	//ERR_NEEDMOREPARAMS
-	if (msg.getParameters().size() == 0)
-	{
-		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "JOIN"));
-		return ;
-	}
 	for (it = channelPW.begin(); it != channelPW.end(); it++)
 	{
 		if (it->first[0] != '#')
@@ -214,24 +214,19 @@ void Server::QUIT(Client *cl, Message msg)
 {
 	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 	{
-		if (it->second.getClients().count(cl->getNickname()))
+		if (it->second.ChannelHasClient(cl))
 		{
 			if (msg.getParameters().size())
-			{
 				this->sendMsg(&it->second, 1, QUITREPLY(cl, msg.getParameters().back()));
-			}
 			else
-			{
 				this->sendMsg(&it->second, 1, QUITREPLY(cl, ""));
-			}
 			this->removeClientFromChannel(cl, &it->second);
 			if (this->_channels.size() == 0)
 				break ;
 			it = this->_channels.begin();
 		}
 	}
-	this->sendMsg(cl, 1, this->ERROR(cl, "Quitting.."));
-	// this->disconnectClient(cl);
+	this->disconnectClient(cl);
 }
 
 void Server::WHO(Client *cl, Message msg)
@@ -263,13 +258,13 @@ void Server::WHO(Client *cl, Message msg)
 
 void Server::KILL(Client *cl, Message msg)
 {
-	if (msg.getParameters().front() == "behaviourbot")
-		return ;
 	if (msg.getParameters().size() < 2)
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "KILL"));
 		return ;
 	}
+	if (msg.getParameters().front() == "behaviourbot")
+		return ;
 	if (!cl->checkMode(USERMODE_OP))
 	{
 		this->sendMsg(cl, 1, ERR_NOPRIVILEGES(cl));
@@ -311,7 +306,6 @@ void Server::OPER(Client *cl, Message msg)
 		for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 			this->sendMsg(&it->second, 1, MODEREPLY(cl, it->second.getName(), "+o", cl->getNickname()));
 	}
-	// MODE MSG NEEDED
 }
 
 void Server::PRIVMSG(Client *cl, Message msg)
@@ -321,6 +315,11 @@ void Server::PRIVMSG(Client *cl, Message msg)
 	std::string target;
 	std::string text;
 	
+	if (!msg.getParameters().size())
+	{
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PRIVMSG"));
+		return ;
+	}
     // ERR_NORECIPIENT (411)
     // ERR_NOTEXTTOSEND (412)
 	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
@@ -385,6 +384,8 @@ void Server::NOTICE(Client *cl, Message msg)
 	Channel *toCh;
 	std::string text;
 
+	if (!msg.getParameters().size())
+		return ;
 	text = msg.getParameters().back();
 	for (size_t i = 0; i < msg.getParameters().size() - 1; i++)
 	{
@@ -444,7 +445,7 @@ void Server::KICK(Client *cl, Message msg)
 		this->sendMsg(cl, 1, ERR_USERNOTINCHANNEL(cl, targetnick, ch->getName()));
 		return ;
 	}
-	std::string comment = (targetnick[0] == ':') ? targetnick : "";
+	std::string comment = (msg.getParameters().back()[0] == ':') ? msg.getParameters().back() : "";
 	this->sendMsg(ch, 1, KICKREPLY(cl, ch, target, comment));
 	this->removeClientFromChannel(target, ch);
 }
@@ -452,7 +453,7 @@ void Server::KICK(Client *cl, Message msg)
 void Server::MODE(Client *cl, Message msg)
 {
 
-	if (msg.getParameters().size() == 0)
+	if (!msg.getParameters().size())
 	{
 		this->sendMsg(cl, 1, this->ERR_NEEDMOREPARAMS(cl, "MODE"));
 		return ;
@@ -549,8 +550,7 @@ void Server::INVITE(Client *cl, Message msg)
 
 void Server::TOPIC(Client *cl, Message msg)
 {
-
-	if (msg.getParameters().size() == 0)
+	if (!msg.getParameters().size())
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "TOPIC"));
 		return ;
@@ -590,7 +590,7 @@ void Server::PART(Client *cl, Message msg)
 	Channel *ch;
 	std::string reason;
 	std::string name;
-	if (msg.getParameters().size() == 0)
+	if (!msg.getParameters().size())
 	{
 		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PART"));
 		return ;

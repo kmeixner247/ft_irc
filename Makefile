@@ -1,4 +1,4 @@
-NAME		=	server
+NAME		=	ircserv
 
 SRCS		=	main.cpp Server.cpp Client.cpp Message.cpp Commands.cpp Channel.cpp ErrorMessages.cpp Replies.cpp BehaviourBot.cpp
 
@@ -6,7 +6,7 @@ CC			=	c++
 
 RM			=	rm
 
-CFLAGS		=	-Wall -Werror -Wextra -std=c++98 -g -fsanitize=address
+CFLAGS		=	-Wall -Werror -Wextra -std=c++98 #-g -fsanitize=address
 
 all:		$(NAME)
 
@@ -15,7 +15,7 @@ $(NAME):	$(SRCS)
 
 run:		
 			make re
-			./server 6969 12345
+			./ircserv 6969 12345
 
 clean:		
 			$(RM) -f $(NAME)

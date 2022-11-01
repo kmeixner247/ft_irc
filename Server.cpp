@@ -73,11 +73,15 @@ void Server::connectClient(int socket)
 
 void Server::disconnectClient(Client *cl)
 {
-	this->_registeredclients.erase(cl->getNickname());
+	static int test = 0;
+	std::cerr << "I AM BEING CALLED FOR THE " << test << "th TIME" << std::endl;
+	if (clientIsRegistered(cl))
+		this->_registeredclients.erase(cl->getNickname());
 	close(cl->getSocket());
-	FD_CLR(cl->getSocket(), &this->_readfds);
-	if (!this->_connectedclients.erase(cl->getSocket()))
-		throw "invalid socket disconnect";
+	if (FD_ISSET(cl->getSocket(), &this->_readfds))
+		FD_CLR(cl->getSocket(), &this->_readfds);
+	if (clientIsConnected(cl))
+		this->_connectedclients.erase(cl->getSocket());
 }
 
 void Server::serverloop()
@@ -117,7 +121,8 @@ void Server::serverloop()
 				{
 					FD_CLR(it->first, &readfds);
 					if (!recv(it->first, buffer, 511, 0))
-						this->disconnectClient(&it->second);
+						this->unexpectedQuit(&it->second);
+						// this->disconnectClient(&it->second);
 					else
 						this->receiveMessage(&it->second, buffer);
 					if (!this->_connectedclients.size())
@@ -186,8 +191,9 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 		else
 			str = va_arg(args, const char*);
 	}
-		std::cerr << "send user ===> " << cl->getNickname() << " : " << msg << std::endl;
-	send(cl->getSocket(), msg.c_str(), msg.length(), 0);
+	std::cerr << "send user ===> " << cl->getNickname() << " : " << msg << std::endl;
+	if (cl->getNickname() != "behaviourbot")
+		send(cl->getSocket(), msg.c_str(), msg.length(), 0);
 }
 
 void Server::sendMsg(Channel *ch, int argNum, std::string str, ...) const
@@ -226,13 +232,10 @@ std::vector<Message> Server::parseMessages(Client *cl, std::string input)
 
 void Server::removeClientFromChannel(Client *cl, Channel *ch)
 {
-	//bot?
 	cl->removeChannel(ch);
 	ch->removeClient(cl);
-	if (ch->getClients().size() == 0)
-	{
+	if (ch->getClients().size() == 0 || (ch->getClients().size() == 1 && ch->getClients().begin()->first == "behaviourbot"))
 		this->_channels.erase(ch->getName());
-	}
 }
 
 void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
@@ -458,4 +461,21 @@ bool matchMask(std::string mask, std::string str)
 	if (mask.back() == '*' || pos >= str.size())
 		return (true);
 	return (false);
+}
+
+void Server::unexpectedQuit(Client *cl)
+{
+	std::cerr << "OTHER QUIT START?" << std::endl;
+	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	{
+		if (it->second.ChannelHasClient(cl))
+		{
+			this->sendMsg(&it->second, 1, QUITREPLY(cl, "Unexpected Quit"));
+			this->removeClientFromChannel(cl, &it->second);
+			if (this->_channels.size() == 0)
+				break ;
+			it = this->_channels.begin();
+		}
+	}
+	this->disconnectClient(cl);
 }

@@ -3,7 +3,7 @@
 Channel::Channel() : 
 	_name(""), 
 	_clients(std::map<std::string, Client *>()),
-	_chanmodes(0),
+	_chanmodes(512),
 	_topic(""), 
 	_limit(99999), 
 	_key(""),
@@ -13,7 +13,7 @@ Channel::Channel() :
 Channel::Channel(const std::string &name) : 
 	_name(name), 
 	_clients(std::map<std::string, Client *>()),
-	_chanmodes(0),
+	_chanmodes(512),
 	_topic(""), 
 	_limit(99999), 
 	_key(""),
@@ -336,8 +336,8 @@ void Channel::distributeMsg(std::string msg)
 		if (it->second->getSocket() > 0)
 		{
 			std::cerr << "send channel ===> " << it->second->getNickname() << "!" << this->getName() << " : " << msg;
-			std::cerr << "socket is " << it->second->getSocket() << std::endl;
-			send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
+			if (it->second->getNickname() != "behaviourbot")
+				send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
 		}
 	}
 }
