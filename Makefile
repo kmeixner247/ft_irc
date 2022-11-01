@@ -7,12 +7,14 @@ CC			=	c++
 RM			=	rm
 
 CFLAGS		=	-Wall -Werror -Wextra -std=c++98 #-g -fsanitize=address
-
+DFLAG		=	-g -D DEBUG=1
 all:		$(NAME)
 
 $(NAME):	$(SRCS)
 			$(CC) $(CFLAGS) -o $(NAME) $(SRCS)
 
+debug:		$(SRCS)
+			$(CC) $(CFLAGS) $(DFLAG) -o $(NAME) $(SRCS)
 run:		
 			make re
 			./ircserv 6969 12345
@@ -25,4 +27,4 @@ fclean:		clean
 
 re:			fclean all
 
-.PHONY:		all run clean fclean re
+.PHONY:		all run clean fclean re debug

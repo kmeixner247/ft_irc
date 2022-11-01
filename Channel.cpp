@@ -335,7 +335,9 @@ void Channel::distributeMsg(std::string msg)
 	{
 		if (it->second->getSocket() > 0)
 		{
-			std::cerr << "send channel ===> " << it->second->getNickname() << "!" << this->getName() << " : " << msg;
+			#if (DEBUG)
+				std::cout << "send channel ===> " << it->second->getNickname() << "!" << this->getName() << " : " << msg;
+			#endif
 			if (it->second->getNickname() != "behaviourbot")
 				send(it->second->getSocket(), msg.c_str(), msg.length(), 0);
 		}
@@ -362,7 +364,6 @@ bool Channel::isBanned(std::string mask)
 {
 	for (std::vector<std::string>::iterator it = this->_banlist.begin(); it != this->_banlist.end(); it++)
 	{
-		std::cout << *it << std::endl;
 		if (matchMask(*it, mask))
 			return (true);
 	}

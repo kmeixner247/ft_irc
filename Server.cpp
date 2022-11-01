@@ -66,6 +66,9 @@ Server::~Server()
 
 void Server::connectClient(int socket)
 {
+	#if (DEBUG)
+		std::cout << "Connecting Client " << socket << "\n" << std::endl;
+	#endif
 	FD_SET(socket, &this->_readfds);
 	Client newclient(socket);
 	this->_connectedclients[socket] = newclient;
@@ -79,7 +82,12 @@ void Server::disconnectClient(Client *cl)
 	if (FD_ISSET(cl->getSocket(), &this->_readfds))
 		FD_CLR(cl->getSocket(), &this->_readfds);
 	if (clientIsConnected(cl))
+	{
+		#if (DEBUG)
+			std::cout << "Disconnecting Client " << cl->getSocket() << "\n" << std::endl;
+		#endif
 		this->_connectedclients.erase(cl->getSocket());
+	}
 }
 
 void Server::serverloop()
@@ -188,7 +196,9 @@ void Server::sendMsg(Client *cl, int argNum, std::string str, ...) const
 		else
 			str = va_arg(args, const char*);
 	}
-	std::cerr << "send user ===> " << cl->getNickname() << " : " << msg << std::endl;
+	#if (DEBUG)
+		std::cout << "send user ===> " << cl->getNickname() << " : " << msg << std::endl;
+	#endif
 	if (cl->getNickname() != "behaviourbot")
 		send(cl->getSocket(), msg.c_str(), msg.length(), 0);
 }
@@ -238,7 +248,9 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 {
 	for (std::vector<Message>::iterator it = msgs.begin(); it != msgs.end(); it++)
 	{
-		std::cerr << "receive user <=== " << cl->getNickname() << " : " << *it << "\n" << std::endl;
+		#if (DEBUG)
+			std::cout << "receive user <=== " << cl->getNickname() << " : " << *it << "\n" << std::endl;
+		#endif
 		std::string command = it->getCommand();
 		if (!(command.compare("PASS")))
 			this->PASS(cl, *it);
@@ -270,7 +282,12 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("ADDGOOD"))) this->ADDGOOD(cl, *it);
 			else if (!(command.compare("RMGOOD"))) this->RMGOOD(cl, *it);
 			else if (!(command.compare("BHVLIST"))) this->BHVLIST(cl);
-			else std::cerr << "NONE OF THOSE:  " << *it << "\n" << std::endl;
+			else 
+			{
+				#if (DEBUG) 
+					std::cout << "UNKNOWN COMMAND: " << *it << "\n" << std::endl;
+				#endif
+			} 
 		}
 	}
 }

@@ -2,7 +2,9 @@
 #include "Server.hpp"
 #include <cstdlib>
 #include <signal.h>
-
+#ifndef DEBUG
+# define DEBUG 0
+#endif
 int inputValidation(int argc, char **argv)
 {
 	if (argc != 3)

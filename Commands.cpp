@@ -348,6 +348,7 @@ void Server::PRIVMSG(Client *cl, Message msg)
 				if (it->second->getNickname() != cl->getNickname())
 				{
 					text = this->PRIVMSGREPLY(cl, toCh->getName(), text);
+					
 					std::cerr << "send channel ===> " << it->second->getNickname() << "!" << toCh->getName() << " : " << text << std::endl;
 					send(it->second->getSocket(), text.c_str(), text.size(), 0);
 				}
