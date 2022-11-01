@@ -173,19 +173,19 @@ void Server::JOIN(Client *cl, Message msg)
 		{
 			ch = &(this->_channels[it->first]);
 			//ERR_BADCHANNELKEY
-			if (ch->getKey() != "" && ch->getKey().compare(it->second))
+			if (ch->getKey() != "" && ch->getKey().compare(it->second) && !ch->isOnInviteList(makeNickMask(this, cl)))
 			{
 				this->sendMsg(cl, 1, ERR_BADCHANNELKEY(cl, ch));
 				continue ;
 			}
 			//ERR_INVITEONLYCHAN
-			if (ch->checkMode(CHANMODE_INVITE) && ch->isOnInviteList(makeNickMask(this, cl)))
+			if (ch->checkMode(CHANMODE_INVITE) && !ch->isOnInviteList(makeNickMask(this, cl)))
 			{
 				this->sendMsg(cl, 1, ERR_INVITEONLYCHAN(cl, ch));
 				continue ;
 			}
 			//ERR_BANNED MCHAN
-			if (ch->isBanned(makeNickMask(this, cl)) && !ch->isOnExcept(makeNickMask(this, cl)))
+			if (ch->isBanned(makeNickMask(this, cl)) && !ch->isOnExcept(makeNickMask(this, cl)) && !ch->isOnInviteList(makeNickMask(this, cl)))
 			{
 				this->sendMsg(cl, 1, ERR_BANNEDFROMCHAN(cl, ch));
 				continue ;
@@ -196,6 +196,8 @@ void Server::JOIN(Client *cl, Message msg)
 				this->sendMsg(cl, 1, ERR_CHANNELISFULL(cl, ch));
 				continue ;
 			}
+			if (ch->isOnInviteList(makeNickMask(this, cl)))
+				ch->removeFromInviteList(makeNickMask(this, cl));
 			ch->addClient(cl);
 			cl->addChannel(ch);
 		}
@@ -544,6 +546,8 @@ void Server::INVITE(Client *cl, Message msg)
 		this->sendMsg(cl, 1, ERR_USERONCHANNEL(cl, ch, msg.getParameters().front()));
 		return ;
 	}
+	std::string temp = makeNickMask(this, target);
+	ch->addToInviteList(makeNickMask(this, target));
 	this->sendMsg(cl, 1, RPL_INVITING(cl, msg.getParameters().front(), msg.getParameters().back()));
 	this->sendMsg(target, 1, INVITEREPLY(target, ch, cl));
 }
