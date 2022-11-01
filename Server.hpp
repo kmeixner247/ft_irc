@@ -91,6 +91,7 @@ private:
 	void JOIN(Client *cl, Message msg);
 	void QUIT(Client *cl, Message msg);
 	void KILL(Client *cl, Message msg);
+	void PING(Client *cl, Message msg);
 	void OPER(Client *cl, Message msg);
 	void SQUIT(Client *cl, Message msg);
 	void PRIVMSG(Client *cl, Message msg);
@@ -119,6 +120,7 @@ private:
 	std::string TOPICREPLY(Client *cl, Channel *ch, std::string topic);
 	std::string KICKREPLY(Client *cl, Channel *ch, Client *target, std::string comment);
 	std::string INVITEREPLY(Client *cl, Channel *ch, Client *target);
+	std::string PONGREPLY(std::string token);
 	std::string ERROR(Client *cl, std::string reason);
 	std::string BOTREPLY(std::string to, std::string text);
 	std::string BHVLISTREPLY(Client *cl, std::string text);

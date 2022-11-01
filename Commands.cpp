@@ -279,6 +279,14 @@ void Server::KILL(Client *cl, Message msg)
 	this->QUIT(target, msg);
 }
 
+void Server::PING(Client *cl, Message msg)
+{
+	if (!msg.getParameters().size())
+		this->sendMsg(cl, 1, ERR_NEEDMOREPARAMS(cl, "PING"));
+	else
+		this->sendMsg(cl, 1, PONGREPLY(msg.getParameters().front()));
+}
+
 void Server::OPER(Client *cl, Message msg)
 {
 	if (msg.getParameters().size() < 2)
@@ -744,7 +752,7 @@ void Server::RMGOOD(Client *cl, Message msg)
 	if (!count)
 		return;
 	text.resize(text.size() - 1);
-	text += " ) to the BAD word pool.";
+	text += " ) from the GOOD word pool.";
 	for (std::map<std::string, Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 	{
 		if (it->second.ChannelHasClient(this->_karen->getBotClient()))

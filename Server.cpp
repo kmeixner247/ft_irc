@@ -61,7 +61,7 @@ Server::~Server()
 		close(it->first);
 		this->_connectedclients.erase(it);
 	}
-	std::cerr << "closing serverfd: " << close(this->_serverfd) << std::endl;
+	close(this->_serverfd);
 }
 
 void Server::connectClient(int socket)
@@ -279,6 +279,7 @@ void Server::interpretMessages(Client *cl, std::vector<Message> msgs)
 			else if (!(command.compare("WHO"))) this->WHO(cl, *it);
 			else if (!(command.compare("PART"))) this->PART(cl, *it);
 			else if (!(command.compare("KILL"))) this->KILL(cl, *it);
+			else if (!(command.compare("PING"))) this->PING(cl, *it);
 			else if (!(command.compare("DIE"))) this->DIE(cl);
 			else if (!(command.compare("ADDBAD"))) this->ADDBAD(cl, *it);
 			else if (!(command.compare("RMBAD"))) this->RMBAD(cl, *it);

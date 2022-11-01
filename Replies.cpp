@@ -383,3 +383,14 @@ std::string Server::RPL_YOUREOPER(Client *cl)
 	msg += "\r\n";
 	return (msg);
 }
+
+std::string Server::PONGREPLY(std::string token)
+{
+	std::string msg;
+	msg += ":" + this->getServerName();
+	msg += " PONG ";
+	msg += this->getServerName();
+	msg += " :" + token;
+	msg += "\r\n";
+	return (msg);
+}

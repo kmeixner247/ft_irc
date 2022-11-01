@@ -6,6 +6,8 @@ _goodwords(std::set<std::string>()),
 _badwords(std::set<std::string>())
 {
 	this->_botclient->setNickname("behaviourbot");
+	this->_botclient->setUsername("soccermom123");
+	this->_botclient->setRealname("karen");
 	this->_goodwords.insert("please");
 	this->_badwords.insert("designmaggi");
 }
@@ -27,6 +29,8 @@ bool BehaviourBot::checkBehaviour(std::string msg)
 
 bool BehaviourBot::addGoodWord(std::string word)
 {
+	if (this->_badwords.count(word))
+		return (false);
 	return (this->_goodwords.insert(word).second);
 }
 
@@ -37,6 +41,8 @@ bool BehaviourBot::removeGoodWord(std::string word)
 
 bool BehaviourBot::addBadWord(std::string word)
 {
+	if (this->_goodwords.count(word))
+		return (false);
 	return (this->_badwords.insert(word).second);
 }
 
