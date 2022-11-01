@@ -13,7 +13,6 @@
 #include <fcntl.h>
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Responses.hpp"
 #include "Channel.hpp"
 #include "BehaviourBot.hpp"
 class Client;
